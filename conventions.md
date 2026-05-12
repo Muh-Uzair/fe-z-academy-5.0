@@ -5,3 +5,5 @@
 3 : all the inputs must have place holders as e.g. user@example.com instead of Enter your email
 
 3 : verb verification will be used instead of approval 
+
+4 : page and content of page ( main content of page )

@@ -19,6 +19,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
+import { useRouter } from "next/navigation";
 
 const signUpStudentSchema = z.object({
   fullName: z.string().min(2, "Full name must be at least 2 characters long."),
@@ -32,9 +33,10 @@ const signUpStudentSchema = z.object({
 
 type SignUpStudentFormValues = z.infer<typeof signUpStudentSchema>;
 
+// CMP CMP CMP
 const SignUpStudent = () => {
+  // VARS
   const [showPassword, setShowPassword] = useState(false);
-
   const form = useForm<SignUpStudentFormValues>({
     resolver: zodResolver(signUpStudentSchema),
     mode: "onChange",
@@ -46,9 +48,12 @@ const SignUpStudent = () => {
       highestEducation: "",
     },
   });
+  const router = useRouter();
 
+  // FUNCTIONS
   const onSubmit = (values: SignUpStudentFormValues) => {
     console.log("student sign up", values);
+    router.push("/verify-otp");                                                                                                                                             
   };
 
   const handleContinueWithGoogle = () => {
@@ -120,7 +125,7 @@ const SignUpStudent = () => {
                     type="button"
                     variant="ghost"
                     size="icon-sm"
-                    className="absolute top-[0.5px] right-1"
+                    className="absolute top-px right-1"
                     onClick={() => setShowPassword((value) => !value)}
                     aria-label={
                       showPassword ? "Hide password" : "Show password"

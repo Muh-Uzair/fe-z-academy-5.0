@@ -3,6 +3,7 @@
 ## 1. PUBLIC FEATURES (Non-logged in users)
 
 ### Must Have:
+
 - Home page with Hero section, Featured Courses, Trending Courses, and Categories
 - Course browsing with Search and Filters (Category, Price, Level, Rating)
 - Course Detail Page (Title, Description, Thumbnail, Instructor info, Rating & Reviews, Price)
@@ -10,13 +11,15 @@
 - Public Analytics / Marketing Section (Top Courses, Most Enrolled, Highest Rated)
 
 ### Should Have:
+
 - Category-wise course listing
 
------------------------------------------------------------------------------------------
+---
 
 ## 2. ADMIN FEATURES
 
 ### Must Have:
+
 - Admin Dashboard
 - Approve/Reject Instructor Sign ups
 - Approve/Reject Courses
@@ -29,6 +32,7 @@
 - Notifications Management
 
 ### Admin Analytics should include:
+
 - Total Revenue (Platform)
 - Total Commission Earned
 - Total Students
@@ -40,16 +44,18 @@
 - Category-wise performance
 
 ### Should Have:
+
 - User management (Search, Filter, View details)
 - Course management (All courses list)
 - Payout tracking for instructors (even if dummy)
 
------------------------------------------------------------------------------------------
+---
 
 ## 3. INSTRUCTOR FEATURES
 
 ### Must Have:
-- Google Signup + Admin Approval
+
+- Google Signup + Admin Verification
 - Instructor Profile (Name, Email, Avatar, Bio, Education, Experience)
 - Create Course (Title, Description, Thumbnail, Video ≤20MB, Price, Category, Level)
 - Course submitted for Admin Review
@@ -62,6 +68,7 @@
 - Notifications (In-app + Push)
 
 ### Instructor Analytics should include:
+
 - Total Courses
 - Total Students Enrolled (across all courses)
 - Total Earnings + Admin Commission breakdown
@@ -70,13 +77,15 @@
 - Monthly earnings chart
 
 ### Should Have:
-- Limited course editing after approval
 
------------------------------------------------------------------------------------------
+- Limited course editing after verification
+
+---
 
 ## 4. STUDENT FEATURES
 
 ### Must Have:
+
 - Google Signup/Login
 - Student Profile (Full Name, Email, Avatar, Bio)
 - Browse & Search Courses
@@ -90,6 +99,7 @@
 - Student Analytics Dashboard
 
 ### Student Analytics should include:
+
 - Total Enrolled Courses
 - Overall Progress (All courses)
 - Completed Courses
@@ -98,5 +108,6 @@
 - Recent activity
 
 ### Should Have:
+
 - Continue Watching section
 - Certificate on 100% completion (optional for later)
