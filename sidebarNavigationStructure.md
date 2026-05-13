@@ -8,15 +8,14 @@ Application uses role-based sidebar navigation. Each user role (Admin, Instructo
 
 ## 1. ADMIN SIDEBAR
 
-
 - Dashboard
 - Courses
   - All Courses
   - Pending Courses
-  - Approved Courses
+  - Verified Courses
 - Instructors
   - All Instructors
-  - Pending Approvals
+  - Pending Verifications
 - Students
 - Enrollments
 - Categories
@@ -29,7 +28,7 @@ Application uses role-based sidebar navigation. Each user role (Admin, Instructo
 - My Courses
   - All My Courses
   - Create New Course
-  - Pending Review
+  - Pending Verifications
 - My Students
 - Enrollments
 - Earnings
@@ -45,4 +44,3 @@ Application uses role-based sidebar navigation. Each user role (Admin, Instructo
   - Continue Watching
 - Chat
 - Settings
-
