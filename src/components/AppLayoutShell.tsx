@@ -279,13 +279,24 @@ const AppLayoutShell = ({ role, children }: AppLayoutShellProps) => {
                           asChild
                           isActive={active}
                           tooltip={item.title}
+                          className={cn(
+                            "rounded-md transition-all",
+                            active && [
+                              "bg-primary text-primary-foreground hover:bg-primary/90",
+                              "data-[active=true]:bg-primary data-[active=true]:text-primary-foreground",
+                            ],
+                          )}
                         >
                           <Link href={item.href}>
-                            <item.icon />
+                            <item.icon
+                              className={cn(
+                                "transition-colors",
+                                active && "text-primary-foreground",
+                              )}
+                            />
                             <span>{item.title}</span>
                           </Link>
                         </SidebarMenuButton>
-
                         {item.items?.length ? (
                           <SidebarMenuSub>
                             {item.items.map((subItem) => (
@@ -295,6 +306,13 @@ const AppLayoutShell = ({ role, children }: AppLayoutShellProps) => {
                                   isActive={isRouteActive(
                                     pathname,
                                     subItem.href,
+                                  )}
+                                  className={cn(
+                                    "rounded-md",
+                                    isRouteActive(pathname, subItem.href) && [
+                                      "bg-primary text-primary-foreground hover:bg-primary/90",
+                                      "data-[active=true]:bg-primary data-[active=true]:text-primary-foreground",
+                                    ],
                                   )}
                                 >
                                   <Link href={subItem.href}>
