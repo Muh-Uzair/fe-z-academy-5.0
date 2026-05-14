@@ -7,7 +7,7 @@ interface FlexColProps extends HTMLAttributes<HTMLDivElement> {
 
 const FlexCol = ({
   children,
-  gap = "gap-4",
+  gap = "gap-6",
   className = "",
   ...props
 }: FlexColProps) => {

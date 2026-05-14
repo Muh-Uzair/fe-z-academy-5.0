@@ -240,8 +240,12 @@ const AppLayoutShell = ({ role, children }: AppLayoutShellProps) => {
   return (
     <TooltipProvider>
       <SidebarProvider defaultOpen>
-        <Sidebar collapsible="icon" variant="inset">
-          <SidebarHeader className="gap-4 px-3 py-4">
+        <Sidebar
+          collapsible="icon"
+          variant="inset"
+          className="bg-white border border-r-[1px]"
+        >
+          <SidebarHeader className="gap-4 px-3 py-4 bg-white">
             <Link
               href={navigation[0].href}
               className="flex items-center gap-3 rounded-xl px-2 py-2 transition-colors hover:bg-sidebar-accent"
@@ -265,7 +269,7 @@ const AppLayoutShell = ({ role, children }: AppLayoutShellProps) => {
             </Link>
           </SidebarHeader>
 
-          <SidebarContent>
+          <SidebarContent className="bg-white">
             <SidebarGroup>
               <SidebarGroupLabel>Navigation</SidebarGroupLabel>
               <SidebarGroupContent>
@@ -331,7 +335,7 @@ const AppLayoutShell = ({ role, children }: AppLayoutShellProps) => {
             </SidebarGroup>
           </SidebarContent>
 
-          <SidebarFooter className="px-3 py-4">
+          <SidebarFooter className="px-3 py-4 bg-white">
             <div className="flex items-center gap-3 rounded-2xl border border-sidebar-border bg-sidebar-accent/35 p-3">
               <Avatar className="border border-sidebar-border">
                 <AvatarFallback>{meta.shortLabel}</AvatarFallback>
@@ -348,8 +352,8 @@ const AppLayoutShell = ({ role, children }: AppLayoutShellProps) => {
           <SidebarRail />
         </Sidebar>
 
-        <SidebarInset className="min-h-svh bg-slate-50/70">
-          <header className="sticky top-0 z-20 border-b border-slate-200/80 bg-background/90 backdrop-blur">
+        <SidebarInset className="min-h-screen bg-stone-100/70 w-full">
+          <header className="sticky top-0 z-20 border-b  bg-white backdrop-blur">
             <div className="flex h-16 items-center justify-between gap-4 px-4 sm:px-6">
               <SidebarTrigger className="rounded-xl border border-primary bg-white hover:bg-slate-100 text-primary" />
 
@@ -363,7 +367,7 @@ const AppLayoutShell = ({ role, children }: AppLayoutShellProps) => {
 
           <div className="flex flex-1 flex-col">
             <main className="flex-1 p-4 sm:p-6">
-              <div className="min-h-[calc(100svh-7rem)]">{children}</div>
+              <div className="h-full">{children}</div>
             </main>
           </div>
         </SidebarInset>
