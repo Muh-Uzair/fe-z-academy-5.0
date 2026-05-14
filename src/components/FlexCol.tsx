@@ -1,0 +1,21 @@
+import React, { HTMLAttributes, ReactNode } from "react";
+
+interface FlexColProps extends HTMLAttributes<HTMLDivElement> {
+  children: ReactNode;
+  gap?: string;
+}
+
+const FlexCol = ({
+  children,
+  gap = "gap-4",
+  className = "",
+  ...props
+}: FlexColProps) => {
+  return (
+    <div className={`flex flex-col ${gap} ${className}`} {...props}>
+      {children}
+    </div>
+  );
+};
+
+export default FlexCol;

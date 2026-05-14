@@ -24,6 +24,8 @@ import {
 } from "@/components/ui/pagination";
 
 import { Role } from "@/types/userTypes";
+import PageFlexCol from "@/components/PageFlexCol";
+import PageHeader from "./PageHeader";
 
 const data = [
   {
@@ -279,14 +281,11 @@ const PendingVerifications = () => {
   });
 
   return (
-    <section className="space-y-6 p-6">
-      <div className="space-y-1">
-        <h1 className="text-3xl font-bold">Pending Instructor Verifications</h1>
-
-        <p className="text-sm text-muted-foreground">
-          Review and manage instructor applications awaiting approval.
-        </p>
-      </div>
+    <PageFlexCol>
+      <PageHeader
+        pageHeading="Pending Instructor Verifications"
+        pageDescription="Review and manage instructor applications awaiting approval."
+      />
 
       <div className="max-w-sm">
         <Input
@@ -368,7 +367,7 @@ const PendingVerifications = () => {
           </PaginationItem>
         </PaginationContent>
       </Pagination>
-    </section>
+    </PageFlexCol>
   );
 };
 
