@@ -1,7 +1,7 @@
-import CourseDetails from "@/features/instructor-my-courses/ui/CourseDetails";
+import CourseDetails from "@/features/course-management/ui/CourseDetails";
 
 const CourseDetailsPage = () => {
-  return <CourseDetails />;
+  return <CourseDetails viewerRole="instructor" />;
 };
 
 export default CourseDetailsPage;

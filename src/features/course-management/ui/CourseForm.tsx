@@ -27,10 +27,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { CourseLevel } from "@/types/courseTypes";
-import type {
-  CourseCategoryOption,
-  InstructorCourseRecord,
-} from "./instructorCourseMockData";
+import type { CourseCategoryOption, CourseRecord } from "./courseMockData";
 
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png"];
 const ACCEPTED_VIDEO_TYPES = ["video/mp4", "video/webm", "video/quicktime"];
@@ -39,7 +36,7 @@ const MAX_VIDEO_SIZE_IN_BYTES = 20 * 1024 * 1024;
 const isFileInstance = (value: unknown): value is File =>
   typeof File !== "undefined" && value instanceof File;
 
-const instructorCourseSchema = z.object({
+const courseSchema = z.object({
   title: z
     .string()
     .trim()
@@ -94,10 +91,10 @@ const instructorCourseSchema = z.object({
     ),
 });
 
-type InstructorCourseFormValues = z.infer<typeof instructorCourseSchema>;
-type InstructorCourseFormMode = "create" | "view" | "edit";
+type CourseFormValues = z.infer<typeof courseSchema>;
+type CourseFormMode = "create" | "view" | "edit";
 
-interface InstructorCourseSubmitValues {
+interface CourseSubmitValues {
   title: string;
   description: string;
   price: number;
@@ -109,16 +106,17 @@ interface InstructorCourseSubmitValues {
   videoUrl: string | null;
 }
 
-interface InstructorCourseFormProps {
-  mode: InstructorCourseFormMode;
+interface CourseFormProps {
+  mode: CourseFormMode;
   categoryOptions: CourseCategoryOption[];
-  initialData?: InstructorCourseRecord | null;
-  onSubmit: (values: InstructorCourseSubmitValues) => void;
+  initialData?: CourseRecord | null;
+  onSubmit: (values: CourseSubmitValues) => void;
   onClose: () => void;
-  onModeChange?: (mode: Exclude<InstructorCourseFormMode, "create">) => void;
+  onModeChange?: (mode: Exclude<CourseFormMode, "create">) => void;
+  allowEdit?: boolean;
 }
 
-const emptyValues: InstructorCourseFormValues = {
+const emptyValues: CourseFormValues = {
   title: "",
   description: "",
   price: 1,
@@ -129,11 +127,11 @@ const emptyValues: InstructorCourseFormValues = {
 };
 
 const getDefaultValues = (
-  initialData?: InstructorCourseRecord | null,
-): InstructorCourseFormValues => ({
+  initialData?: CourseRecord | null,
+): CourseFormValues => ({
   title: initialData?.title ?? "",
   description: initialData?.description ?? "",
-  price: initialData?.price ?? 0,
+  price: initialData?.price ?? 1,
   level: initialData?.level ?? CourseLevel.Beginner,
   categoryId: initialData?.category ?? "",
   thumbnailFile: undefined,
@@ -154,14 +152,15 @@ const revokeObjectUrl = (url: string | null) => {
   }
 };
 
-const InstructorCourseForm = ({
+const CourseForm = ({
   mode,
   categoryOptions,
   initialData,
   onSubmit,
   onClose,
   onModeChange,
-}: InstructorCourseFormProps) => {
+  allowEdit = true,
+}: CourseFormProps) => {
   const [thumbnailPreviewUrl, setThumbnailPreviewUrl] = useState<string | null>(
     initialData?.thumbnail ?? null,
   );
@@ -171,8 +170,8 @@ const InstructorCourseForm = ({
   const [thumbnailInputKey, setThumbnailInputKey] = useState(0);
   const [videoInputKey, setVideoInputKey] = useState(0);
 
-  const form = useForm<InstructorCourseFormValues>({
-    resolver: zodResolver(instructorCourseSchema),
+  const form = useForm<CourseFormValues>({
+    resolver: zodResolver(courseSchema),
     mode: "onChange",
     defaultValues: initialData ? getDefaultValues(initialData) : emptyValues,
   });
@@ -244,7 +243,7 @@ const InstructorCourseForm = ({
     });
   };
 
-  const handleSubmit = (values: InstructorCourseFormValues) => {
+  const handleSubmit = (values: CourseFormValues) => {
     const thumbnailUrl = thumbnailPreviewUrl ?? initialData?.thumbnail ?? null;
     const videoUrl = videoPreviewUrl ?? initialData?.videoUrl ?? null;
 
@@ -488,7 +487,7 @@ const InstructorCourseForm = ({
                         <div className="space-y-2">
                           <p className="text-xs text-muted-foreground">
                             Upload a new thumbnail to replace the current
-                            preview, or keep the existing one.
+                            preview.
                           </p>
                           <div className="flex flex-wrap gap-2">
                             <label htmlFor="course-thumbnail-upload">
@@ -578,10 +577,7 @@ const InstructorCourseForm = ({
                             <p>{formatFileSize(selectedVideoFile.size)}</p>
                           </>
                         ) : (
-                          <p>
-                            Current course video preview. You can keep it or
-                            replace it while editing.
-                          </p>
+                          <p>Current course video preview.</p>
                         )}
                       </div>
 
@@ -648,9 +644,11 @@ const InstructorCourseForm = ({
               <Button type="button" variant="outline" onClick={handleClose}>
                 Close
               </Button>
-              <Button type="button" onClick={() => onModeChange?.("edit")}>
-                Edit Course
-              </Button>
+              {allowEdit ? (
+                <Button type="button" onClick={() => onModeChange?.("edit")}>
+                  Edit Course
+                </Button>
+              ) : null}
             </>
           ) : (
             <>
@@ -672,10 +670,10 @@ const InstructorCourseForm = ({
   );
 };
 
-export default InstructorCourseForm;
+export default CourseForm;
 export type {
-  InstructorCourseFormMode,
-  InstructorCourseFormProps,
-  InstructorCourseFormValues,
-  InstructorCourseSubmitValues,
+  CourseFormMode,
+  CourseFormProps,
+  CourseFormValues,
+  CourseSubmitValues,
 };

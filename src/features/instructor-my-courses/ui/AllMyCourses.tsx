@@ -11,18 +11,20 @@ import TableImage from "@/components/TableImage";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  instructorCoursesMockData,
-  type InstructorCourseRecord,
-} from "./instructorCourseMockData";
+  courseMockData,
+  type CourseRecord,
+} from "@/features/course-management/ui/courseMockData";
+import {
+  formatCourseLevel,
+  getCourseVerificationLabel,
+} from "@/features/course-management/ui/courseHelpers";
 
 const LOGGED_IN_INSTRUCTOR_ID = "user_001";
-const getVerificationLabel = (course: InstructorCourseRecord) =>
-  course.isVerified ? "Verified" : "Not Verified";
 
 const AllMyCourses = () => {
   const [search, setSearch] = useState("");
 
-  const filteredCourses = instructorCoursesMockData.filter((course) => {
+  const filteredCourses = courseMockData.filter((course) => {
     if (course.instructor !== LOGGED_IN_INSTRUCTOR_ID) {
       return false;
     }
@@ -37,7 +39,9 @@ const AllMyCourses = () => {
       course.title.toLowerCase().includes(normalizedSearch) ||
       course.categoryName.toLowerCase().includes(normalizedSearch) ||
       course.level.toLowerCase().includes(normalizedSearch) ||
-      getVerificationLabel(course).toLowerCase().includes(normalizedSearch)
+      getCourseVerificationLabel(course, "simple")
+        .toLowerCase()
+        .includes(normalizedSearch)
     );
   });
 
@@ -62,7 +66,7 @@ const AllMyCourses = () => {
           {
             key: "thumbnail",
             label: "Thumbnail",
-            render: (value: string, row: InstructorCourseRecord) => (
+            render: (value: string, row: CourseRecord) => (
               <TableImage src={value} alt={row.title} shape="rectangle" />
             ),
           },
@@ -81,8 +85,7 @@ const AllMyCourses = () => {
           {
             key: "level",
             label: "Level",
-            render: (value: string) =>
-              value.charAt(0).toUpperCase() + value.slice(1),
+            render: (value: string) => formatCourseLevel(value),
           },
           {
             key: "categoryName",
@@ -91,10 +94,13 @@ const AllMyCourses = () => {
           {
             key: "isVerified",
             label: "Verification",
-            render: (value: boolean, row: InstructorCourseRecord) => (
-              <Badge variant={value ? "default" : "secondary"}>
-                {getVerificationLabel(row)}
-              </Badge>
+            render: (value: boolean, row: CourseRecord) => (
+              <>
+                {row.isVerified === false && (
+                  <Badge variant="destructive">Not verified</Badge>
+                )}
+                {row.isVerified && <Badge>Verified</Badge>}
+              </>
             ),
           },
           {
@@ -113,7 +119,7 @@ const AllMyCourses = () => {
           {
             key: "action",
             label: "Action",
-            render: (_: unknown, row: InstructorCourseRecord) => (
+            render: (_: unknown, row: CourseRecord) => (
               <Button asChild>
                 <Link href={`/instructor/my-courses/course-details/${row._id}`}>
                   View Details

@@ -11,32 +11,22 @@ import TableImage from "@/components/TableImage";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  instructorCoursesMockData,
-  type InstructorCourseRecord,
-} from "./instructorCourseMockData";
+  courseMockData,
+  type CourseRecord,
+} from "@/features/course-management/ui/courseMockData";
+import {
+  formatCourseLevel,
+  getCourseVerificationLabel,
+  truncateText,
+} from "@/features/course-management/ui/courseHelpers";
 
 const LOGGED_IN_INSTRUCTOR_ID = "user_001";
 const TRUNCATE_REASON_AT = 60;
 
-const getVerificationLabel = (course: InstructorCourseRecord) =>
-  course.isVerified ? "Verified" : "Not Verified";
-
-const truncateReason = (reason: string | null) => {
-  if (!reason) {
-    return "Not reviewed yet";
-  }
-
-  if (reason.length <= TRUNCATE_REASON_AT) {
-    return reason;
-  }
-
-  return `${reason.slice(0, TRUNCATE_REASON_AT).trimEnd()}...`;
-};
-
 const PendingVerifications = () => {
   const [search, setSearch] = useState("");
 
-  const filteredCourses = instructorCoursesMockData.filter((course) => {
+  const filteredCourses = courseMockData.filter((course) => {
     const belongsToInstructor = course.instructor === LOGGED_IN_INSTRUCTOR_ID;
     const isPendingOrRejected = !course.isVerified;
 
@@ -54,7 +44,9 @@ const PendingVerifications = () => {
       course.title.toLowerCase().includes(normalizedSearch) ||
       course.categoryName.toLowerCase().includes(normalizedSearch) ||
       course.level.toLowerCase().includes(normalizedSearch) ||
-      getVerificationLabel(course).toLowerCase().includes(normalizedSearch) ||
+      getCourseVerificationLabel(course, "simple")
+        .toLowerCase()
+        .includes(normalizedSearch) ||
       (course.verificationRejectionReason ?? "")
         .toLowerCase()
         .includes(normalizedSearch)
@@ -82,7 +74,7 @@ const PendingVerifications = () => {
           {
             key: "thumbnail",
             label: "Thumbnail",
-            render: (value: string, row: InstructorCourseRecord) => (
+            render: (value: string, row: CourseRecord) => (
               <TableImage src={value} alt={row.title} shape="rectangle" />
             ),
           },
@@ -101,8 +93,7 @@ const PendingVerifications = () => {
           {
             key: "level",
             label: "Level",
-            render: (value: string) =>
-              value.charAt(0).toUpperCase() + value.slice(1),
+            render: (value: string) => formatCourseLevel(value),
           },
           {
             key: "categoryName",
@@ -111,25 +102,30 @@ const PendingVerifications = () => {
           {
             key: "isVerified",
             label: "Verified",
-            render: (_: boolean, row: InstructorCourseRecord) => (
-              <Badge variant={row.isVerified ? "default" : "secondary"}>
-                {getVerificationLabel(row)}
-              </Badge>
+            render: (_: boolean, row: CourseRecord) => (
+              <>
+                {row.isVerified === false && (
+                  <Badge variant="destructive">Not verified</Badge>
+                )}
+                {row.isVerified && <Badge>Verified</Badge>}
+              </>
             ),
           },
           {
             key: "verificationRejectionReason",
-            label: "Verification Feedback",
+            label: "Verification Rejection Reason",
             render: (value: string | null) => (
               <span title={value ?? "Not reviewed yet"}>
-                {truncateReason(value)}
+                {value
+                  ? truncateText(value, TRUNCATE_REASON_AT)
+                  : "Not reviewed yet"}
               </span>
             ),
           },
           {
             key: "action",
             label: "Action",
-            render: (_: unknown, row: InstructorCourseRecord) => (
+            render: (_: unknown, row: CourseRecord) => (
               <Button asChild>
                 <Link href={`/instructor/my-courses/course-details/${row._id}`}>
                   View Details

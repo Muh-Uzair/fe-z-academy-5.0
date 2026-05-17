@@ -3,13 +3,13 @@
 import PageFlexCol from "@/components/PageFlexCol";
 import PageHeader from "@/components/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import InstructorCourseForm, {
-  type InstructorCourseSubmitValues,
-} from "./InstructorCourseForm";
-import { instructorCourseCategoryOptions } from "./instructorCourseMockData";
+import CourseForm, {
+  type CourseSubmitValues,
+} from "@/features/course-management/ui/CourseForm";
+import { courseCategoryOptions } from "@/features/course-management/ui/courseMockData";
 
 const CreateNewCourses = () => {
-  const handleCreateCourse = (values: InstructorCourseSubmitValues) => {
+  const handleCreateCourse = (values: CourseSubmitValues) => {
     console.log("create course form data", {
       title: values.title,
       description: values.description,
@@ -39,9 +39,9 @@ const CreateNewCourses = () => {
           <CardTitle>Course Submission Form</CardTitle>
         </CardHeader>
         <CardContent>
-          <InstructorCourseForm
+          <CourseForm
             mode="create"
-            categoryOptions={instructorCourseCategoryOptions}
+            categoryOptions={courseCategoryOptions}
             onSubmit={handleCreateCourse}
             onClose={() => console.log("course creation cancelled")}
           />

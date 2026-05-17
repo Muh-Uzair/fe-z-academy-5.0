@@ -1,19 +1,16 @@
 import { CourseLevel, type Course } from "@/types/courseTypes";
 
-export type InstructorCourseStatus = "pending" | "approved" | "rejected";
-
 export interface CourseCategoryOption {
   _id: string;
   name: string;
 }
 
-export interface InstructorCourseRecord extends Course {
+export interface CourseRecord extends Course {
   categoryName: string;
   instructorName: string;
-  status: InstructorCourseStatus;
 }
 
-export const instructorCourseCategoryOptions: CourseCategoryOption[] = [
+export const courseCategoryOptions: CourseCategoryOption[] = [
   {
     _id: "cat_001",
     name: "Web Development",
@@ -28,7 +25,7 @@ export const instructorCourseCategoryOptions: CourseCategoryOption[] = [
   },
 ];
 
-export const instructorCoursesMockData: InstructorCourseRecord[] = [
+export const courseMockData: CourseRecord[] = [
   {
     _id: "course_001",
     title: "Modern React Foundations",
@@ -45,7 +42,6 @@ export const instructorCoursesMockData: InstructorCourseRecord[] = [
     category: "cat_001",
     categoryName: "Web Development",
     isVerified: false,
-    status: "pending",
     verificationRejectionReason: null,
     averageRating: 4.6,
     totalReviews: 84,
@@ -70,7 +66,6 @@ export const instructorCoursesMockData: InstructorCourseRecord[] = [
     category: "cat_001",
     categoryName: "Web Development",
     isVerified: true,
-    status: "approved",
     verificationRejectionReason: null,
     averageRating: 4.9,
     totalReviews: 121,
@@ -95,7 +90,6 @@ export const instructorCoursesMockData: InstructorCourseRecord[] = [
     category: "cat_003",
     categoryName: "Data Science",
     isVerified: false,
-    status: "rejected",
     verificationRejectionReason:
       "Please replace the thumbnail and expand the course description with clearer learning outcomes before resubmitting.",
     averageRating: 0,
