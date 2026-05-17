@@ -64,17 +64,8 @@ function Button({
   const Comp = asChild ? Slot.Root : "button";
   const isDisabled = disabled || loading;
   const LeftVisual = loading ? Spinner : IconLeft;
-
-  return (
-    <Comp
-      data-slot="button"
-      data-variant={variant}
-      data-size={size}
-      aria-busy={loading || undefined}
-      disabled={isDisabled}
-      className={cn(buttonVariants({ variant, size, className }))}
-      {...props}
-    >
+  const content = (
+    <>
       {LeftVisual ? (
         <span data-icon="inline-start" aria-hidden="true">
           <LeftVisual />
@@ -86,6 +77,48 @@ function Button({
           <IconRight />
         </span>
       ) : null}
+    </>
+  );
+
+  const buttonChildren = asChild
+    ? React.cloneElement(
+        React.Children.only(children) as React.ReactElement<{
+          children?: React.ReactNode;
+        }>,
+        undefined,
+        <>
+          {LeftVisual ? (
+            <span data-icon="inline-start" aria-hidden="true">
+              <LeftVisual />
+            </span>
+          ) : null}
+          {
+            (
+              React.Children.only(children) as React.ReactElement<{
+                children?: React.ReactNode;
+              }>
+            ).props.children
+          }
+          {IconRight ? (
+            <span data-icon="inline-end" aria-hidden="true">
+              <IconRight />
+            </span>
+          ) : null}
+        </>,
+      )
+    : content;
+
+  return (
+    <Comp
+      data-slot="button"
+      data-variant={variant}
+      data-size={size}
+      aria-busy={loading || undefined}
+      disabled={isDisabled}
+      className={cn(buttonVariants({ variant, size, className }))}
+      {...props}
+    >
+      {buttonChildren}
     </Comp>
   );
 }
