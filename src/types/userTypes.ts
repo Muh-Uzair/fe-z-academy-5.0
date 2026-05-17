@@ -14,6 +14,7 @@ export interface IUser {
   yearsOfExperience?: number;
   avatar?: string | null;
   isVerified: boolean;
+  verificationRejectionReason: string | null;
   otp?: string | null;
   otpExpires?: string | null;
   createdAt: string;

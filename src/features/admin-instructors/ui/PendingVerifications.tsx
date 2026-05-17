@@ -11,6 +11,7 @@ import PageHeader from "../../../components/PageHeader";
 import AppTable from "../../../components/AppTable";
 import AppSearchBar from "@/components/AppSearchBar";
 import TableImage from "@/components/TableImage";
+import { Badge } from "@/components/ui/badge";
 
 const data = [
   {
@@ -103,7 +104,12 @@ const PendingVerifications = () => {
           {
             key: "isVerified",
             label: "Verified",
-            render: (value: boolean) => (value ? "Yes" : "No"),
+            render: (value: boolean) => (
+              <>
+                {!value && <Badge variant="destructive">Not verified</Badge>}
+                {value && <Badge>Verified</Badge>}
+              </>
+            ),
           },
           {
             key: "role",
