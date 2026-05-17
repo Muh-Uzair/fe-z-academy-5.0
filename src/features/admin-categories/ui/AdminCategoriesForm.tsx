@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ImagePlus, Upload, X } from "lucide-react";
+import { ImagePlus, Upload } from "lucide-react";
 import { useRef, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
@@ -93,7 +93,6 @@ const AdminCategoriesForm = ({
     control: form.control,
     name: "imageFile",
   });
-  const hasSelectedImage = Boolean(selectedImageFile);
 
   const revokeUnsavedPreview = () => {
     if (selectedImageFile && previewUrl?.startsWith("blob:")) {
@@ -118,20 +117,6 @@ const AdminCategoriesForm = ({
       shouldTouch: true,
       shouldValidate: true,
     });
-  };
-
-  const handleRemoveSelectedImage = () => {
-    revokeUnsavedPreview();
-    setPreviewUrl(initialData?.image ?? null);
-    form.setValue("imageFile", undefined, {
-      shouldDirty: true,
-      shouldTouch: true,
-      shouldValidate: true,
-    });
-
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
   };
 
   const handleSubmit = (values: AdminCategoryFormValues) => {
@@ -248,20 +233,10 @@ const AdminCategoriesForm = ({
                             variant="outline"
                             iconLeft={ImagePlus}
                           asChild
-                        >
+                          >
                             <span>Choose Another Image</span>
                           </Button>
                         </label>
-                        {hasSelectedImage ? (
-                          <Button
-                            type="button"
-                            variant="outline"
-                            iconLeft={X}
-                            onClick={handleRemoveSelectedImage}
-                          >
-                            Keep Current Image
-                          </Button>
-                        ) : null}
                       </div>
                     </div>
                   ) : null}
