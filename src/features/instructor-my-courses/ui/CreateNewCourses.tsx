@@ -5,3 +5,4 @@ const CreateNewCourses = () => {
 };
 
 export default CreateNewCourses;
+ 
