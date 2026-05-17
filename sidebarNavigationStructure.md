@@ -19,7 +19,6 @@ Application uses role-based sidebar navigation. Each user role (Admin, Instructo
 - Students
 - Enrollments
 - Categories
-- Revenue & Payouts
 - Settings
 
 ## 2. INSTRUCTOR SIDEBAR
@@ -31,7 +30,6 @@ Application uses role-based sidebar navigation. Each user role (Admin, Instructo
   - Pending Verifications
 - My Students
 - Enrollments
-- Earnings
 - Chat
 - Settings
 

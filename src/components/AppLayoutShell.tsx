@@ -108,11 +108,6 @@ const navigationByRole: Record<AppRole, NavigationItem[]> = {
       icon: Tags,
     },
     {
-      title: "Revenue & Payouts",
-      href: "/admin/revenue-payouts",
-      icon: CircleDollarSign,
-    },
-    {
       title: "Settings",
       href: "/admin/settings",
       icon: Settings,
@@ -152,11 +147,6 @@ const navigationByRole: Record<AppRole, NavigationItem[]> = {
       title: "Enrollments",
       href: "/instructor/enrollments",
       icon: Grid2X2,
-    },
-    {
-      title: "Earnings",
-      href: "/instructor/earnings",
-      icon: CircleDollarSign,
     },
     {
       title: "Chat",
