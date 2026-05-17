@@ -9,7 +9,7 @@ import PageHeader from "@/components/PageHeader";
 import AppTable from "@/components/AppTable";
 import TableImage from "@/components/TableImage";
 import { formatDate } from "@/lib/utils";
-import { ICategory } from "@/types/categorytypes";
+import { ICategory } from "@/types/categoryTypes";
 
 const data: ICategory[] = [
   {
