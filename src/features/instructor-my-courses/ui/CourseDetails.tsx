@@ -41,7 +41,7 @@ const statusLabelMap: Record<InstructorCourseStatus, string> = {
   rejected: "Needs Changes",
 };
 
-const InstructorCourseDetails = () => {
+const CourseDetails = () => {
   const params = useParams<{ id?: string | string[] }>();
   const router = useRouter();
   const routeCourseId = Array.isArray(params?.id) ? params.id[0] : params?.id;
@@ -50,7 +50,10 @@ const InstructorCourseDetails = () => {
     Record<string, InstructorCourseRecord>
   >(() =>
     Object.fromEntries(
-      instructorCoursesMockData.map((mockCourse) => [mockCourse._id, mockCourse]),
+      instructorCoursesMockData.map((mockCourse) => [
+        mockCourse._id,
+        mockCourse,
+      ]),
     ),
   );
   const [formMode, setFormMode] = useState<InstructorCourseFormMode>("view");
@@ -217,4 +220,4 @@ const InstructorCourseDetails = () => {
   );
 };
 
-export default InstructorCourseDetails;
+export default CourseDetails;
