@@ -4,7 +4,7 @@ export enum Role {
   Student = "student",
 }
 
-export interface UserInterface {
+export interface IUser {
   _id: string;
   fullName: string;
   email: string;
@@ -15,8 +15,8 @@ export interface UserInterface {
   avatar?: string | null;
   isVerified: boolean;
   otp?: string | null;
-  otpExpires?: Date | null;
-  createdAt: Date;
-  updatedAt: Date;
-  role: Role; 
+  otpExpires?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  role: Role;
 }

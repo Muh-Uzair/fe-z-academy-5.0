@@ -2,12 +2,15 @@
 
 import { useState } from "react";
 
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+
 import { Role } from "@/types/userTypes";
+
 import PageFlexCol from "@/components/PageFlexCol";
-import PageHeader from "./PageHeader";
-import AppTable from "./AppTable";
+import PageHeader from "../../../components/PageHeader";
+import AppTable from "../../../components/AppTable";
+import AppSearchBar from "@/components/AppSearchBar";
+import TableImage from "@/components/TableImage";
 
 const data = [
   {
@@ -62,11 +65,9 @@ const PendingVerifications = () => {
       <AppTable
         upperHeader={
           <div className="max-w-sm">
-            <Input
+            <AppSearchBar
               placeholder="Search instructors by name or email..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="bg-white"
+              onChange={(value: string) => setSearch(value)}
             />
           </div>
         }
@@ -76,11 +77,7 @@ const PendingVerifications = () => {
             key: "avatar",
             label: "Avatar",
             render: (value: string, row: { fullName: string }) => (
-              <img
-                src={value}
-                alt={row.fullName}
-                className="h-10 w-10 rounded-full object-cover"
-              />
+              <TableImage src={value} alt={row.fullName} shape="circle" />
             ),
           },
           {
@@ -120,18 +117,15 @@ const PendingVerifications = () => {
             label: "Action",
             render: (_: unknown, row: { _id: string }) => (
               <div className="text-right">
-                <Button
-                  size="sm"
-                  onClick={() => console.log("verify", row._id)}
-                >
+                <Button onClick={() => console.log("verify", row._id)}>
                   Verify
                 </Button>
               </div>
             ),
           },
         ]}
+        pagination={true}
       />
-
     </PageFlexCol>
   );
 };

@@ -70,7 +70,10 @@ const navigationByRole: Record<AppRole, NavigationItem[]> = {
       icon: BookOpen,
       items: [
         { title: "All Courses", href: "/admin/courses/all-courses" },
-        { title: "Pending Courses", href: "/admin/courses/pending-courses" },
+        {
+          title: "Pending Verification",
+          href: "/admin/courses/pending-verification-courses",
+        },
         { title: "Verified Courses", href: "/admin/courses/verified-courses" },
       ],
     },

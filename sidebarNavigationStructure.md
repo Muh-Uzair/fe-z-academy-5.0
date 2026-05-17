@@ -11,7 +11,7 @@ Application uses role-based sidebar navigation. Each user role (Admin, Instructo
 - Dashboard
 - Courses
   - All Courses
-  - Pending Courses
+  - Pending Verifications
   - Verified Courses
 - Instructors
   - All Instructors

@@ -9,14 +9,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
+
+import { Button } from "@/components/ui/button";
 
 interface AppTableProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -24,12 +18,14 @@ interface AppTableProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data?: any[];
   upperHeader?: ReactNode;
+  pagination?: boolean;
 }
 
 const AppTable = ({
   columns = [],
   data = [],
   upperHeader = null,
+  pagination = false,
 }: AppTableProps) => {
   return (
     <div className="flex flex-col">
@@ -66,31 +62,17 @@ const AppTable = ({
         </Table>
       </div>
 
-      <Pagination>
-        <PaginationContent>
-          <PaginationItem>
-            <PaginationPrevious href="#" />
-          </PaginationItem>
-
-          <PaginationItem>
-            <PaginationLink href="#" isActive>
-              1
-            </PaginationLink>
-          </PaginationItem>
-
-          <PaginationItem>
-            <PaginationLink href="#">2</PaginationLink>
-          </PaginationItem>
-
-          <PaginationItem>
-            <PaginationLink href="#">3</PaginationLink>
-          </PaginationItem>
-
-          <PaginationItem>
-            <PaginationNext href="#" />
-          </PaginationItem>
-        </PaginationContent>
-      </Pagination>
+      {pagination && (
+        <div className="shrink-0 flex justify-between items-center">
+          <span className="text-sm text-muted-foreground">
+            Showing 1–5 of 24
+          </span>
+          <div className="flex gap-2">
+            <Button variant="outline">Previous</Button>
+            <Button variant="outline">Next</Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
