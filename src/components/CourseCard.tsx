@@ -1,6 +1,10 @@
 "use client";
 
 import React, { ReactNode } from "react";
+import { Star, Users, Clock } from "lucide-react";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 
 interface CourseCardProps {
   course: {
@@ -22,46 +26,74 @@ interface CourseCardProps {
 
 const CourseCard = ({ course, footer = null }: CourseCardProps) => {
   return (
-    <div className="w-full rounded-xl border bg-white shadow-sm hover:shadow-md transition overflow-hidden flex flex-col">
+    <div className="w-full rounded-2xl border bg-card text-card-foreground shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col group">
       {/* Image Section */}
-      <div className="relative h-44 w-full overflow-hidden">
-        <img
-          src={course.thumbnail}
-          alt={course.title}
-          className="h-full w-full object-cover hover:scale-105 transition duration-300"
-        />
+      <div className="relative w-full overflow-hidden">
+        <AspectRatio ratio={16 / 9}>
+          <img
+            src={course.thumbnail}
+            alt={course.title}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          />
+          {/* Overlay gradient for readability */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent pointer-events-none" />
+        </AspectRatio>
 
+        {/* Price Badge */}
         <div className="absolute top-3 right-3 bg-black/80 text-white text-xs px-2 py-1 rounded-md">
           ${course.price}
+        </div>
+        
+        {/* Category Badge */}
+        <div className="absolute top-3 left-3">
+          <Badge variant="secondary" className="shadow-sm bg-background/95 backdrop-blur-sm hover:bg-background border border-border/50">
+            {course.category}
+          </Badge>
         </div>
       </div>
 
       {/* Content */}
-      <div className="p-4 space-y-3 flex flex-col flex-1">
-        <h2 className="font-semibold text-base leading-snug line-clamp-2">
+      <div className="p-5 flex flex-col flex-1">
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-xs font-semibold text-primary bg-primary/10 px-2.5 py-1 rounded-md capitalize">
+            {course.level}
+          </span>
+          <div className="flex items-center gap-1 text-yellow-500 text-xs font-semibold">
+            <Star className="h-4 w-4 fill-current" />
+            <span>{course.averageRating.toFixed(1)}</span>
+            <span className="text-muted-foreground font-normal">({course.totalReviews})</span>
+          </div>
+        </div>
+
+        <h2 className="font-bold text-lg leading-tight line-clamp-2 mb-2 group-hover:text-primary transition-colors">
           {course.title}
         </h2>
 
-        <div className="flex items-center justify-between text-xs text-gray-500">
-          <span className="capitalize">{course.level}</span>
-          <span>{course.category}</span>
-        </div>
-
-        <p className="text-sm text-gray-600">
-          By{" "}
-          <span className="font-medium text-gray-800">{course.instructor}</span>
+        <p className="text-sm text-muted-foreground mb-4">
+          By <span className="font-medium text-foreground">{course.instructor}</span>
         </p>
 
-        <div className="grid grid-cols-2 gap-y-2 text-xs text-gray-500 pt-1">
-          <div>⭐ {course.averageRating.toFixed(1)}</div>
-          <div>{course.totalReviews} reviews</div>
-          <div>{course.totalStudentsEnrolled} students</div>
-          <div>{course.totalDurationInMinutes} min</div>
+        <Separator className="mb-4" />
+
+        {/* Stats */}
+        <div className="grid grid-cols-2 gap-3 text-sm text-muted-foreground mb-5">
+          <div className="flex items-center gap-2">
+            <Users className="h-4 w-4 text-primary" />
+            <span className="truncate">{course.totalStudentsEnrolled} students</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Clock className="h-4 w-4 text-primary" />
+            <span className="truncate">
+              {Math.floor(course.totalDurationInMinutes / 60)}h {course.totalDurationInMinutes % 60}m
+            </span>
+          </div>
         </div>
 
         {/* Footer pinned to bottom */}
         {footer && (
-          <div className="pt-3 border-t mt-auto flex gap-2">{footer}</div>
+          <div className="mt-auto pt-2 flex flex-col gap-2">
+            {footer}
+          </div>
         )}
       </div>
     </div>

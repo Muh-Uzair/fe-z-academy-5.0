@@ -3,6 +3,8 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
+import PublicNavbar from "@/components/PublicNavbar";
+import PublicFooter from "@/components/PublicFooter";
 import PageFlexCol from "@/components/PageFlexCol";
 import AppSearchBar from "@/components/AppSearchBar";
 import AppCourseCardsGridLayout from "@/components/AppCourseCardsGridLayout";
@@ -13,6 +15,13 @@ import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 import { CourseLevel } from "@/types/courseTypes";
 
@@ -294,12 +303,8 @@ const courses = [
 // -------------------- Sidebar --------------------
 
 type FilterSidebarProps = {
-  selectedLevels: CourseLevel[];
-  onLevelToggle: (level: CourseLevel) => void;
   maxPrice: number[];
   onPriceChange: (val: number[]) => void;
-  selectedCategories: string[];
-  onCategoryToggle: (cat: string) => void;
   minRating: number | null;
   onRatingChange: (val: number | null) => void;
   selectedDuration: string | null;
@@ -310,12 +315,8 @@ type FilterSidebarProps = {
 };
 
 const FilterSidebar = ({
-  selectedLevels,
-  onLevelToggle,
   maxPrice,
   onPriceChange,
-  selectedCategories,
-  onCategoryToggle,
   minRating,
   onRatingChange,
   selectedDuration,
@@ -324,7 +325,7 @@ const FilterSidebar = ({
   onVerifiedChange,
   onReset,
 }: FilterSidebarProps) => (
-  <aside className="rounded-xl border bg-card p-5 h-fit space-y-5 sticky top-4">
+  <aside className="rounded-xl border bg-card p-4 sm:p-5 h-fit space-y-5 static lg:sticky lg:top-4">
     {/* Header */}
     <div className="flex items-center justify-between">
       <h2 className="font-semibold text-base">Filters</h2>
@@ -362,19 +363,19 @@ const FilterSidebar = ({
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-medium">Max Price</h3>
         <span className="text-sm font-semibold text-primary">
-          {maxPrice[0] === 0 ? "Free" : `$${maxPrice[0]}`}
+          ${maxPrice[0]}
         </span>
       </div>
       <Slider
-        min={0}
-        max={100}
-        step={5}
+        min={1}
+        max={1000}
+        step={10}
         value={maxPrice}
         onValueChange={onPriceChange}
       />
       <div className="flex justify-between text-[11px] text-muted-foreground">
-        <span>Free</span>
-        <span>$100</span>
+        <span>$1</span>
+        <span>$1000</span>
       </div>
     </div>
 
@@ -397,28 +398,6 @@ const FilterSidebar = ({
             className="text-sm font-normal cursor-pointer flex items-center gap-1"
           >
             <span className="text-yellow-400">★</span> {opt.label}
-          </Label>
-        </div>
-      ))}
-    </div>
-
-    <Separator />
-
-    {/* Level */}
-    <div className="space-y-2.5">
-      <h3 className="text-sm font-medium">Course Level</h3>
-      {Object.values(CourseLevel).map((level) => (
-        <div key={level} className="flex items-center gap-2">
-          <Checkbox
-            id={`level-${level}`}
-            checked={selectedLevels.includes(level)}
-            onCheckedChange={() => onLevelToggle(level)}
-          />
-          <Label
-            htmlFor={`level-${level}`}
-            className="capitalize text-sm cursor-pointer font-normal"
-          >
-            {level}
           </Label>
         </div>
       ))}
@@ -449,28 +428,6 @@ const FilterSidebar = ({
         </div>
       ))}
     </div>
-
-    <Separator />
-
-    {/* Category */}
-    <div className="space-y-2.5">
-      <h3 className="text-sm font-medium">Category</h3>
-      {CATEGORIES.map((cat) => (
-        <div key={cat} className="flex items-center gap-2">
-          <Checkbox
-            id={`cat-${cat}`}
-            checked={selectedCategories.includes(cat)}
-            onCheckedChange={() => onCategoryToggle(cat)}
-          />
-          <Label
-            htmlFor={`cat-${cat}`}
-            className="text-sm font-normal cursor-pointer"
-          >
-            {cat}
-          </Label>
-        </div>
-      ))}
-    </div>
   </aside>
 );
 
@@ -479,27 +436,17 @@ const FilterSidebar = ({
 const Courses = () => {
   const router = useRouter();
   const [search, setSearch] = useState("");
-  const [selectedLevels, setSelectedLevels] = useState<CourseLevel[]>([]);
-  const [maxPrice, setMaxPrice] = useState([100]);
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedLevel, setSelectedLevel] = useState<string>("all");
+  const [maxPrice, setMaxPrice] = useState([1000]);
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [minRating, setMinRating] = useState<number | null>(null);
   const [selectedDuration, setSelectedDuration] = useState<string | null>(null);
   const [verifiedOnly, setVerifiedOnly] = useState(false);
 
-  const handleLevelToggle = (level: CourseLevel) =>
-    setSelectedLevels((prev) =>
-      prev.includes(level) ? prev.filter((l) => l !== level) : [...prev, level],
-    );
-
-  const handleCategoryToggle = (cat: string) =>
-    setSelectedCategories((prev) =>
-      prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat],
-    );
-
   const handleReset = () => {
-    setSelectedLevels([]);
-    setMaxPrice([100]);
-    setSelectedCategories([]);
+    setSelectedLevel("all");
+    setMaxPrice([1000]);
+    setSelectedCategory("all");
     setMinRating(null);
     setSelectedDuration(null);
     setVerifiedOnly(false);
@@ -520,13 +467,12 @@ const Courses = () => {
         course.instructor.toLowerCase().includes(q);
 
       const matchesLevel =
-        selectedLevels.length === 0 || selectedLevels.includes(course.level);
+        selectedLevel === "all" || course.level === selectedLevel;
 
       const matchesPrice = course.price <= maxPrice[0];
 
       const matchesCategory =
-        selectedCategories.length === 0 ||
-        selectedCategories.includes(course.category);
+        selectedCategory === "all" || course.category === selectedCategory;
 
       const matchesRating =
         minRating === null || course.averageRating >= minRating;
@@ -550,33 +496,63 @@ const Courses = () => {
     });
   }, [
     search,
-    selectedLevels,
+    selectedLevel,
     maxPrice,
-    selectedCategories,
+    selectedCategory,
     minRating,
     selectedDuration,
     verifiedOnly,
   ]);
 
   return (
-    <div className="p-10">
+    <>
+      <PublicNavbar />
+      <div className="p-4 sm:p-6 md:p-10">
       <PageFlexCol>
-        {/* Search */}
-        <AppSearchBar
-          placeholder="Search by title, category or instructor..."
-          onChange={(value) => setSearch(value)}
-        />
+        {/* Top Bar: Search & Filters */}
+        <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+          <AppSearchBar
+            placeholder="Search by title, category or instructor..."
+            onChange={(value) => setSearch(value)}
+            className="w-full flex-1"
+          />
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full md:w-auto">
+            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+              <SelectTrigger className="w-full md:w-[180px] bg-card">
+                <SelectValue placeholder="Category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Categories</SelectItem>
+                {CATEGORIES.map((cat) => (
+                  <SelectItem key={cat} value={cat}>
+                    {cat}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={selectedLevel} onValueChange={setSelectedLevel}>
+              <SelectTrigger className="w-full md:w-[180px] bg-card capitalize">
+                <SelectValue placeholder="Level" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Levels</SelectItem>
+                {Object.values(CourseLevel).map((level) => (
+                  <SelectItem key={level} value={level} className="capitalize">
+                    {level}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
 
         {/* Body */}
         <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-6 items-start">
           {/* Sidebar */}
           <FilterSidebar
-            selectedLevels={selectedLevels}
-            onLevelToggle={handleLevelToggle}
             maxPrice={maxPrice}
             onPriceChange={setMaxPrice}
-            selectedCategories={selectedCategories}
-            onCategoryToggle={handleCategoryToggle}
             minRating={minRating}
             onRatingChange={setMinRating}
             selectedDuration={selectedDuration}
@@ -605,7 +581,9 @@ const Courses = () => {
           />
         </div>
       </PageFlexCol>
-    </div>
+      </div>
+      <PublicFooter />
+    </>
   );
 };
 

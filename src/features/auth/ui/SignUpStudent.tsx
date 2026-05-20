@@ -53,7 +53,7 @@ const SignUpStudent = () => {
   // FUNCTIONS
   const onSubmit = (values: SignUpStudentFormValues) => {
     console.log("student sign up", values);
-    router.push("/verify-otp");                                                                                                                                             
+    router.push("/verify-otp");
   };
 
   const handleContinueWithGoogle = () => {
@@ -125,7 +125,7 @@ const SignUpStudent = () => {
                     type="button"
                     variant="ghost"
                     size="icon-sm"
-                    className="absolute top-px right-1"
+                    className="absolute top-[6px] right-1"
                     onClick={() => setShowPassword((value) => !value)}
                     aria-label={
                       showPassword ? "Hide password" : "Show password"

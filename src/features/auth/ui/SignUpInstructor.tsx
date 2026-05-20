@@ -125,7 +125,7 @@ const SignUpInstructor = () => {
                     type="button"
                     variant="ghost"
                     size="icon-sm"
-                    className="absolute top-px right-1"
+                    className="absolute top-[6px] right-1"
                     onClick={() => setShowPassword((value) => !value)}
                     aria-label={
                       showPassword ? "Hide password" : "Show password"

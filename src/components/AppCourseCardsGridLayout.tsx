@@ -34,7 +34,7 @@ const AppCourseCardsGridLayout = ({
   return (
     <div className="flex flex-col">
       {/* Header */}
-      <div className="pb-6">{upperHeader}</div>
+      {upperHeader && <div className="pb-6">{upperHeader}</div>}
 
       {/* GRID */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
