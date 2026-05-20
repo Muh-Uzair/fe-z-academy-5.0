@@ -28,7 +28,7 @@ const AppTable = ({
   pagination = false,
 }: AppTableProps) => {
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col w-full min-w-0">
       <div className="rounded-t-xl pb-6">{upperHeader}</div>
 
       {/* ✅ border + radius + overflow-hidden on YOUR div, not on <Table> */}

@@ -12,7 +12,7 @@ const FlexCol = ({
   ...props
 }: FlexColProps) => {
   return (
-    <div className={`flex flex-col ${gap} ${className}`} {...props}>
+    <div className={`flex flex-col min-w-0 w-full ${gap} ${className}`} {...props}>
       {children}
     </div>
   );

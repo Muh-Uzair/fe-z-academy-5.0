@@ -25,7 +25,7 @@ const AboutUs = () => {
       <div className="min-h-screen bg-background flex flex-col">
         {/* Hero Section */}
         <section className="relative overflow-hidden bg-primary/5 py-20 lg:py-32">
-          <div className="container px-4 md:px-6 mx-auto relative z-10">
+          <div className="max-w-[1200px] px-4 md:px-6 mx-auto w-full relative z-10">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
               <div className="space-y-6">
                 <div className="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
@@ -78,7 +78,7 @@ const AboutUs = () => {
 
         {/* Mission Section */}
         <section className="py-20 bg-background">
-          <div className="container px-4 md:px-6 mx-auto">
+          <div className="max-w-[1200px] px-4 md:px-6 mx-auto w-full">
             <div className="flex flex-col items-center text-center space-y-4 mb-16">
               <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">Our Mission</h2>
               <p className="text-lg text-muted-foreground max-w-[800px]">
@@ -120,7 +120,7 @@ const AboutUs = () => {
 
         {/* Two-Sided Platform Section */}
         <section className="py-20 bg-muted/50">
-          <div className="container px-4 md:px-6 mx-auto">
+          <div className="max-w-[1200px] px-4 md:px-6 mx-auto w-full">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
 
               {/* Image side */}
@@ -186,7 +186,7 @@ const AboutUs = () => {
 
         {/* CTA Section */}
         <section className="py-24 bg-primary/5 text-center border-t border-b border-primary/10">
-          <div className="container px-4 md:px-6 mx-auto space-y-8">
+          <div className="max-w-[1200px] px-4 md:px-6 mx-auto w-full space-y-8">
             <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-foreground">Ready to start your journey?</h2>
             <p className="text-muted-foreground text-lg md:text-xl max-w-[600px] mx-auto">
               Join thousands of learners and experts who are already transforming their lives with Z-Academy.

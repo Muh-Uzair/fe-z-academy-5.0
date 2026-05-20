@@ -345,7 +345,7 @@ const AppLayoutShell = ({ role, children }: AppLayoutShellProps) => {
           <SidebarRail />
         </Sidebar>
 
-        <SidebarInset className="min-h-screen bg-stone-100/70 w-full">
+        <SidebarInset className="min-h-screen bg-stone-100/70 w-full min-w-0 overflow-x-hidden">
           <header className="sticky top-0 z-20 border-b  bg-white backdrop-blur">
             <div className="flex h-16 items-center justify-between gap-4 px-4 sm:px-6">
               <SidebarTrigger className="rounded-xl border border-primary bg-white hover:bg-slate-100 text-primary" />
@@ -358,9 +358,9 @@ const AppLayoutShell = ({ role, children }: AppLayoutShellProps) => {
             </div>
           </header>
 
-          <div className="flex flex-1 flex-col">
-            <main className="flex-1 p-4 sm:p-6">
-              <div className="h-full">{children}</div>
+          <div className="flex flex-1 flex-col min-w-0 w-full">
+            <main className="flex-1 p-4 sm:p-6 min-w-0 w-full">
+              <div className="h-full min-w-0">{children}</div>
             </main>
           </div>
         </SidebarInset>

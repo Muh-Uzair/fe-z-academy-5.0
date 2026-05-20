@@ -73,28 +73,30 @@ const CourseCard = ({ course, footer = null }: CourseCardProps) => {
           By <span className="font-medium text-foreground">{course.instructor}</span>
         </p>
 
-        <Separator className="mb-4" />
+        <div className="mt-auto">
+          {/* Stats */}
+          <div className="grid grid-cols-2 gap-3 text-sm text-muted-foreground mb-4">
+            <div className="flex items-center gap-2">
+              <Users className="h-4 w-4 text-primary" />
+              <span className="truncate">{course.totalStudentsEnrolled} students</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Clock className="h-4 w-4 text-primary" />
+              <span className="truncate">
+                {Math.floor(course.totalDurationInMinutes / 60)}h {course.totalDurationInMinutes % 60}m
+              </span>
+            </div>
+          </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-2 gap-3 text-sm text-muted-foreground mb-5">
-          <div className="flex items-center gap-2">
-            <Users className="h-4 w-4 text-primary" />
-            <span className="truncate">{course.totalStudentsEnrolled} students</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Clock className="h-4 w-4 text-primary" />
-            <span className="truncate">
-              {Math.floor(course.totalDurationInMinutes / 60)}h {course.totalDurationInMinutes % 60}m
-            </span>
-          </div>
+          <Separator className="mb-4" />
+
+          {/* Footer pinned to bottom */}
+          {footer && (
+            <div className="flex flex-col gap-2">
+              {footer}
+            </div>
+          )}
         </div>
-
-        {/* Footer pinned to bottom */}
-        {footer && (
-          <div className="mt-auto pt-2 flex flex-col gap-2">
-            {footer}
-          </div>
-        )}
       </div>
     </div>
   );

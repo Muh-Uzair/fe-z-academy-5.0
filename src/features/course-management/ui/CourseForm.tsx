@@ -320,10 +320,12 @@ const CourseForm = ({
                       disabled={isReadOnly}
                     />
                   </FormControl>
-                  <FormDescription>
-                    Keep the title clear, outcome-focused, and easy for
-                    students to scan quickly.
-                  </FormDescription>
+                  {!isReadOnly && (
+                    <FormDescription>
+                      Keep the title clear, outcome-focused, and easy for
+                      students to scan quickly.
+                    </FormDescription>
+                  )}
                   <FormMessage />
                 </FormItem>
               )}
@@ -343,10 +345,12 @@ const CourseForm = ({
                       disabled={isReadOnly}
                     />
                   </FormControl>
-                  <FormDescription>
-                    Match the backend model by collecting a full course summary
-                    that can later go directly into the API payload.
-                  </FormDescription>
+                  {!isReadOnly && (
+                    <FormDescription>
+                      Match the backend model by collecting a full course summary
+                      that can later go directly into the API payload.
+                    </FormDescription>
+                  )}
                   <FormMessage />
                 </FormItem>
               )}
@@ -371,9 +375,11 @@ const CourseForm = ({
                         }
                       />
                     </FormControl>
-                    <FormDescription>
-                      Free courses are not supported in this flow.
-                    </FormDescription>
+                    {!isReadOnly && (
+                      <FormDescription>
+                        Free courses are not supported in this flow.
+                      </FormDescription>
+                    )}
                     <FormMessage />
                   </FormItem>
                 )}
@@ -408,10 +414,12 @@ const CourseForm = ({
                         </SelectContent>
                       </Select>
                     </FormControl>
-                    <FormDescription>
-                      This should match the course difficulty promised to
-                      students.
-                    </FormDescription>
+                    {!isReadOnly && (
+                      <FormDescription>
+                        This should match the course difficulty promised to
+                        students.
+                      </FormDescription>
+                    )}
                     <FormMessage />
                   </FormItem>
                 )}
@@ -445,10 +453,12 @@ const CourseForm = ({
                         </SelectContent>
                       </Select>
                     </FormControl>
-                    <FormDescription>
-                      Categories are already admin-managed, so the instructor
-                      only selects from approved options.
-                    </FormDescription>
+                    {!isReadOnly && (
+                      <FormDescription>
+                        Categories are already admin-managed, so the instructor
+                        only selects from approved options.
+                      </FormDescription>
+                    )}
                     <FormMessage />
                   </FormItem>
                 )}
@@ -463,11 +473,13 @@ const CourseForm = ({
               render={() => (
                 <FormItem>
                   <FormLabel>Course Thumbnail</FormLabel>
-                  <FormDescription>
-                    Upload a `.jpg`, `.jpeg`, or `.png` image from your local
-                    computer. We will replace this preview with an S3 upload
-                    flow later.
-                  </FormDescription>
+                  {!isReadOnly && (
+                    <FormDescription>
+                      Upload a `.jpg`, `.jpeg`, or `.png` image from your local
+                      computer. We will replace this preview with an S3 upload
+                      flow later.
+                    </FormDescription>
+                  )}
 
                   {thumbnailPreviewUrl ? (
                     <div className="space-y-3">
@@ -555,10 +567,12 @@ const CourseForm = ({
               render={() => (
                 <FormItem>
                   <FormLabel>Course Video</FormLabel>
-                  <FormDescription>
-                    Upload a `.mp4`, `.webm`, or `.mov` file up to 20MB. For
-                    now we collect the raw `File` object and log it on submit.
-                  </FormDescription>
+                  {!isReadOnly && (
+                    <FormDescription>
+                      Upload a `.mp4`, `.webm`, or `.mov` file up to 20MB. For
+                      now we collect the raw `File` object and log it on submit.
+                    </FormDescription>
+                  )}
 
                   {videoPreviewUrl ? (
                     <div className="space-y-3 rounded-xl border bg-muted/20 p-3">

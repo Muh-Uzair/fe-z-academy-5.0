@@ -61,7 +61,7 @@ export default function Home() {
         <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-primary/20 rounded-full blur-[100px] -z-10" />
         <div className="absolute bottom-[-10%] left-[-5%] w-[400px] h-[400px] bg-primary-dark/20 rounded-full blur-[120px] -z-10" />
 
-        <div className="container mx-auto px-6 grid lg:grid-cols-2 gap-12 items-center">
+        <div className="max-w-[1200px] mx-auto w-full px-6 grid lg:grid-cols-2 gap-12 items-center">
           <div className="flex flex-col gap-6 relative z-10">
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-black text-foreground tracking-tight leading-[1.1]">
               Master New Skills <br />
@@ -124,7 +124,7 @@ export default function Home() {
       </section>
 
       {/* Top Categories */}
-      <section className="py-20 px-6 container mx-auto">
+      <section className="py-20 px-6 max-w-[1200px] mx-auto w-full">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-10">
           <div>
             <h2 className="text-3xl md:text-4xl font-bold text-foreground">Explore Top Categories</h2>
@@ -150,7 +150,7 @@ export default function Home() {
 
       {/* Featured Courses */}
       <section className="py-20 px-6 bg-muted/30">
-        <div className="container mx-auto">
+        <div className="max-w-[1200px] mx-auto w-full">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-10">
             <div>
               <h2 className="text-3xl md:text-4xl font-bold text-foreground">Featured Courses</h2>
@@ -175,7 +175,7 @@ export default function Home() {
       </section>
 
       {/* Split Info Section */}
-      <section className="py-24 px-6 container mx-auto">
+      <section className="py-24 px-6 max-w-[1200px] mx-auto w-full">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           <div className="relative rounded-3xl overflow-hidden shadow-2xl aspect-video lg:aspect-square order-2 lg:order-1">
             <img
@@ -212,7 +212,7 @@ export default function Home() {
 
       {/* Trending Courses */}
       <section className="py-20 px-6 bg-primary/5 border-t border-primary/10">
-        <div className="container mx-auto">
+        <div className="max-w-[1200px] mx-auto w-full">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-10">
             <div>
               <h2 className="text-3xl md:text-4xl font-bold text-foreground">Trending Now</h2>
