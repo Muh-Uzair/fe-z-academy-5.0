@@ -69,6 +69,8 @@ const CourseDetails = ({ viewerRole }: CourseDetailsProps) => {
   const isAdminViewer = viewerRole === "admin";
   const showAdminReviewPanel =
     isAdminViewer && searchParams.get("review") === "true";
+  const source = searchParams.get("source");
+  const isFromBrowse = source === "browse";
   const adminReviewReason = adminReviewReasonById[course._id] ?? "";
   const courseVerificationState = getCourseVerificationState(course);
 
@@ -284,6 +286,9 @@ const CourseDetails = ({ viewerRole }: CourseDetailsProps) => {
             onClose={() => router.back()}
             onModeChange={isInstructorViewer ? setFormMode : undefined}
             allowEdit={isInstructorViewer}
+            hideVideo={isFromBrowse}
+            showEnrollButton={isFromBrowse}
+            onEnroll={() => router.push(`/course-checkout/${course._id}`)}
           />
         </CardContent>
       </Card>

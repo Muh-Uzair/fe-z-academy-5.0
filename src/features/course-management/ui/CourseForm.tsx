@@ -114,6 +114,9 @@ interface CourseFormProps {
   onClose: () => void;
   onModeChange?: (mode: Exclude<CourseFormMode, "create">) => void;
   allowEdit?: boolean;
+  hideVideo?: boolean;
+  showEnrollButton?: boolean;
+  onEnroll?: () => void;
 }
 
 const emptyValues: CourseFormValues = {
@@ -160,6 +163,9 @@ const CourseForm = ({
   onClose,
   onModeChange,
   allowEdit = true,
+  hideVideo = false,
+  showEnrollButton = false,
+  onEnroll,
 }: CourseFormProps) => {
   const [thumbnailPreviewUrl, setThumbnailPreviewUrl] = useState<string | null>(
     initialData?.thumbnail ?? null,
@@ -561,9 +567,10 @@ const CourseForm = ({
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="videoFile"
+            {!hideVideo && (
+              <FormField
+                control={form.control}
+                name="videoFile"
               render={() => (
                 <FormItem>
                   <FormLabel>Course Video</FormLabel>
@@ -649,6 +656,7 @@ const CourseForm = ({
                 </FormItem>
               )}
             />
+            )}
           </div>
         </div>
 
@@ -661,6 +669,11 @@ const CourseForm = ({
               {allowEdit ? (
                 <Button type="button" onClick={() => onModeChange?.("edit")}>
                   Edit Course
+                </Button>
+              ) : null}
+              {showEnrollButton && onEnroll ? (
+                <Button type="button" onClick={onEnroll}>
+                  Enroll Now
                 </Button>
               ) : null}
             </>

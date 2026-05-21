@@ -113,7 +113,7 @@ const BrowseCourses = () => {
             className="w-full"
             onClick={() =>
               router.push(
-                `/student/course-details/${course._id}`,
+                `/student/course-details/${course._id}?source=browse`,
               )
             }
           >
