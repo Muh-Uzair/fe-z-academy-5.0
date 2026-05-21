@@ -35,6 +35,12 @@ export interface Course {
 
   totalDurationInMinutes: number;
 
+  totalDurationWatchedInMinutes: number;
+
+  watchPercentage: number;
+
+  mostRecentlySeen: boolean;
+
   createdAt: string;
 
   updatedAt: string;

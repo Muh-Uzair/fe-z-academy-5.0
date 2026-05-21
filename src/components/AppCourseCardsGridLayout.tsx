@@ -16,6 +16,7 @@ interface Course {
   totalReviews: number;
   totalStudentsEnrolled: number;
   totalDurationInMinutes: number;
+  totalDurationWatchedInMinutes?: number;
 }
 
 interface AppCourseCardsGridLayoutProps {
@@ -23,6 +24,7 @@ interface AppCourseCardsGridLayoutProps {
   upperHeader?: ReactNode;
   pagination?: boolean;
   renderFooter?: (course: Course) => ReactNode;
+  mode?: "default" | "in-progress";
 }
 
 const AppCourseCardsGridLayout = ({
@@ -30,6 +32,7 @@ const AppCourseCardsGridLayout = ({
   upperHeader = null,
   pagination = false,
   renderFooter,
+  mode = "default",
 }: AppCourseCardsGridLayoutProps) => {
   return (
     <div className="flex flex-col">
@@ -42,6 +45,7 @@ const AppCourseCardsGridLayout = ({
           <CourseCard
             key={course._id}
             course={course}
+            mode={mode}
             footer={renderFooter ? renderFooter(course) : null}
           />
         ))}

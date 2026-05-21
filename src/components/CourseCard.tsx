@@ -5,6 +5,7 @@ import { Star, Users, Clock } from "lucide-react";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Progress } from "@/components/ui/progress";
 
 interface CourseCardProps {
   course: {
@@ -19,12 +20,14 @@ interface CourseCardProps {
     totalReviews: number;
     totalStudentsEnrolled: number;
     totalDurationInMinutes: number;
+    totalDurationWatchedInMinutes?: number;
   };
 
   footer?: ReactNode;
+  mode?: "default" | "in-progress";
 }
 
-const CourseCard = ({ course, footer = null }: CourseCardProps) => {
+const CourseCard = ({ course, footer = null, mode = "default" }: CourseCardProps) => {
   return (
     <div className="w-full rounded-2xl border bg-card text-card-foreground shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col group">
       {/* Image Section */}
@@ -40,9 +43,11 @@ const CourseCard = ({ course, footer = null }: CourseCardProps) => {
         </AspectRatio>
 
         {/* Price Badge */}
-        <div className="absolute top-3 right-3 bg-black/80 text-white text-xs px-2 py-1 rounded-md">
-          ${course.price}
-        </div>
+        {mode === "default" && (
+          <div className="absolute top-3 right-3 bg-black/80 text-white text-xs px-2 py-1 rounded-md">
+            ${course.price}
+          </div>
+        )}
         
         {/* Category Badge */}
         <div className="absolute top-3 left-3">
@@ -58,11 +63,13 @@ const CourseCard = ({ course, footer = null }: CourseCardProps) => {
           <span className="text-xs font-semibold text-primary bg-primary/10 px-2.5 py-1 rounded-md capitalize">
             {course.level}
           </span>
-          <div className="flex items-center gap-1 text-yellow-500 text-xs font-semibold">
-            <Star className="h-4 w-4 fill-current" />
-            <span>{course.averageRating.toFixed(1)}</span>
-            <span className="text-muted-foreground font-normal">({course.totalReviews})</span>
-          </div>
+          {mode === "default" && (
+            <div className="flex items-center gap-1 text-yellow-500 text-xs font-semibold">
+              <Star className="h-4 w-4 fill-current" />
+              <span>{course.averageRating.toFixed(1)}</span>
+              <span className="text-muted-foreground font-normal">({course.totalReviews})</span>
+            </div>
+          )}
         </div>
 
         <h2 className="font-bold text-lg leading-tight line-clamp-2 mb-2 group-hover:text-primary transition-colors">
@@ -76,10 +83,12 @@ const CourseCard = ({ course, footer = null }: CourseCardProps) => {
         <div className="mt-auto">
           {/* Stats */}
           <div className="grid grid-cols-2 gap-3 text-sm text-muted-foreground mb-4">
-            <div className="flex items-center gap-2">
-              <Users className="h-4 w-4 text-primary" />
-              <span className="truncate">{course.totalStudentsEnrolled} students</span>
-            </div>
+            {mode === "default" && (
+              <div className="flex items-center gap-2">
+                <Users className="h-4 w-4 text-primary" />
+                <span className="truncate">{course.totalStudentsEnrolled} students</span>
+              </div>
+            )}
             <div className="flex items-center gap-2">
               <Clock className="h-4 w-4 text-primary" />
               <span className="truncate">
@@ -87,6 +96,16 @@ const CourseCard = ({ course, footer = null }: CourseCardProps) => {
               </span>
             </div>
           </div>
+
+          {mode === "in-progress" && course.totalDurationWatchedInMinutes !== undefined && (
+            <div className="mb-4 space-y-1.5 mt-auto">
+               <div className="flex justify-between text-xs font-medium text-muted-foreground">
+                 <span>{course.totalDurationWatchedInMinutes}m / {course.totalDurationInMinutes}m watched</span>
+                 <span className="text-foreground">{Math.round((course.totalDurationWatchedInMinutes / course.totalDurationInMinutes) * 100)}%</span>
+               </div>
+               <Progress value={(course.totalDurationWatchedInMinutes / course.totalDurationInMinutes) * 100} className="h-1.5 bg-primary/10" />
+            </div>
+          )}
 
           <Separator className="mb-4" />
 
