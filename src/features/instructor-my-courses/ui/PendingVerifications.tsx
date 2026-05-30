@@ -127,7 +127,7 @@ const PendingVerifications = () => {
             label: "Action",
             render: (_: unknown, row: CourseRecord) => (
               <Button asChild>
-                <Link href={`/instructor/my-courses/course-details/${row._id}`}>
+                <Link href={`/course-details/${row._id}?role=instructor`}>
                   View Details
                 </Link>
               </Button>

@@ -122,7 +122,7 @@ const VerifiedCourses = () => {
             label: "Action",
             render: (_: unknown, row: CourseRecord) => (
               <Button asChild>
-                <Link href={`/admin/courses/course-details/${row._id}`}>
+                <Link href={`/course-details/${row._id}?role=admin`}>
                   View Details
                 </Link>
               </Button>

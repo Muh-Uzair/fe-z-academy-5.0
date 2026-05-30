@@ -119,7 +119,7 @@ const ContinueWatching = () => {
             <div className="flex flex-col md:flex-row">
               {/* Left side: Large Thumbnail */}
               <div className="md:w-5/12 lg:w-4/12 relative overflow-hidden">
-                <Link href={`/student/course-details/${heroCourse._id}`}>
+                <Link href={`/course-details/${heroCourse._id}?role=student`}>
                   <AspectRatio ratio={16 / 9} className="md:h-full">
                     <img
                       src={heroCourse.thumbnail}
@@ -164,9 +164,9 @@ const ContinueWatching = () => {
                       {heroCourse.totalDurationWatchedInMinutes}m / {heroCourse.totalDurationInMinutes}m watched
                     </span>
 
-                    <Button >
-                      <Link href={`/student/course-details/${heroCourse._id}`}>
-                        Resume Course
+                    <Button asChild>
+                      <Link href={`/course-details/${heroCourse._id}?role=student`}>
+                        <PlayCircle className="h-5 w-5" />Resume Course
                       </Link>
                     </Button>
                   </div>
@@ -185,8 +185,8 @@ const ContinueWatching = () => {
             courses={otherCourses}
             mode="in-progress"
             renderFooter={(course) => (
-              <Button >
-                <Link href={`/student/course-details/${course._id}`}>
+              <Button asChild>
+                <Link href={`/course-details/${course._id}?role=student`}>
                   Resume
                 </Link>
               </Button>

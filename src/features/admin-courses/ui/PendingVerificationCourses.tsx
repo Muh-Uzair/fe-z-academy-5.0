@@ -127,7 +127,7 @@ const PendingVerificationCourses = () => {
             render: (_: unknown, row: CourseRecord) => (
               <Button asChild>
                 <Link
-                  href={`/admin/courses/course-details/${row._id}?review=true`}
+                  href={`/course-details/${row._id}?role=admin&review=true`}
                 >
                   View Details
                 </Link>

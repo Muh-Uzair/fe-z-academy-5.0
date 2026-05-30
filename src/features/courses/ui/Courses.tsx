@@ -571,7 +571,7 @@ const Courses = () => {
                 className="w-full"
                 onClick={() =>
                   router.push(
-                    `/student/browse-courses/course-details/${course._id}`,
+                    `/course-details/${course._id}?role=student`,
                   )
                 }
               >

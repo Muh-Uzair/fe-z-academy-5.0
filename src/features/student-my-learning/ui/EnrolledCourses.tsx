@@ -140,7 +140,7 @@ const EnrolledCourses = () => {
             render: (_: unknown, row: Course) => (
               <Button asChild>
                 <Link
-                  href={`/student/course-details/${row._id}?source=enrolled`}
+                 href={`/course-details/${row._id}?role=student&source=enrolled`}
                 >
                   View Details
                 </Link>
