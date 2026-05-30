@@ -108,6 +108,11 @@ const navigationByRole: Record<AppRole, NavigationItem[]> = {
       icon: Tags,
     },
     {
+      title: "Chat",
+      href: "/admin/chat",
+      icon: MessageSquare,
+    },
+    {
       title: "Settings",
       href: "/admin/settings",
       icon: Settings,

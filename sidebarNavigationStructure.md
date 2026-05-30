@@ -19,6 +19,7 @@ Application uses role-based sidebar navigation. Each user role (Admin, Instructo
 - Students
 - Enrollments
 - Categories
+- Chat
 - Settings
 
 ## 2. INSTRUCTOR SIDEBAR
