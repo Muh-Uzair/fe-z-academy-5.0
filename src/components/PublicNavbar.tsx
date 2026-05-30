@@ -65,7 +65,7 @@ const PublicNavbar = () => {
       <div className="flex items-center gap-3">
         {/* Desktop Auth */}
         <div className="hidden md:flex items-center gap-3">
-          <Link href="/login">
+          <Link href="/signin">
             <Button variant="ghost" className="hover:text-primary hover:bg-primary/10 transition-colors">Sign In</Button>
           </Link>
           <Link href="/signup">

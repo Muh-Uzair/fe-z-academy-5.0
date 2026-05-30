@@ -321,7 +321,7 @@ const CourseCheckout = () => {
                 <AppCourseCardsGridLayout
                     courses={similarCourses}
                     renderFooter={() => (
-                        <Button variant="outline" className="w-full">View Details</Button>
+                        <Button  className="w-full">View Details</Button>
                     )}
                 />
             </div>
