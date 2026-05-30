@@ -176,174 +176,180 @@ const CourseDetails = ({ viewerRole }: CourseDetailsProps) => {
   };
 
   return (
-    <PageFlexCol>
-      <PageHeader
-        pageHeading="Course Details"
-        pageDescription={pageDescription}
-        pageHeaderLeftSection={
-          <Button variant="outline" onClick={() => router.back()}>
-            Back
-          </Button>
-        }
-      />
-
-      <div className="grid gap-4 lg:grid-cols-4">
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle>{course.title}</CardTitle>
-            <CardDescription>{course.categoryName}</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3 text-sm">
-            <div className="flex flex-wrap items-center gap-2">
-              {course.isVerified === false && (
-                <Badge variant="destructive">Not verified</Badge>
-              )}
-              {course.isVerified && <Badge>Verified</Badge>}
-
-              <Badge variant="outline">{formatCourseLevel(course.level)}</Badge>
-              <Badge variant="outline">${course.price}</Badge>
-            </div>
-            <p className="text-muted-foreground">{course.description}</p>
-            {course.verificationRejectionReason ? (
-              <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
-                {course.verificationRejectionReason}
-              </div>
-            ) : null}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Performance</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3 text-sm">
-            <div>
-              <p className="text-muted-foreground">Students Enrolled</p>
-              <p className="text-xl font-semibold">
-                {course.totalStudentsEnrolled}
-              </p>
-            </div>
-            <div>
-              <p className="text-muted-foreground">Average Rating</p>
-              <p className="text-xl font-semibold">
-                {course.averageRating.toFixed(1)}
-              </p>
-            </div>
-            <div>
-              <p className="text-muted-foreground">Total Reviews</p>
-              <p className="text-xl font-semibold">{course.totalReviews}</p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Meta</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3 text-sm">
-            <div>
-              <p className="text-muted-foreground">Instructor</p>
-              <p className="font-medium">{course.instructorName}</p>
-            </div>
-            <div>
-              <p className="text-muted-foreground">Created At</p>
-              <p className="font-medium">{formatDate(course.createdAt)}</p>
-            </div>
-            <div>
-              <p className="text-muted-foreground">Last Updated</p>
-              <p className="font-medium">{formatDate(course.updatedAt)}</p>
-            </div>
-            <div>
-              <p className="text-muted-foreground">Duration</p>
-              <p className="font-medium">
-                {course.totalDurationInMinutes} minutes
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card className="overflow-visible">
-        <CardHeader>
-          <CardTitle>
-            {isInstructorViewer && formMode === "edit"
-              ? "Edit Course"
-              : "View Course"}
-          </CardTitle>
-          <CardDescription>
-            {isInstructorViewer && formMode === "edit"
-              ? "Update the course details and save your changes."
-              : "Use the shared course form to keep the viewing experience consistent across roles."}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <CourseForm
-            key={`${course._id}-${viewerRole}-${formMode}-${course.updatedAt}`}
-            mode={isInstructorViewer ? formMode : "view"}
-            initialData={course}
-            categoryOptions={courseCategoryOptions}
-            onSubmit={handleUpdateCourse}
-            onClose={() => router.back()}
-            onModeChange={isInstructorViewer ? setFormMode : undefined}
-            allowEdit={isInstructorViewer}
-            hideVideo={isFromBrowse}
-            showEnrollButton={isFromBrowse}
-            onEnroll={() => router.push(`/course-checkout/${course._id}`)}
+    <div className="w-full flex justify-center items-center p-8">
+      <div className="max-w-[1200px]">
+        <PageFlexCol>
+          <PageHeader
+            pageHeading="Course Details"
+            pageDescription={pageDescription}
+            pageHeaderLeftSection={
+              <Button variant="outline" onClick={() => router.back()}>
+                Back
+              </Button>
+            }
           />
-        </CardContent>
-      </Card>
 
-      {showAdminReviewPanel ? (
-        <Card>
-          <CardHeader>
-            <CardTitle>Admin Review</CardTitle>
-            <CardDescription>
-              {courseVerificationState === "pending"
-                ? "This course has not been reviewed yet. Verify it or return a rejection reason to the instructor."
-                : "Update the review result if the course still needs changes or is ready to be approved."}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <p className="text-sm font-medium">
-                Verification Rejection Reason
-              </p>
-              <Textarea
-                value={adminReviewReason}
-                onChange={(event) =>
-                  setAdminReviewReasonById((currentReasons) => ({
-                    ...currentReasons,
-                    [course._id]: event.target.value,
-                  }))
-                }
-                placeholder="Explain what the instructor needs to fix before this course can be approved."
-                className="min-h-32"
+          <div className="grid gap-4 lg:grid-cols-4">
+            <Card className="lg:col-span-2">
+              <CardHeader>
+                <CardTitle>{course.title}</CardTitle>
+                <CardDescription>{course.categoryName}</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3 text-sm">
+                <div className="flex flex-wrap items-center gap-2">
+                  {course.isVerified === false && (
+                    <Badge variant="destructive">Not verified</Badge>
+                  )}
+                  {course.isVerified && <Badge>Verified</Badge>}
+
+                  <Badge variant="outline">
+                    {formatCourseLevel(course.level)}
+                  </Badge>
+                  <Badge variant="outline">${course.price}</Badge>
+                </div>
+                <p className="text-muted-foreground">{course.description}</p>
+                {course.verificationRejectionReason ? (
+                  <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
+                    {course.verificationRejectionReason}
+                  </div>
+                ) : null}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Performance</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3 text-sm">
+                <div>
+                  <p className="text-muted-foreground">Students Enrolled</p>
+                  <p className="text-xl font-semibold">
+                    {course.totalStudentsEnrolled}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Average Rating</p>
+                  <p className="text-xl font-semibold">
+                    {course.averageRating.toFixed(1)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Total Reviews</p>
+                  <p className="text-xl font-semibold">{course.totalReviews}</p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Meta</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3 text-sm">
+                <div>
+                  <p className="text-muted-foreground">Instructor</p>
+                  <p className="font-medium">{course.instructorName}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Created At</p>
+                  <p className="font-medium">{formatDate(course.createdAt)}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Last Updated</p>
+                  <p className="font-medium">{formatDate(course.updatedAt)}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Duration</p>
+                  <p className="font-medium">
+                    {course.totalDurationInMinutes} minutes
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <Card className="overflow-visible">
+            <CardHeader>
+              <CardTitle>
+                {isInstructorViewer && formMode === "edit"
+                  ? "Edit Course"
+                  : "View Course"}
+              </CardTitle>
+              <CardDescription>
+                {isInstructorViewer && formMode === "edit"
+                  ? "Update the course details and save your changes."
+                  : "Use the shared course form to keep the viewing experience consistent across roles."}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <CourseForm
+                key={`${course._id}-${viewerRole}-${formMode}-${course.updatedAt}`}
+                mode={isInstructorViewer ? formMode : "view"}
+                initialData={course}
+                categoryOptions={courseCategoryOptions}
+                onSubmit={handleUpdateCourse}
+                onClose={() => router.back()}
+                onModeChange={isInstructorViewer ? setFormMode : undefined}
+                allowEdit={isInstructorViewer}
+                hideVideo={isFromBrowse}
+                showEnrollButton={isFromBrowse}
+                onEnroll={() => router.push(`/course-checkout/${course._id}`)}
               />
-              <p className="text-sm text-muted-foreground">
-                Leave this blank if you are going to verify the course.
-              </p>
-            </div>
+            </CardContent>
+          </Card>
 
-            <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleVerifyCourse}
-              >
-                Verify Course
-              </Button>
-              <Button
-                type="button"
-                onClick={handleRejectCourse}
-                disabled={!adminReviewReason.trim()}
-              >
-                Save Rejection Reason
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      ) : null}
-    </PageFlexCol>
+          {showAdminReviewPanel ? (
+            <Card>
+              <CardHeader>
+                <CardTitle>Admin Review</CardTitle>
+                <CardDescription>
+                  {courseVerificationState === "pending"
+                    ? "This course has not been reviewed yet. Verify it or return a rejection reason to the instructor."
+                    : "Update the review result if the course still needs changes or is ready to be approved."}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <p className="text-sm font-medium">
+                    Verification Rejection Reason
+                  </p>
+                  <Textarea
+                    value={adminReviewReason}
+                    onChange={(event) =>
+                      setAdminReviewReasonById((currentReasons) => ({
+                        ...currentReasons,
+                        [course._id]: event.target.value,
+                      }))
+                    }
+                    placeholder="Explain what the instructor needs to fix before this course can be approved."
+                    className="min-h-32"
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    Leave this blank if you are going to verify the course.
+                  </p>
+                </div>
+
+                <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleVerifyCourse}
+                  >
+                    Verify Course
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={handleRejectCourse}
+                    disabled={!adminReviewReason.trim()}
+                  >
+                    Save Rejection Reason
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ) : null}
+        </PageFlexCol>
+      </div>
+    </div>
   );
 };
 

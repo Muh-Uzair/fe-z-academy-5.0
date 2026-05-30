@@ -57,11 +57,9 @@ const courseSchema = z.object({
   }),
   categoryId: z.string().trim().min(1, "Course category is required."),
   thumbnailFile: z
-    .custom<File | null | undefined>(
-      (value) =>
-        value === undefined || value === null || isFileInstance(value),
-      "Please select a valid image file.",
-    )
+    .custom<
+      File | null | undefined
+    >((value) => value === undefined || value === null || isFileInstance(value), "Please select a valid image file.")
     .refine(
       (file) =>
         !file ||
@@ -71,8 +69,7 @@ const courseSchema = z.object({
     ),
   videoFile: z
     .custom<File | null | undefined>(
-      (value) =>
-        value === undefined || value === null || isFileInstance(value),
+      (value) => value === undefined || value === null || isFileInstance(value),
       "Please select a valid video file.",
     )
     .refine(
@@ -84,9 +81,7 @@ const courseSchema = z.object({
     )
     .refine(
       (file) =>
-        !file ||
-        !isFileInstance(file) ||
-        file.size <= MAX_VIDEO_SIZE_IN_BYTES,
+        !file || !isFileInstance(file) || file.size <= MAX_VIDEO_SIZE_IN_BYTES,
       "Course video must be 20MB or smaller.",
     ),
 });
@@ -353,8 +348,8 @@ const CourseForm = ({
                   </FormControl>
                   {!isReadOnly && (
                     <FormDescription>
-                      Match the backend model by collecting a full course summary
-                      that can later go directly into the API payload.
+                      Match the backend model by collecting a full course
+                      summary that can later go directly into the API payload.
                     </FormDescription>
                   )}
                   <FormMessage />
@@ -571,91 +566,92 @@ const CourseForm = ({
               <FormField
                 control={form.control}
                 name="videoFile"
-              render={() => (
-                <FormItem>
-                  <FormLabel>Course Video</FormLabel>
-                  {!isReadOnly && (
-                    <FormDescription>
-                      Upload a `.mp4`, `.webm`, or `.mov` file up to 20MB. For
-                      now we collect the raw `File` object and log it on submit.
-                    </FormDescription>
-                  )}
+                render={() => (
+                  <FormItem>
+                    <FormLabel>Course Video</FormLabel>
+                    {!isReadOnly && (
+                      <FormDescription>
+                        Upload a `.mp4`, `.webm`, or `.mov` file up to 20MB. For
+                        now we collect the raw `File` object and log it on
+                        submit.
+                      </FormDescription>
+                    )}
 
-                  {videoPreviewUrl ? (
-                    <div className="space-y-3 rounded-xl border bg-muted/20 p-3">
-                      <video
-                        src={videoPreviewUrl}
-                        controls
-                        preload="metadata"
-                        className="aspect-video w-full rounded-lg border bg-black"
-                      />
-                      <div className="space-y-1 text-xs text-muted-foreground">
-                        {selectedVideoFile ? (
-                          <>
-                            <p className="font-medium text-foreground">
-                              {selectedVideoFile.name}
-                            </p>
-                            <p>{formatFileSize(selectedVideoFile.size)}</p>
-                          </>
-                        ) : (
-                          <p>Current course video preview.</p>
-                        )}
+                    {videoPreviewUrl ? (
+                      <div className="space-y-3 rounded-xl border bg-muted/20 p-3">
+                        <video
+                          src={videoPreviewUrl}
+                          controls
+                          preload="metadata"
+                          className="aspect-video w-full rounded-lg border bg-black"
+                        />
+                        <div className="space-y-1 text-xs text-muted-foreground">
+                          {selectedVideoFile ? (
+                            <>
+                              <p className="font-medium text-foreground">
+                                {selectedVideoFile.name}
+                              </p>
+                              <p>{formatFileSize(selectedVideoFile.size)}</p>
+                            </>
+                          ) : (
+                            <p>Current course video preview.</p>
+                          )}
+                        </div>
+
+                        {!isReadOnly ? (
+                          <div className="flex flex-wrap gap-2">
+                            <label htmlFor="course-video-upload">
+                              <Button
+                                type="button"
+                                variant="outline"
+                                iconLeft={Video}
+                                asChild
+                              >
+                                <span>Choose Another Video</span>
+                              </Button>
+                            </label>
+                          </div>
+                        ) : null}
                       </div>
+                    ) : isReadOnly ? (
+                      <div className="rounded-lg border border-dashed bg-muted/40 px-4 py-10 text-center text-sm text-muted-foreground">
+                        No course video available yet.
+                      </div>
+                    ) : (
+                      <div className="rounded-xl border-2 border-dashed border-border bg-muted/40 p-6">
+                        <label
+                          htmlFor="course-video-upload"
+                          className="flex cursor-pointer flex-col items-center gap-3 text-center"
+                        >
+                          <Video className="text-muted-foreground" />
+                          <div className="space-y-1">
+                            <p className="text-sm font-medium">
+                              Choose a course video
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              Maximum file size is 20MB
+                            </p>
+                          </div>
+                        </label>
+                      </div>
+                    )}
 
-                      {!isReadOnly ? (
-                        <div className="flex flex-wrap gap-2">
-                          <label htmlFor="course-video-upload">
-                            <Button
-                              type="button"
-                              variant="outline"
-                              iconLeft={Video}
-                              asChild
-                            >
-                              <span>Choose Another Video</span>
-                            </Button>
-                          </label>
-                        </div>
-                      ) : null}
-                    </div>
-                  ) : isReadOnly ? (
-                    <div className="rounded-lg border border-dashed bg-muted/40 px-4 py-10 text-center text-sm text-muted-foreground">
-                      No course video available yet.
-                    </div>
-                  ) : (
-                    <div className="rounded-xl border-2 border-dashed border-border bg-muted/40 p-6">
-                      <label
-                        htmlFor="course-video-upload"
-                        className="flex cursor-pointer flex-col items-center gap-3 text-center"
-                      >
-                        <Video className="text-muted-foreground" />
-                        <div className="space-y-1">
-                          <p className="text-sm font-medium">
-                            Choose a course video
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            Maximum file size is 20MB
-                          </p>
-                        </div>
-                      </label>
-                    </div>
-                  )}
-
-                  {!isReadOnly ? (
-                    <FormControl>
-                      <Input
-                        key={videoInputKey}
-                        id="course-video-upload"
-                        type="file"
-                        accept=".mp4,.webm,.mov,video/mp4,video/webm,video/quicktime"
-                        className="hidden"
-                        onChange={handleVideoChange}
-                      />
-                    </FormControl>
-                  ) : null}
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                    {!isReadOnly ? (
+                      <FormControl>
+                        <Input
+                          key={videoInputKey}
+                          id="course-video-upload"
+                          type="file"
+                          accept=".mp4,.webm,.mov,video/mp4,video/webm,video/quicktime"
+                          className="hidden"
+                          onChange={handleVideoChange}
+                        />
+                      </FormControl>
+                    ) : null}
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             )}
           </div>
         </div>
