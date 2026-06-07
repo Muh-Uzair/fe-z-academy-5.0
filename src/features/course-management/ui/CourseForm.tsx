@@ -26,8 +26,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { CourseLevel } from "@/types/courseTypes";
-import type { CourseCategoryOption, CourseRecord } from "./courseMockData";
+import { CourseLevel, type CourseRecord } from "@/types/courseTypes";
+import { type Category } from "@/types/categoryTypes";
 
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png"];
 const ACCEPTED_VIDEO_TYPES = ["video/mp4", "video/webm", "video/quicktime"];
@@ -103,7 +103,7 @@ interface CourseSubmitValues {
 
 interface CourseFormProps {
   mode: CourseFormMode;
-  categoryOptions: CourseCategoryOption[];
+  categoryOptions: Category[];
   initialData?: CourseRecord | null;
   onSubmit: (values: CourseSubmitValues) => void;
   onClose: () => void;

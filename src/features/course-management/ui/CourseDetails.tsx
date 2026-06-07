@@ -20,11 +20,8 @@ import CourseForm, {
   type CourseFormMode,
   type CourseSubmitValues,
 } from "./CourseForm";
-import {
-  courseCategoryOptions,
-  courseMockData,
-  type CourseRecord,
-} from "./courseMockData";
+import { categoriesData as courseCategoryOptions, coursesData as courseMockData } from "@/dummy-data";
+import { type CourseRecord } from "@/types/courseTypes";
 import {
   formatCourseLevel,
   getCourseVerificationBadgeVariant,

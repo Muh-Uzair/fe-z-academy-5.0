@@ -11,34 +11,7 @@ import PublicFooter from "@/components/PublicFooter";
 import CourseCard from "@/components/CourseCard";
 import { Badge } from "@/components/ui/badge";
 
-// Updated Mock Data to match CourseCardProps
-const mockCourses = Array.from({ length: 6 }).map((_, i) => ({
-  _id: `course-${i + 1}`,
-  title: i % 2 === 0 ? `Complete Web Development Bootcamp ${new Date().getFullYear()}` : `Advanced UI/UX Design Masterclass`,
-  thumbnail: "",
-  price: i % 2 === 0 ? 49.99 : 89.99,
-  level: ["beginner", "intermediate", "expert"][i % 3],
-  instructor: ["John Doe", "Jane Smith", "Sarah Connor"][i % 3],
-  category: ["Development", "Design", "Business"][i % 3],
-  averageRating: 4.5 + (i % 5) * 0.1,
-  totalReviews: 1250 + i * 100,
-  totalStudentsEnrolled: 5000 + i * 1000,
-  totalDurationInMinutes: 1200 + i * 60,
-}));
-
-// Provide distinct Unsplash thumbnails for the courses
-const courseImages = [
-  "https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=800&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=800&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=800&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1504639725590-34d0984388bd?q=80&w=800&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=800&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=800&auto=format&fit=crop",
-];
-
-mockCourses.forEach((course, index) => {
-  course.thumbnail = courseImages[index % courseImages.length];
-});
+import { coursesData as mockCourses } from "@/dummy-data";
 
 const categories = [
   { name: "Development", icon: <MonitorPlay className="h-6 w-6" />, count: "1.2k Courses" },

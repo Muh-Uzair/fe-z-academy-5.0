@@ -18,22 +18,9 @@ import { Textarea } from "@/components/ui/textarea";
 
 import { Role } from "@/types/userTypes";
 
-const dummyInstructor = {
-  _id: "6823f1a9c1d2e3f4a5b6c701",
-  fullName: "Muhammad Hassan",
-  email: "muhammadhassan@example.com",
-  password: "hashed-password",
-  bio: "Senior MERN Stack developer and instructor with strong experience in full stack web application development and modern frontend architectures.",
-  highestEducation: "BS Computer Science",
-  yearsOfExperience: 5,
-  avatar: "https://randomuser.me/api/portraits/men/32.jpg",
-  isVerified: true,
-  otp: null,
-  otpExpires: null,
-  role: Role.Instructor,
-  createdAt: "2026-05-01T10:00:00Z",
-  updatedAt: "2026-05-15T04:00:00Z",
-};
+import { usersData } from "@/dummy-data";
+
+const dummyInstructor = usersData.find(u => u.role === Role.Instructor) || usersData[0];
 
 const InstructorDetails = () => {
   const [verificationReason, setVerificationReason] = useState("");

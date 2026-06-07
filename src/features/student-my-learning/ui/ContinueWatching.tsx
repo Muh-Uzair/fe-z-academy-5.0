@@ -14,90 +14,16 @@ import PageHeader from "@/components/PageHeader";
 import AppCourseCardsGridLayout from "@/components/AppCourseCardsGridLayout";
 import { Course, CourseLevel } from "@/types/courseTypes";
 
-// --- Dummy Data ---
-const activeCourses: Course[] = [
-  {
-    _id: "ac1",
-    title: "Full Stack Web Development with MERN",
-    description: "Learn MERN stack from scratch and build real-world apps.",
-    thumbnail: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=800&q=80",
-    videoUrl: "https://example.com/video1",
-    price: 49.99,
-    level: CourseLevel.Beginner,
-    instructor: "John Smith",
-    category: "Web Development",
-    isVerified: true,
-    verificationRejectionReason: null,
-    averageRating: 4.6,
-    totalReviews: 120,
-    totalStudentsEnrolled: 1500,
-    totalDurationInMinutes: 420,
-    totalDurationWatchedInMinutes: 273, // 65%
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    _id: "ac2",
-    title: "Advanced CSS Patterns & Animations",
-    description: "Deep dive into CSS architecture.",
-    thumbnail: "https://images.unsplash.com/photo-1507721999472-8ed4421c4af2?auto=format&fit=crop&w=800&q=80",
-    videoUrl: "https://example.com/video2",
-    price: 29.99,
-    level: CourseLevel.Intermediate,
-    instructor: "Sarah Johnson",
-    category: "Design",
-    isVerified: true,
-    verificationRejectionReason: null,
-    averageRating: 4.8,
-    totalReviews: 85,
-    totalStudentsEnrolled: 900,
-    totalDurationInMinutes: 300,
-    totalDurationWatchedInMinutes: 60, // 20%
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    _id: "ac3",
-    title: "Node.js API Mastery",
-    description: "Build scalable backend APIs using Node.js and Express.",
-    thumbnail: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=800&q=80",
-    videoUrl: "https://example.com/video3",
-    price: 39.99,
-    level: CourseLevel.Advanced,
-    instructor: "Ali Khan",
-    category: "Backend",
-    isVerified: true,
-    verificationRejectionReason: null,
-    averageRating: 4.3,
-    totalReviews: 60,
-    totalStudentsEnrolled: 700,
-    totalDurationInMinutes: 280,
-    totalDurationWatchedInMinutes: 224, // 80%
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    _id: "ac4",
-    title: "UI/UX Design Fundamentals",
-    description: "Master modern UI/UX design principles.",
-    thumbnail: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=800&q=80",
-    videoUrl: "https://example.com/video4",
-    price: 19.99,
-    level: CourseLevel.Beginner,
-    instructor: "Emily Watson",
-    category: "Design",
-    isVerified: true,
-    verificationRejectionReason: null,
-    averageRating: 4.7,
-    totalReviews: 140,
-    totalStudentsEnrolled: 1700,
-    totalDurationInMinutes: 600,
-    totalDurationWatchedInMinutes: 30, // 5%
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  }
-];
+import { enrollmentsData, coursesData } from "@/dummy-data";
 
+const activeCourses = enrollmentsData.map(e => {
+  const c = coursesData.find(c => c._id === e.course);
+  if (!c) return null;
+  return {
+    ...c,
+    totalDurationWatchedInMinutes: e.totalDurationWatchedInMinutes
+  };
+}).filter(Boolean) as (Course & { totalDurationWatchedInMinutes: number; instructorName?: string })[];
 
 const ContinueWatching = () => {
   // First course is the "Hero" course, the rest go in the grid.
@@ -143,7 +69,7 @@ const ContinueWatching = () => {
                 </h3>
 
                 <p className="text-muted-foreground mb-6">
-                  Instructor: <span className="font-medium text-foreground">{heroCourse.instructor}</span>
+                  Instructor: <span className="font-medium text-foreground">{heroCourse.instructorName || heroCourse.instructor}</span>
                 </p>
 
                 <div className="mt-auto space-y-4">

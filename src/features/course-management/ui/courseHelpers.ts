@@ -1,5 +1,4 @@
-import type { CourseLevel } from "@/types/courseTypes";
-import type { CourseRecord } from "./courseMockData";
+import type { CourseLevel, CourseRecord } from "@/types/courseTypes";
 
 export type CourseVerificationState = "verified" | "pending" | "rejected";
 

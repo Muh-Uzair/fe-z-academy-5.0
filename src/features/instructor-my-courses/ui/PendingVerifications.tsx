@@ -10,10 +10,8 @@ import PageHeader from "@/components/PageHeader";
 import TableImage from "@/components/TableImage";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  courseMockData,
-  type CourseRecord,
-} from "@/features/course-management/ui/courseMockData";
+import { coursesData as courseMockData } from "@/dummy-data";
+import { type CourseRecord } from "@/types/courseTypes";
 import {
   formatCourseLevel,
   getCourseVerificationLabel,

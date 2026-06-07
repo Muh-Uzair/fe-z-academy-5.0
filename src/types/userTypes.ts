@@ -4,20 +4,17 @@ export enum Role {
   Student = "student",
 }
 
-export interface IUser {
+export interface User {
   _id: string;
   fullName: string;
   email: string;
-  password: string;
   bio: string;
   highestEducation: string;
-  yearsOfExperience?: number;
-  avatar?: string | null;
+  yearsOfExperience: number;
+  avatar: string | null;
   isVerified: boolean;
   verificationRejectionReason: string | null;
-  otp?: string | null;
-  otpExpires?: string | null;
+  role: Role | string;
   createdAt: string;
   updatedAt: string;
-  role: Role;
 }

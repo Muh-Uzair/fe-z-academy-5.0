@@ -1,8 +1,8 @@
-export interface ICategory {
+export interface Category {
   _id: string;
   name: string;
-  image: string | null;
-  description: string | null;
+  image: string;
+  description: string;
   createdAt: string;
   updatedAt: string;
 }

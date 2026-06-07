@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import CourseForm, {
   type CourseSubmitValues,
 } from "@/features/course-management/ui/CourseForm";
-import { courseCategoryOptions } from "@/features/course-management/ui/courseMockData";
+import { categoriesData } from "@/dummy-data";
 
 const CreateNewCourses = () => {
   const handleCreateCourse = (values: CourseSubmitValues) => {
@@ -41,7 +41,7 @@ const CreateNewCourses = () => {
         <CardContent>
           <CourseForm
             mode="create"
-            categoryOptions={courseCategoryOptions}
+            categoryOptions={categoriesData}
             onSubmit={handleCreateCourse}
             onClose={() => console.log("course creation cancelled")}
           />
