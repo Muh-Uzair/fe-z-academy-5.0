@@ -93,7 +93,7 @@ export default function PublicCourseChat() {
   };
 
   return (
-    <div className="flex flex-col flex-1 border rounded-xl overflow-hidden bg-background shadow-sm h-[100vh] min-h-0">
+    <div className="flex flex-col flex-1 border rounded-xl overflow-hidden bg-background shadow-sm h-[100vh] min-h-0 m-3">
       {/* Header Inline */}
       <div className="border-b p-4">
         <div className="flex items-center justify-between">
