@@ -17,7 +17,7 @@ import {
   getCourseVerificationLabel,
 } from "@/features/course-management/ui/courseHelpers";
 
-const LOGGED_IN_INSTRUCTOR_ID = "user_001";
+const LOGGED_IN_INSTRUCTOR_ID = "user_008";
 
 const AllMyCourses = () => {
   const [search, setSearch] = useState("");

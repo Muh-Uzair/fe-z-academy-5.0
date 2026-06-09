@@ -18,7 +18,7 @@ import {
   truncateText,
 } from "@/features/course-management/ui/courseHelpers";
 
-const LOGGED_IN_INSTRUCTOR_ID = "user_001";
+const LOGGED_IN_INSTRUCTOR_ID = "user_008";
 const TRUNCATE_REASON_AT = 60;
 
 const PendingVerifications = () => {
