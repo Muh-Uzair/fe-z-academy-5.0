@@ -1,14 +1,14 @@
 "use client";
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, Search, Send } from "lucide-react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { ArrowLeft, Send } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
 import { usersData } from "@/dummy-data/usersData";
 import { coursesData } from "@/dummy-data/coursesData";
+import AppSearchBar from "@/components/AppSearchBar";
 
 // --- DUMMY DATA FOR UI MOCKUP ---
 const currentUser = usersData[0];
@@ -20,19 +20,20 @@ export type CourseStudentInstructorListItem = {
   role: "student" | "instructor";
   status: "online" | "offline";
   lastMessage: string;
-  avatar?: string;
+  avatar?: string | null;
 };
 
-const dummyCourseStudentInstructorList: CourseStudentInstructorListItem[] = usersData
-  .filter((u) => u._id !== currentUser._id)
-  .map((u) => ({
-    id: u._id,
-    fullName: u.fullName,
-    role: u.role as "student" | "instructor",
-    status: Math.random() > 0.5 ? "online" : "offline",
-    lastMessage: "",
-    avatar: u.avatar,
-  }));
+const dummyCourseStudentInstructorList: CourseStudentInstructorListItem[] =
+  usersData
+    .filter((u) => u._id !== currentUser._id)
+    .map((u) => ({
+      id: u._id,
+      fullName: u.fullName,
+      role: u.role as "student" | "instructor",
+      status: Math.random() > 0.5 ? "online" : "offline",
+      lastMessage: "",
+      avatar: u.avatar,
+    }));
 
 type Message = {
   id: string;
@@ -41,44 +42,72 @@ type Message = {
   createdAt: string;
 };
 
-const initialMessages: Message[] = [
-  { id: "1", content: "Hi, I had a question about the assignment.", sender: currentUser, createdAt: new Date(Date.now() - 3600000).toISOString() },
-  { id: "2", content: "Sure, what's your question?", sender: dummyCourseStudentInstructorList[0], createdAt: new Date(Date.now() - 1800000).toISOString() },
+const staticMessages: Message[] = [
+  {
+    id: "1",
+    content: "Hi, I had a question about the assignment.",
+    sender: currentUser,
+    createdAt: new Date(Date.now() - 3600000).toISOString(),
+  },
+  {
+    id: "2",
+    content: "Sure, what's your question?",
+    sender: dummyCourseStudentInstructorList[0],
+    createdAt: new Date(Date.now() - 3500000).toISOString(),
+  },
+  {
+    id: "3",
+    content: "I am having trouble understanding the concept in chapter 2.",
+    sender: currentUser,
+    createdAt: new Date(Date.now() - 3400000).toISOString(),
+  },
+  {
+    id: "4",
+    content:
+      "Did you review the supplemental video material? It explains it perfectly.",
+    sender: dummyCourseStudentInstructorList[0],
+    createdAt: new Date(Date.now() - 3300000).toISOString(),
+  },
+  {
+    id: "5",
+    content: "Ah, I missed that! Thanks, I will check it out now.",
+    sender: currentUser,
+    createdAt: new Date(Date.now() - 3200000).toISOString(),
+  },
 ];
 
 // --- HELPER COMPONENTS ---
 
 function formatMessageTime(isoString: string) {
-  return new Date(isoString).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  return new Date(isoString).toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 function getNameInitials(name: string) {
-  return name.split(" ").map((n) => n[0]).join("").substring(0, 2).toUpperCase();
+  return name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .substring(0, 2)
+    .toUpperCase();
 }
 
 function toTitleCase(str: string) {
-  return str.replace(
-    /\w\S*/g,
-    function(txt) {
-      return txt.charAt(0).toUpperCase() + txt.substring(1).toLowerCase();
-    }
-  );
+  return str.replace(/\w\S*/g, function (txt) {
+    return txt.charAt(0).toUpperCase() + txt.substring(1).toLowerCase();
+  });
 }
 
 // --- SIDEBAR COMPONENT ---
 
 function PrivateChatSidebar({
   courseStudentInstructorList,
-  searchTerm,
   selectedCourseStudentInstructorId,
-  onSearchChange,
-  onSelectCourseStudentInstructor,
 }: {
   courseStudentInstructorList: CourseStudentInstructorListItem[];
-  searchTerm: string;
   selectedCourseStudentInstructorId: string;
-  onSearchChange: (value: string) => void;
-  onSelectCourseStudentInstructor: (id: string) => void;
 }) {
   return (
     <div className="flex w-[320px] min-h-0 min-w-0 shrink-0 flex-col rounded-2xl border bg-card">
@@ -88,19 +117,13 @@ function PrivateChatSidebar({
           variant="outline"
           size="icon"
           aria-label="Go back"
-          className="shrink-0"
+          className="shrink-0 h-10 w-10"
         >
           <ArrowLeft className="h-4 w-4" />
         </Button>
 
         <div className="relative min-w-0 flex-1">
-          <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
-          <Input
-            value={searchTerm}
-            onChange={(e) => onSearchChange(e.target.value)}
-            placeholder="Search students or instructor..."
-            className="pl-9"
-          />
+          <AppSearchBar placeholder="Search students or instructor..." />
         </div>
       </div>
 
@@ -114,7 +137,6 @@ function PrivateChatSidebar({
               <button
                 key={courseStudentInstructor.id}
                 type="button"
-                onClick={() => onSelectCourseStudentInstructor(courseStudentInstructor.id)}
                 className={`grid w-full min-w-0 grid-cols-[auto_minmax(0,1fr)] items-start gap-3 overflow-hidden rounded-xl border px-3 py-3 text-left transition-colors ${
                   isSelected
                     ? "border-primary bg-primary/10"
@@ -124,11 +146,13 @@ function PrivateChatSidebar({
                 <div className="relative">
                   <Avatar className="h-10 w-10">
                     <AvatarImage
-                      src={courseStudentInstructor.avatar}
+                      src={courseStudentInstructor.avatar || undefined}
                       alt={toTitleCase(courseStudentInstructor.fullName)}
                     />
                     <AvatarFallback>
-                      {getNameInitials(toTitleCase(courseStudentInstructor.fullName))}
+                      {getNameInitials(
+                        toTitleCase(courseStudentInstructor.fullName),
+                      )}
                     </AvatarFallback>
                   </Avatar>
                 </div>
@@ -165,7 +189,7 @@ const PrivateChatHeader = React.memo(function PrivateChatHeader({
         <div className="flex items-center gap-3">
           <Avatar className="h-10 w-10">
             <AvatarImage
-              src={selectedCourseStudentInstructor.avatar}
+              src={selectedCourseStudentInstructor.avatar || undefined}
               alt={selectedCourseStudentInstructor.fullName}
             />
             <AvatarFallback>
@@ -252,49 +276,57 @@ const ChatMessages = React.memo(function ChatMessages({
   return (
     <ScrollArea ref={scrollAreaRef} className="min-h-0 flex-1 px-4 py-6">
       <div className="space-y-6 min-h-[80%]">
-        {messages.map((msg, i) => (
-          <div
-            key={i}
-            className={`flex gap-3 ${
-              msg.sender._id === userId ? "justify-end" : "justify-start"
-            }`}
-          >
-            {msg.sender._id !== userId && (
-              <Avatar className="h-8 w-8">
-                <AvatarImage src={msg.sender.avatar} alt={msg.sender.fullName} />
-                <AvatarFallback>
-                  {getNameInitials(msg.sender.fullName)}
-                </AvatarFallback>
-              </Avatar>
-            )}
-
+        {messages.map((msg, i) => {
+          const senderId = "_id" in msg.sender ? msg.sender._id : msg.sender.id;
+          return (
             <div
-              className={`max-w-[70%] rounded-2xl px-4 py-3 min-w-0 ${
-                msg.sender._id === userId
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted"
+              key={i}
+              className={`flex gap-3 ${
+                senderId === userId ? "justify-end" : "justify-start"
               }`}
             >
-              <p className="text-sm break-words whitespace-pre-wrap">{msg.content}</p>
-              <p
-                className={`mt-1 text-xs opacity-70 ${
-                  msg.sender._id === userId ? "text-right" : "text-left"
+              {senderId !== userId && (
+                <Avatar className="h-8 w-8">
+                  <AvatarImage
+                    src={msg.sender.avatar || undefined}
+                    alt={msg.sender.fullName}
+                  />
+                  <AvatarFallback>
+                    {getNameInitials(msg.sender.fullName)}
+                  </AvatarFallback>
+                </Avatar>
+              )}
+
+              <div
+                className={`max-w-[70%] rounded-2xl px-4 py-3 min-w-0 ${
+                  senderId === userId
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted"
                 }`}
               >
-                {formatMessageTime(msg.createdAt)}
-              </p>
-            </div>
+                <p className="text-sm break-words whitespace-pre-wrap">
+                  {msg.content}
+                </p>
+                <p
+                  className={`mt-1 text-xs opacity-70 ${
+                    senderId === userId ? "text-right" : "text-left"
+                  }`}
+                >
+                  {formatMessageTime(msg.createdAt)}
+                </p>
+              </div>
 
-            {msg.sender._id === userId && (
-              <Avatar className="h-8 w-8">
-                <AvatarImage src={msg.sender.avatar} alt="You" />
-                <AvatarFallback>
-                  {getNameInitials(msg.sender.fullName)}
-                </AvatarFallback>
-              </Avatar>
-            )}
-          </div>
-        ))}
+              {senderId === userId && (
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src={msg.sender.avatar || undefined} alt="You" />
+                  <AvatarFallback>
+                    {getNameInitials(msg.sender.fullName)}
+                  </AvatarFallback>
+                </Avatar>
+              )}
+            </div>
+          );
+        })}
       </div>
     </ScrollArea>
   );
@@ -361,48 +393,19 @@ function PrivateChatPanel({
 // --- MAIN COMPONENT ---
 
 export default function PrivateCourseChat() {
-  const [courseStudentInstructorList] = useState<CourseStudentInstructorListItem[]>(dummyCourseStudentInstructorList);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCourseStudentInstructorId, setSelectedCourseStudentInstructorId] = useState(dummyCourseStudentInstructorList[0].id);
-  const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [newMessage, setNewMessage] = useState("");
 
-  const filteredCourseStudentInstructorList = useMemo(() => {
-    const normalizedSearch = searchTerm.trim().toLowerCase();
-    if (!normalizedSearch) return courseStudentInstructorList;
-    return courseStudentInstructorList.filter((c) =>
-      c.fullName.toLowerCase().includes(normalizedSearch)
-    );
-  }, [courseStudentInstructorList, searchTerm]);
-
-  const selectedCourseStudentInstructor =
-    courseStudentInstructorList.find(
-      (c) => c.id === selectedCourseStudentInstructorId
-    ) ?? courseStudentInstructorList[0];
-
-  const handleSelectCourseStudentInstructor = useCallback(
-    (id: string) => {
-      setSelectedCourseStudentInstructorId(id);
-      setMessages([]);
-      setNewMessage("");
-    },
-    []
-  );
+  // Keep static dependencies
+  const courseStudentInstructorList = dummyCourseStudentInstructorList;
+  const selectedCourseStudentInstructor = courseStudentInstructorList[0];
+  const messages = staticMessages;
 
   const handleSendMessage = () => {
     const trimmedMessage = newMessage.trim();
-    if (!trimmedMessage || !selectedCourseStudentInstructor) return;
+    if (!trimmedMessage) return;
 
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: Date.now().toString(),
-        content: trimmedMessage,
-        sender: currentUser,
-        createdAt: new Date().toISOString(),
-      },
-    ]);
-    setNewMessage("");
+    console.log("User submitted message:", trimmedMessage);
+    setNewMessage(""); // Clear input, but don't add to messages
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -413,29 +416,20 @@ export default function PrivateCourseChat() {
   };
 
   return (
-    <div className="flex h-[600px] min-h-0 gap-4 bg-background p-3">
+    <div className="flex h-[100vh] min-h-0 gap-4 bg-background p-3">
       <PrivateChatSidebar
-        courseStudentInstructorList={filteredCourseStudentInstructorList}
-        searchTerm={searchTerm}
-        selectedCourseStudentInstructorId={selectedCourseStudentInstructorId}
-        onSearchChange={setSearchTerm}
-        onSelectCourseStudentInstructor={handleSelectCourseStudentInstructor}
+        courseStudentInstructorList={courseStudentInstructorList}
+        selectedCourseStudentInstructorId={selectedCourseStudentInstructor.id}
       />
 
-      {selectedCourseStudentInstructor ? (
-        <PrivateChatPanel
-          selectedCourseStudentInstructor={selectedCourseStudentInstructor}
-          messages={messages}
-          newMessage={newMessage}
-          onMessageChange={setNewMessage}
-          onSendMessage={handleSendMessage}
-          onKeyDown={handleKeyDown}
-        />
-      ) : (
-        <div className="flex min-h-0 min-w-0 flex-1 items-center justify-center rounded-2xl border bg-background p-6 text-center text-sm text-muted-foreground">
-          No students or instructor found for this course yet.
-        </div>
-      )}
+      <PrivateChatPanel
+        selectedCourseStudentInstructor={selectedCourseStudentInstructor}
+        messages={messages}
+        newMessage={newMessage}
+        onMessageChange={setNewMessage}
+        onSendMessage={handleSendMessage}
+        onKeyDown={handleKeyDown}
+      />
     </div>
   );
 }
