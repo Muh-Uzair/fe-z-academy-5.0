@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  Bell,
   BookOpen,
   CircleDollarSign,
   FolderKanban,
@@ -17,7 +18,12 @@ import {
   Users,
 } from "lucide-react";
 
-import { Avatar, AvatarBadge, AvatarFallback } from "@/components/ui/avatar";
+import {
+  Avatar,
+  AvatarBadge,
+  AvatarFallback,
+  AvatarImage,
+} from "@/components/ui/avatar";
 import {
   Sidebar,
   SidebarContent,
@@ -66,7 +72,7 @@ const navigationByRole: Record<AppRole, NavigationItem[]> = {
     },
     {
       title: "Courses",
-      href: "/admin/courses",
+      href: "/admin/courses/all-courses",
       icon: BookOpen,
       items: [
         { title: "All Courses", href: "/admin/courses/all-courses" },
@@ -79,7 +85,7 @@ const navigationByRole: Record<AppRole, NavigationItem[]> = {
     },
     {
       title: "Instructors",
-      href: "/admin/instructors",
+      href: "/admin/instructors/all-instructors",
       icon: UserCheck,
       items: [
         {
@@ -126,7 +132,7 @@ const navigationByRole: Record<AppRole, NavigationItem[]> = {
     },
     {
       title: "My Courses",
-      href: "/instructor/my-courses",
+      href: "/instructor/my-courses/all-my-courses",
       icon: FolderKanban,
       items: [
         {
@@ -177,7 +183,7 @@ const navigationByRole: Record<AppRole, NavigationItem[]> = {
     },
     {
       title: "My Learning",
-      href: "/student/my-learning",
+      href: "/student/my-learning/enrolled-courses",
       icon: GraduationCap,
       items: [
         {
@@ -351,14 +357,31 @@ const AppLayoutShell = ({ role, children }: AppLayoutShellProps) => {
         </Sidebar>
 
         <SidebarInset className="min-h-screen bg-stone-100/70 w-full min-w-0 overflow-x-hidden">
-          <header className="sticky top-0 z-20 border-b  bg-white backdrop-blur">
+          <header className="sticky top-0 z-20 border-b bg-white backdrop-blur">
             <div className="flex h-16 items-center justify-between gap-4 px-4 sm:px-6">
               <SidebarTrigger className="rounded-xl border border-primary bg-white hover:bg-slate-100 text-primary" />
 
-              <div>
-                <div className="h-12.5 w-12.5 bg-stone-200 rounded-full">
-                  <AvatarBadge />
+              <div className="flex items-center gap-3">
+                {/* Notification Bell */}
+                <div
+                  className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-white text-muted-foreground transition-colors hover:bg-slate-100 hover:text-foreground"
+                  aria-label="Notifications"
+                >
+                  <Bell className="h-4.5 w-4.5" />
+                  {/* Unread badge */}
+                  <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-primary ring-2 ring-white" />
                 </div>
+
+                {/* Avatar */}
+                <Avatar className="h-9 w-9 ring-2 ring-primary/20 transition-shadow hover:ring-primary/50">
+                  <AvatarImage
+                    src="https://i.pravatar.cc/150?img=47"
+                    alt="User avatar"
+                  />
+                  <AvatarFallback className="bg-primary text-white text-xs font-semibold">
+                    {meta.shortLabel}
+                  </AvatarFallback>
+                </Avatar>
               </div>
             </div>
           </header>
