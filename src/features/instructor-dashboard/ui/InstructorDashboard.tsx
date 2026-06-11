@@ -12,8 +12,24 @@ import {
   BookOpen,
   Star,
   Wallet,
-  PieChart,
+  PieChart as PieChartIcon,
 } from "lucide-react";
+import {
+  Line,
+  LineChart,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Pie,
+  PieChart,
+  Cell,
+} from "recharts";
+import {
+  ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
 
 // Dummy Data
 const INSTRUCTOR_STATS = [
@@ -122,6 +138,30 @@ const RECENT_REVIEWS = [
   },
 ];
 
+const EARNINGS_DATA = [
+  { source: "Mastering React 18", value: 12000, color: "var(--color-course1)" },
+  { source: "Advanced Node.js", value: 8500, color: "var(--color-course2)" },
+  { source: "Fullstack Next.js", value: 14000, color: "var(--color-course3)" },
+];
+const EARNINGS_CONFIG = {
+  course1: { label: "Mastering React 18", color: "var(--primary)" },
+  course2: { label: "Advanced Node.js", color: "var(--primary-light)" },
+  course3: { label: "Fullstack Next.js", color: "var(--primary-dark)" },
+} satisfies ChartConfig;
+
+const ENROLLMENTS_DATA = [
+  { week: "Week 1", enrollments: 120 },
+  { week: "Week 2", enrollments: 250 },
+  { week: "Week 3", enrollments: 180 },
+  { week: "Week 4", enrollments: 300 },
+];
+const ENROLLMENTS_CONFIG = {
+  enrollments: {
+    label: "Enrollments",
+    color: "var(--primary)",
+  },
+} satisfies ChartConfig;
+
 const InstructorDashboard = () => {
   const courseColumns = [
     {
@@ -216,26 +256,37 @@ const InstructorDashboard = () => {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
-        {/* Placeholder for Earnings Chart */}
-        <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-6 flex flex-col justify-center items-center h-64">
-          <PieChart className="h-10 w-10 text-muted-foreground/50 mb-2" />
-          <h3 className="text-lg font-medium text-muted-foreground">
-            Monthly Earnings Chart
-          </h3>
-          <p className="text-sm text-muted-foreground/70">
-            Chart integration will go here
-          </p>
+        <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-6 flex flex-col h-auto">
+          <div className="mb-4">
+            <h3 className="text-lg font-medium">Monthly Earnings</h3>
+            <p className="text-sm text-muted-foreground">Revenue breakdown by course</p>
+          </div>
+          <ChartContainer config={EARNINGS_CONFIG} className="h-[250px] w-full">
+            <PieChart>
+              <ChartTooltip content={<ChartTooltipContent />} />
+              <Pie data={EARNINGS_DATA} dataKey="value" nameKey="source" cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={5}>
+                {EARNINGS_DATA.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.color} />
+                ))}
+              </Pie>
+            </PieChart>
+          </ChartContainer>
         </div>
 
-        {/* Placeholder for Enrollments Chart */}
-        <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-6 flex flex-col justify-center items-center h-64">
-          <Users className="h-10 w-10 text-muted-foreground/50 mb-2" />
-          <h3 className="text-lg font-medium text-muted-foreground">
-            Enrollments Chart
-          </h3>
-          <p className="text-sm text-muted-foreground/70">
-            Chart integration will go here
-          </p>
+        <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-6 flex flex-col h-auto">
+          <div className="mb-4">
+            <h3 className="text-lg font-medium">Enrollments Trend</h3>
+            <p className="text-sm text-muted-foreground">New students over the last 4 weeks</p>
+          </div>
+          <ChartContainer config={ENROLLMENTS_CONFIG} className="h-[250px] w-full">
+            <LineChart data={ENROLLMENTS_DATA} margin={{ top: 10, left: -20, right: 10, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} />
+              <XAxis dataKey="week" tickLine={false} axisLine={false} tickMargin={8} />
+              <YAxis tickLine={false} axisLine={false} />
+              <ChartTooltip content={<ChartTooltipContent />} />
+              <Line type="monotone" dataKey="enrollments" stroke="var(--color-enrollments)" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} />
+            </LineChart>
+          </ChartContainer>
         </div>
       </div>
 

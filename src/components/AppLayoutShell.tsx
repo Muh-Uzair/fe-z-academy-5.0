@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation";
 import {
   Bell,
   BookOpen,
-  CircleDollarSign,
   FolderKanban,
   GraduationCap,
   Grid2X2,
@@ -16,14 +15,10 @@ import {
   Tags,
   UserCheck,
   Users,
+  LogOut,
 } from "lucide-react";
 
-import {
-  Avatar,
-  AvatarBadge,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Sidebar,
   SidebarContent,
@@ -246,17 +241,16 @@ const AppLayoutShell = ({ role, children }: AppLayoutShellProps) => {
       <SidebarProvider defaultOpen>
         <Sidebar
           collapsible="icon"
-          variant="inset"
-          className="bg-white border border-r-[1px]"
+          className="bg-white border-r border-sidebar-border"
         >
-          <SidebarHeader className="gap-4 px-3 py-4 bg-white">
+          <SidebarHeader className="p-4 group-data-[collapsible=icon]:p-2 bg-white">
             <Link
               href={navigation[0].href}
-              className="flex items-center gap-3 rounded-xl px-2 py-2 transition-colors hover:bg-sidebar-accent"
+              className="flex items-center gap-3 rounded-xl p-2 transition-colors hover:bg-sidebar-accent group-data-[collapsible=icon]:justify-center"
             >
               <div
                 className={cn(
-                  "flex size-10 items-center justify-center rounded-2xl text-sm font-semibold",
+                  "flex size-10 shrink-0 items-center justify-center rounded-xl text-sm font-semibold",
                   meta.accent,
                 )}
               >
@@ -339,17 +333,28 @@ const AppLayoutShell = ({ role, children }: AppLayoutShellProps) => {
             </SidebarGroup>
           </SidebarContent>
 
-          <SidebarFooter className="px-3 py-4 bg-white">
-            <div className="flex items-center gap-3 rounded-2xl border border-sidebar-border bg-sidebar-accent/35 p-3">
-              <Avatar className="border border-sidebar-border">
-                <AvatarFallback>{meta.shortLabel}</AvatarFallback>
-              </Avatar>
-              <div className="min-w-0 group-data-[collapsible=icon]:hidden">
-                <div className="truncate text-sm font-medium">{meta.label}</div>
-                <div className="truncate text-xs text-sidebar-foreground/70">
-                  Layout shell ready
+          <SidebarFooter className="p-4 group-data-[collapsible=icon]:p-2 bg-white">
+            <div className="flex items-center justify-between gap-2 rounded-2xl border border-sidebar-border bg-sidebar-accent/35 p-3 group-data-[collapsible=icon]:p-2 group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:justify-center">
+              <div className="flex items-center gap-3 overflow-hidden group-data-[collapsible=icon]:justify-center">
+                <Avatar className="border border-sidebar-border shrink-0">
+                  <AvatarFallback>{meta.shortLabel}</AvatarFallback>
+                </Avatar>
+                <div className="min-w-0 group-data-[collapsible=icon]:hidden">
+                  <div className="truncate text-sm font-medium">
+                    {meta.label}
+                  </div>
+                  <div className="truncate text-xs text-sidebar-foreground/70">
+                    Sign out here
+                  </div>
                 </div>
               </div>
+              <button
+                onClick={() => console.log("signout clicked")}
+                className="p-2 shrink-0 text-muted-foreground hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors group-data-[collapsible=icon]:w-full group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center"
+                title="Sign out"
+              >
+                <LogOut className="size-5" />
+              </button>
             </div>
           </SidebarFooter>
 
@@ -359,7 +364,7 @@ const AppLayoutShell = ({ role, children }: AppLayoutShellProps) => {
         <SidebarInset className="min-h-screen bg-stone-100/70 w-full min-w-0 overflow-x-hidden">
           <header className="sticky top-0 z-20 border-b bg-white backdrop-blur">
             <div className="flex h-16 items-center justify-between gap-4 px-4 sm:px-6">
-              <SidebarTrigger className="rounded-xl border border-primary bg-white hover:bg-slate-100 text-primary" />
+              <SidebarTrigger className="rounded-xl border border-primary bg-white hover:bg-primary-very-light hover:text-primary text-primary" />
 
               <div className="flex items-center gap-3">
                 {/* Notification Bell */}

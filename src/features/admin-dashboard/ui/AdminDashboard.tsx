@@ -12,6 +12,21 @@ import {
   GraduationCap,
   TrendingUp,
 } from "lucide-react";
+import {
+  Area,
+  AreaChart,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+} from "recharts";
+import {
+  ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
 
 // Dummy Data
 const PLATFORM_STATS = [
@@ -134,6 +149,40 @@ const TOP_COURSES = [
   },
 ];
 
+const REVENUE_DATA = [
+  { month: "Jan", revenue: 32000 },
+  { month: "Feb", revenue: 38000 },
+  { month: "Mar", revenue: 45000 },
+  { month: "Apr", revenue: 42000 },
+  { month: "May", revenue: 54000 },
+  { month: "Jun", revenue: 61000 },
+];
+const REVENUE_CONFIG = {
+  revenue: {
+    label: "Revenue",
+    color: "var(--primary)",
+  },
+} satisfies ChartConfig;
+
+const USER_GROWTH_DATA = [
+  { month: "Jan", students: 1200, instructors: 40 },
+  { month: "Feb", students: 1800, instructors: 65 },
+  { month: "Mar", students: 2400, instructors: 80 },
+  { month: "Apr", students: 3100, instructors: 120 },
+  { month: "May", students: 3800, instructors: 150 },
+  { month: "Jun", students: 4500, instructors: 180 },
+];
+const USER_CONFIG = {
+  students: {
+    label: "Students",
+    color: "var(--primary-light)",
+  },
+  instructors: {
+    label: "Instructors",
+    color: "var(--primary-dark)",
+  },
+} satisfies ChartConfig;
+
 const AdminDashboard = () => {
   const userColumns = [
     { key: "name", label: "Name" },
@@ -208,26 +257,37 @@ const AdminDashboard = () => {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
-        {/* Placeholder for Revenue Trend Chart */}
-        <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-6 flex flex-col justify-center items-center h-64">
-          <TrendingUp className="h-10 w-10 text-muted-foreground/50 mb-2" />
-          <h3 className="text-lg font-medium text-muted-foreground">
-            Revenue Trend Chart
-          </h3>
-          <p className="text-sm text-muted-foreground/70">
-            Chart integration will go here
-          </p>
+        <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-6 flex flex-col h-auto">
+          <div className="mb-4">
+            <h3 className="text-lg font-medium">Revenue Trend</h3>
+            <p className="text-sm text-muted-foreground">Monthly revenue over the last 6 months</p>
+          </div>
+          <ChartContainer config={REVENUE_CONFIG} className="h-[250px] w-full">
+            <AreaChart data={REVENUE_DATA} margin={{ top: 10, left: -20, right: 10, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} />
+              <XAxis dataKey="month" tickLine={false} axisLine={false} tickMargin={8} />
+              <YAxis tickLine={false} axisLine={false} tickFormatter={(val) => `$${val / 1000}k`} />
+              <ChartTooltip content={<ChartTooltipContent />} />
+              <Area type="monotone" dataKey="revenue" stroke="var(--color-revenue)" fill="var(--color-revenue)" fillOpacity={0.2} />
+            </AreaChart>
+          </ChartContainer>
         </div>
 
-        {/* Placeholder for User Growth Chart */}
-        <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-6 flex flex-col justify-center items-center h-64">
-          <Users className="h-10 w-10 text-muted-foreground/50 mb-2" />
-          <h3 className="text-lg font-medium text-muted-foreground">
-            User Growth Chart
-          </h3>
-          <p className="text-sm text-muted-foreground/70">
-            Chart integration will go here
-          </p>
+        <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-6 flex flex-col h-auto">
+          <div className="mb-4">
+            <h3 className="text-lg font-medium">User Growth</h3>
+            <p className="text-sm text-muted-foreground">New students and instructors joined</p>
+          </div>
+          <ChartContainer config={USER_CONFIG} className="h-[250px] w-full">
+            <BarChart data={USER_GROWTH_DATA} margin={{ top: 10, left: -20, right: 10, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} />
+              <XAxis dataKey="month" tickLine={false} axisLine={false} tickMargin={8} />
+              <YAxis tickLine={false} axisLine={false} />
+              <ChartTooltip content={<ChartTooltipContent />} />
+              <Bar dataKey="students" fill="var(--color-students)" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="instructors" fill="var(--color-instructors)" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ChartContainer>
         </div>
       </div>
 
