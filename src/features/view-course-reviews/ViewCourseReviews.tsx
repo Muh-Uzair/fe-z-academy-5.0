@@ -7,8 +7,9 @@ import { usersData } from "@/dummy-data/usersData";
 import { Star, Users, GraduationCap, Briefcase } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import CourseCard from "@/components/CourseCard";
+import { useRouter } from "next/navigation";
 
 interface ViewCourseReviewsProps {
   courseId: string;
@@ -32,6 +33,7 @@ const StarRating = ({ rating }: { rating: number }) => (
 );
 
 const ViewCourseReviews = ({ courseId }: ViewCourseReviewsProps) => {
+  const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
 
   const course = coursesData.find((c) => c._id === courseId);
@@ -76,6 +78,16 @@ const ViewCourseReviews = ({ courseId }: ViewCourseReviewsProps) => {
               category: course.categoryName,
               instructor: course.instructorName,
             }}
+            footer={
+              <Button
+                className="w-full"
+                onClick={() =>
+                  router.push(`/course-details/${course._id}?role=instructor`)
+                }
+              >
+                View Details
+              </Button>
+            }
           />
 
           {/* Instructor Card */}
@@ -132,6 +144,14 @@ const ViewCourseReviews = ({ courseId }: ViewCourseReviewsProps) => {
                   </p>
                 )}
               </CardContent>
+              <CardFooter>
+                <Button
+                  className="w-full"
+                  onClick={() => router.push(`/user-profile/001`)}
+                >
+                  View Profile
+                </Button>
+              </CardFooter>
             </Card>
           )}
         </div>
