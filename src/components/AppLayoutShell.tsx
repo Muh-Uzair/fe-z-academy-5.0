@@ -12,6 +12,7 @@ import {
   MessageSquare,
   Search,
   Settings,
+  Star,
   Tags,
   UserCheck,
   Users,
@@ -114,6 +115,11 @@ const navigationByRole: Record<AppRole, NavigationItem[]> = {
       icon: MessageSquare,
     },
     {
+      title: "Reviews",
+      href: "/admin/reviews",
+      icon: Star,
+    },
+    {
       title: "Settings",
       href: "/admin/settings",
       icon: Settings,
@@ -158,6 +164,11 @@ const navigationByRole: Record<AppRole, NavigationItem[]> = {
       title: "Chat",
       href: "/instructor/chat",
       icon: MessageSquare,
+    },
+    {
+      title: "Reviews",
+      href: "/instructor/reviews",
+      icon: Star,
     },
     {
       title: "Settings",
@@ -271,7 +282,7 @@ const AppLayoutShell = ({ role, children }: AppLayoutShellProps) => {
             <SidebarGroup>
               <SidebarGroupLabel>Navigation</SidebarGroupLabel>
               <SidebarGroupContent>
-                <SidebarMenu>
+                <SidebarMenu className="gap-2">
                   {navigation.map((item) => {
                     const active = isRouteActive(pathname, item.href);
 
@@ -282,18 +293,23 @@ const AppLayoutShell = ({ role, children }: AppLayoutShellProps) => {
                           isActive={active}
                           tooltip={item.title}
                           className={cn(
-                            "rounded-md transition-all",
-                            active && [
-                              "bg-primary text-primary-foreground hover:bg-primary/90",
-                              "data-[active=true]:bg-primary data-[active=true]:text-primary-foreground",
-                            ],
+                            "rounded-md transition-all px-4 gap-3",
+                            active
+                              ? [
+                                  "bg-primary-very-light text-primary hover:bg-primary-very-light/90",
+                                  "data-[active=true]:bg-primary-very-light data-[active=true]:text-primary",
+                                  "py-2 h-auto",
+                                ]
+                              : "text-muted-foreground py-2 h-auto hover:text-foreground hover:bg-sidebar-accent",
                           )}
                         >
                           <Link href={item.href}>
                             <item.icon
                               className={cn(
                                 "transition-colors",
-                                active && "text-primary-foreground",
+                                active
+                                  ? "text-primary"
+                                  : "text-muted-foreground",
                               )}
                             />
                             <span>{item.title}</span>
@@ -310,11 +326,14 @@ const AppLayoutShell = ({ role, children }: AppLayoutShellProps) => {
                                     subItem.href,
                                   )}
                                   className={cn(
-                                    "rounded-md",
-                                    isRouteActive(pathname, subItem.href) && [
-                                      "bg-primary text-primary-foreground hover:bg-primary/90",
-                                      "data-[active=true]:bg-primary data-[active=true]:text-primary-foreground",
-                                    ],
+                                    "rounded-md transition-all px-4",
+                                    isRouteActive(pathname, subItem.href)
+                                      ? [
+                                          "bg-primary-very-light text-primary hover:bg-primary-very-light/90",
+                                          "data-[active=true]:bg-primary-very-light data-[active=true]:text-primary",
+                                          "py-2 h-auto",
+                                        ]
+                                      : "text-muted-foreground py-2 h-auto hover:text-foreground hover:bg-sidebar-accent",
                                   )}
                                 >
                                   <Link href={subItem.href}>

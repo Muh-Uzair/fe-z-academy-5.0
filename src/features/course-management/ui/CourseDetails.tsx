@@ -14,20 +14,29 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Star } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { formatDate } from "@/lib/utils";
+import { formatDate, cn } from "@/lib/utils";
 import CourseForm, {
   type CourseFormMode,
   type CourseSubmitValues,
 } from "./CourseForm";
-import { categoriesData as courseCategoryOptions, coursesData as courseMockData } from "@/dummy-data";
-import { type CourseRecord } from "@/types/courseTypes";
 import {
-  formatCourseLevel,
-  getCourseVerificationBadgeVariant,
-  getCourseVerificationLabel,
-  getCourseVerificationState,
-} from "./courseHelpers";
+  categoriesData as courseCategoryOptions,
+  coursesData as courseMockData,
+} from "@/dummy-data";
+import { type CourseRecord } from "@/types/courseTypes";
+import { formatCourseLevel, getCourseVerificationState } from "./courseHelpers";
 
 type CourseViewerRole = "student" | "instructor" | "admin";
 
@@ -58,6 +67,10 @@ const CourseDetails = ({ viewerRole }: CourseDetailsProps) => {
       ]),
     ),
   );
+
+  const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
+  const [reviewRating, setReviewRating] = useState(0);
+  const [reviewFeedback, setReviewFeedback] = useState("");
 
   const course =
     (routeCourseId ? coursesById[routeCourseId] : null) ?? courseMockData[0];
@@ -125,6 +138,16 @@ const CourseDetails = ({ viewerRole }: CourseDetailsProps) => {
     setFormMode("view");
   };
 
+  const handleSubmitReview = () => {
+    console.log("Submit review", {
+      rating: reviewRating,
+      feedback: reviewFeedback,
+    });
+    setReviewDialogOpen(false);
+    setReviewRating(0);
+    setReviewFeedback("");
+  };
+
   const handleVerifyCourse = () => {
     console.log("verify course", {
       courseId: course._id,
@@ -180,9 +203,65 @@ const CourseDetails = ({ viewerRole }: CourseDetailsProps) => {
             pageHeading="Course Details"
             pageDescription={pageDescription}
             pageHeaderLeftSection={
-              <Button variant="outline" onClick={() => router.back()}>
-                Back
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" onClick={() => router.back()}>
+                  Back
+                </Button>
+                {viewerRole === "student" && source === "enrolled" && (
+                  <Dialog open={reviewDialogOpen} onOpenChange={setReviewDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button>Add review</Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[425px]">
+                      <DialogHeader>
+                        <DialogTitle>Write a Review</DialogTitle>
+                        <DialogDescription>
+                          Share your thoughts about this course to help others.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="grid gap-4 py-4">
+                        <div className="flex flex-col gap-2">
+                          <Label>Rating</Label>
+                          <div className="flex items-center gap-1">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <button
+                                key={star}
+                                type="button"
+                                className="focus:outline-none"
+                                onClick={() => setReviewRating(star)}
+                              >
+                                <Star
+                                  className={cn(
+                                    "h-6 w-6 cursor-pointer transition-colors",
+                                    reviewRating >= star
+                                      ? "fill-yellow-400 text-yellow-400"
+                                      : "text-muted-foreground hover:text-yellow-400"
+                                  )}
+                                />
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <Label htmlFor="feedback">Feedback</Label>
+                          <Textarea
+                            id="feedback"
+                            placeholder="Tell us what you liked or what could be improved..."
+                            value={reviewFeedback}
+                            onChange={(e) => setReviewFeedback(e.target.value)}
+                            className="min-h-[100px]"
+                          />
+                        </div>
+                      </div>
+                      <DialogFooter>
+                        <Button type="button" onClick={handleSubmitReview} disabled={!reviewRating || !reviewFeedback.trim()}>
+                          Submit review
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                )}
+              </div>
             }
           />
 

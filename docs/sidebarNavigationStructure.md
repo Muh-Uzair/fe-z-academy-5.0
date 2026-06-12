@@ -14,6 +14,7 @@ These pages are accessible without a specific dashboard role, or are shared acro
 - **User Profile** (`/user-profile/[id]`)
 - **Public Course Chat** (`/public-course-chat/[id]`)
 - **Private Course Chat** (`/private-course-chat/[id]`)
+- **View Course Reviews** (`/view-course-reviews/[id]`)
 
 ## 2. AUTHENTICATION
 Pages handling user sign-up, sign-in, and verification.
@@ -39,6 +40,7 @@ Pages handling user sign-up, sign-in, and verification.
 - **Enrollments** (`/admin/enrollments`)
 - **Categories** (`/admin/categories`)
 - **Chat** (`/admin/chat`)
+- **Reviews** (`/admin/reviews`)
 - **Settings** (`/admin/settings`)
 
 ---
@@ -46,13 +48,14 @@ Pages handling user sign-up, sign-in, and verification.
 ## 4. INSTRUCTOR DASHBOARD
 
 - **Dashboard** (`/instructor/dashboard`)
-- **My Courses**
+- **My Courses** (`/instructor/my-courses`)
   - All My Courses (`/instructor/my-courses/all-my-courses`)
   - Create New Course (`/instructor/my-courses/create-new-courses`)
   - Pending Verifications (`/instructor/my-courses/pending-verifications`)
 - **My Students** (`/instructor/my-students`)
 - **Enrollments** (`/instructor/enrollments`)
 - **Chat** (`/instructor/chat`)
+- **Reviews** (`/instructor/reviews`)
 - **Settings** (`/instructor/settings`)
 
 ---
@@ -61,7 +64,7 @@ Pages handling user sign-up, sign-in, and verification.
 
 - **Dashboard** (`/student/dashboard`)
 - **Browse Courses** (`/student/browse-courses`)
-- **My Learning**
+- **My Learning** (`/student/my-learning`)
   - Enrolled Courses (`/student/my-learning/enrolled-courses`)
   - Continue Watching (`/student/my-learning/continue-watching`)
 - **Chat** (`/student/chat`)

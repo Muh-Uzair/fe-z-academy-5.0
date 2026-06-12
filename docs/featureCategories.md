@@ -53,6 +53,7 @@ _Creation, moderation, and public discovery of courses._
 - `/admin/courses/pending-verification-courses` (Admin: Course Approvals)
 - `/admin/courses/verified-courses` (Admin: Live Courses)
 - `/admin/categories` (Admin: Category Management)
+- `/instructor/my-courses` (Instructor: My Courses Overview)
 - `/instructor/my-courses/all-my-courses` (Instructor: My Courses List)
 - `/instructor/my-courses/create-new-courses` (Instructor: Course Builder)
 - `/instructor/my-courses/pending-verifications` (Instructor: Awaiting Approval)
@@ -85,6 +86,7 @@ _The core learning/purchasing experience for the student._
 - `/course-checkout/[id]` (Dummy Payment Gateway)
 - `/course-enrollments/[id]` (Enrollment Confirmation/Tracking)
 - `/student/browse-courses` (Student: Course Discovery)
+- `/student/my-learning` (Student: My Learning Overview)
 - `/student/my-learning/enrolled-courses` (Student: My Learning Portal)
 - `/student/my-learning/continue-watching` (Student: Resume Videos)
 
@@ -157,7 +159,31 @@ _Interaction features between users._
 - **Private Messaging**: 1-to-1 chat system allowing students to message instructors or peers within the same course.
 - **Feedback System**: Course rating and review system accessible to students after enrollment.
 
-## 6. Financials & Notifications
+## 6. Reviews & Feedback
+
+_Course ratings, student feedback, and review moderation._
+
+**Associated Pages:**
+
+- `/view-course-reviews/[id]` (Public: View Course Reviews)
+- `/admin/reviews` (Admin: Moderate All Reviews)
+- `/instructor/reviews` (Instructor: View Course Feedback)
+
+**Key Features:**
+
+- Public viewing of course reviews with pagination.
+- Admin dashboard to moderate and search through all platform reviews.
+- Instructor dashboard to monitor course feedback and student satisfaction.
+
+---
+
+_Course ratings, student feedback, and review moderation._
+
+- **Public Reviews**: Dedicated page to view paginated reviews for a specific course, including rating breakdowns and student feedback.
+- **Admin Review Moderation**: Centralized hub for admins to monitor, filter, and moderate all course reviews across the platform.
+- **Instructor Feedback Dashboard**: Hub for instructors to view feedback specifically left on their own courses.
+
+## 7. Financials & Notifications
 
 _Money movement tracking and system alerts._
 
