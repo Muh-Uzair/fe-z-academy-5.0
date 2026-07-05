@@ -52,7 +52,7 @@ const SignUpStudent = () => {
 
   // FUNCTIONS
   const onSubmit = (values: SignUpStudentFormValues) => {
-    console.log("student sign up", values);
+    console.log("student sign up", { ...values, role: "student" });
     router.push("/verify-otp");
   };
 

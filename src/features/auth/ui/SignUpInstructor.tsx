@@ -53,7 +53,7 @@ const SignUpInstructor = () => {
   });
 
   const onSubmit = (values: SignUpInstructorFormValues) => {
-    console.log("instructor sign up", values);
+    console.log("instructor sign up", { ...values, role: "instructor" });
   };
 
   const handleContinueWithGoogle = () => {
@@ -197,7 +197,9 @@ const SignUpInstructor = () => {
                   type="number"
                   min={0}
                   placeholder="5"
-                  onChange={(event) => field.onChange(event.target.value)}
+                  onChange={(event) =>
+                    field.onChange(Number(event.target.value))
+                  }
                 />
               </FormControl>
               <FormDescription>

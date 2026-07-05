@@ -130,7 +130,7 @@ const getDefaultValues = (
   title: initialData?.title ?? "",
   description: initialData?.description ?? "",
   price: initialData?.price ?? 1,
-  level: initialData?.level ?? CourseLevel.Beginner,
+  level: (initialData?.level as CourseLevel) ?? CourseLevel.Beginner,
   categoryId: initialData?.category ?? "",
   thumbnailFile: undefined,
   videoFile: undefined,

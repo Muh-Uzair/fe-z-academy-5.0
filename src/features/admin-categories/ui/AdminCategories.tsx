@@ -17,7 +17,7 @@ import PageHeader from "@/components/PageHeader";
 import AppTable from "@/components/AppTable";
 import TableImage from "@/components/TableImage";
 import { formatDate } from "@/lib/utils";
-import { ICategory } from "@/types/categoryTypes";
+import { Category as ICategory } from "@/types/categoryTypes";
 import AdminCategoriesForm, {
   type AdminCategoryFormMode,
   type AdminCategorySubmitValues,
@@ -83,7 +83,7 @@ const AdminCategories = () => {
       {
         _id: `cat_${Date.now()}`,
         name: values.name,
-        image: values.imageUrl,
+        image: values.imageUrl ?? "",
         description: values.description,
         createdAt: timestamp,
         updatedAt: timestamp,
@@ -123,7 +123,7 @@ const AdminCategories = () => {
     const updatedCategory: ICategory = {
       ...selectedCategory,
       name: values.name,
-      image: values.imageUrl,
+      image: values.imageUrl ?? "",
       description: values.description,
       updatedAt: new Date().toISOString(),
     };
