@@ -380,8 +380,8 @@ const AppLayoutShell = ({ role, children }: AppLayoutShellProps) => {
           <SidebarRail />
         </Sidebar>
 
-        <SidebarInset className="min-h-screen bg-stone-100/70 w-full min-w-0 overflow-x-hidden">
-          <header className="sticky top-0 z-20 border-b bg-white backdrop-blur">
+        <SidebarInset className="h-svh bg-stone-100/70 w-full min-w-0 overflow-hidden flex flex-col">
+          <header className="shrink-0 z-20 border-b bg-white backdrop-blur">
             <div className="flex h-16 items-center justify-between gap-4 px-4 sm:px-6">
               <SidebarTrigger className="rounded-xl border border-primary bg-white hover:bg-primary-very-light hover:text-primary text-primary" />
 
@@ -410,7 +410,7 @@ const AppLayoutShell = ({ role, children }: AppLayoutShellProps) => {
             </div>
           </header>
 
-          <div className="flex flex-1 flex-col min-w-0 w-full">
+          <div className="flex flex-1 flex-col min-w-0 w-full overflow-y-auto overflow-x-hidden">
             <main className="flex-1 p-4 sm:p-6 min-w-0 w-full">
               <div className="h-full min-w-0">{children}</div>
             </main>
