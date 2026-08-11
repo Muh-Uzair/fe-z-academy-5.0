@@ -1,12 +1,11 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import Link from "next/link";
 import PageHeader from "@/components/PageHeader";
 import AppSearchBar from "@/components/AppSearchBar";
 import AppCourseCardsGridLayout from "@/components/AppCourseCardsGridLayout";
 import { coursesData } from "@/dummy-data/coursesData";
-import { Button } from "@/components/ui/button";
+import AppButton from "@/components/AppButton";
 
 const AdminEnrollments = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -37,11 +36,9 @@ const AdminEnrollments = () => {
           </div>
         }
         renderFooter={(course) => (
-          <Button asChild className="w-full">
-            <Link href={`/course-enrollments/${course._id}`}>
+          <AppButton href={`/course-enrollments/${course._id}`} className="w-full">
               View Enrollments
-            </Link>
-          </Button>
+            </AppButton>
         )}
       />
     </div>

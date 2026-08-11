@@ -6,7 +6,7 @@ import PageHeader from "@/components/PageHeader";
 import AppSearchBar from "@/components/AppSearchBar";
 import AppCourseCardsGridLayout from "@/components/AppCourseCardsGridLayout";
 import { coursesData } from "@/dummy-data/coursesData";
-import { Button } from "@/components/ui/button";
+import AppButton from "@/components/AppButton";
 
 const InstructorEnrollments = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -37,11 +37,11 @@ const InstructorEnrollments = () => {
           </div>
         }
         renderFooter={(course) => (
-          <Button asChild className="w-full">
+          <AppButton asChild className="w-full">
             <Link href={`/course-enrollments/${course._id}`}>
               View Enrollments
             </Link>
-          </Button>
+          </AppButton>
         )}
       />
     </div>
