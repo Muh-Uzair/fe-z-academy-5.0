@@ -4,8 +4,7 @@ import React, { useState } from "react";
 import PageFlexCol from "@/components/PageFlexCol";
 import PageHeader from "@/components/PageHeader";
 import AppCourseCardsGridLayout from "@/components/AppCourseCardsGridLayout";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
+import AppButton from "@/components/AppButton";
 import { coursesData } from "@/dummy-data/coursesData";
 import AppSearchBar from "@/components/AppSearchBar";
 
@@ -38,11 +37,9 @@ const InstructorReviews = () => {
         }
         pagination={true}
         renderFooter={(course) => (
-          <Button asChild className="w-full mt-2">
-            <Link href={`/view-course-reviews/${course._id}`}>
-              View Reviews
-            </Link>
-          </Button>
+          <AppButton href={`/view-course-reviews/${course._id}`} className="w-full mt-2">
+            View Reviews
+          </AppButton>
         )}
       />
     </PageFlexCol>

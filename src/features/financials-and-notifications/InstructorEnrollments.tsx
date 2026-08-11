@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import Link from "next/link";
 import PageHeader from "@/components/PageHeader";
 import AppSearchBar from "@/components/AppSearchBar";
 import AppCourseCardsGridLayout from "@/components/AppCourseCardsGridLayout";
@@ -37,11 +36,9 @@ const InstructorEnrollments = () => {
           </div>
         }
         renderFooter={(course) => (
-          <AppButton asChild className="w-full">
-            <Link href={`/course-enrollments/${course._id}`}>
+          <AppButton href={`/course-enrollments/${course._id}`} className="w-full">
               View Enrollments
-            </Link>
-          </AppButton>
+            </AppButton>
         )}
       />
     </div>

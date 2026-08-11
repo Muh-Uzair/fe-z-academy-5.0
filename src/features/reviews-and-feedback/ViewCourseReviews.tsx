@@ -5,7 +5,7 @@ import { coursesData } from "@/dummy-data/coursesData";
 import { reviewsData } from "@/dummy-data/reviewsData";
 import { usersData } from "@/dummy-data/usersData";
 import { Star, Users, GraduationCap, Briefcase } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import AppButton from "@/components/AppButton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import CourseCard from "@/components/CourseCard";
@@ -79,14 +79,14 @@ const ViewCourseReviews = ({ courseId }: ViewCourseReviewsProps) => {
               instructor: course.instructorName,
             }}
             footer={
-              <Button
+              <AppButton
                 className="w-full"
                 onClick={() =>
                   router.push(`/course-details/${course._id}?role=instructor`)
                 }
               >
                 View Details
-              </Button>
+              </AppButton>
             }
           />
 
@@ -145,12 +145,12 @@ const ViewCourseReviews = ({ courseId }: ViewCourseReviewsProps) => {
                 )}
               </CardContent>
               <CardFooter>
-                <Button
+                <AppButton
                   className="w-full"
                   onClick={() => router.push(`/user-profile/001`)}
                 >
                   View Profile
-                </Button>
+                </AppButton>
               </CardFooter>
             </Card>
           )}
@@ -257,7 +257,7 @@ const ViewCourseReviews = ({ courseId }: ViewCourseReviewsProps) => {
                 Page {currentPage} of {totalPages}
               </p>
               <div className="flex gap-2">
-                <Button
+                <AppButton
                   variant="outline"
                   size="sm"
                   onClick={handlePrevious}
@@ -265,8 +265,8 @@ const ViewCourseReviews = ({ courseId }: ViewCourseReviewsProps) => {
                   className="h-8 px-4 text-xs"
                 >
                   Previous
-                </Button>
-                <Button
+                </AppButton>
+                <AppButton
                   variant="outline"
                   size="sm"
                   onClick={handleNext}
@@ -274,7 +274,7 @@ const ViewCourseReviews = ({ courseId }: ViewCourseReviewsProps) => {
                   className="h-8 px-4 text-xs"
                 >
                   Next
-                </Button>
+                </AppButton>
               </div>
             </div>
           )}
