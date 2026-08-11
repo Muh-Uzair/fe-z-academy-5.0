@@ -6,7 +6,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { Button } from "@/components/ui/button";
+import AppButton from "@/components/AppButton";
 import {
   Form,
   FormControl,
@@ -121,7 +121,7 @@ const SignUpStudent = () => {
                     autoComplete="new-password"
                     className="pr-10"
                   />
-                  <Button
+                  <AppButton
                     type="button"
                     variant="ghost"
                     size="icon-sm"
@@ -132,7 +132,7 @@ const SignUpStudent = () => {
                     }
                   >
                     {showPassword ? <EyeOff /> : <Eye />}
-                  </Button>
+                  </AppButton>
                 </div>
               </FormControl>
               <FormDescription>
@@ -185,13 +185,13 @@ const SignUpStudent = () => {
           )}
         />
 
-        <Button
+        <AppButton
           type="submit"
           className="w-full"
           disabled={form.formState.isSubmitting}
         >
           Sign Up
-        </Button>
+        </AppButton>
 
         <div className="space-y-4">
           <div className="flex items-center gap-3">
@@ -202,14 +202,14 @@ const SignUpStudent = () => {
             <Separator className="flex-1" />
           </div>
 
-          <Button
+          <AppButton
             type="button"
             variant="outline"
             className="w-full"
             onClick={handleContinueWithGoogle}
           >
             Continue with Google
-          </Button>
+          </AppButton>
         </div>
       </form>
     </Form>

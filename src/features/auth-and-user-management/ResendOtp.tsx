@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { Button } from "@/components/ui/button";
+import AppButton from "@/components/AppButton";
 import {
   Card,
   CardContent,
@@ -76,13 +76,13 @@ const ResendOtp = () => {
                 )}
               />
 
-              <Button
+              <AppButton
                 type="submit"
                 className="w-full"
                 disabled={form.formState.isSubmitting}
               >
                 Resend OTP
-              </Button>
+              </AppButton>
             </form>
           </Form>
         </CardContent>

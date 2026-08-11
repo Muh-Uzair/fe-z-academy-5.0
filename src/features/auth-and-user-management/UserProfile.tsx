@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { GraduationCap, Briefcase, Mail } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import AppButton from "@/components/AppButton";
 
 interface UserProfileProps {
   userId: string;
@@ -120,11 +120,11 @@ const UserProfile = ({ userId }: UserProfileProps) => {
             </div>
           }
           renderFooter={(course) => (
-            <Button asChild className="w-full">
+            <AppButton asChild className="w-full">
               <Link href={`/course-enrollments/${course._id}`}>
                 View Course
               </Link>
-            </Button>
+            </AppButton>
           )}
         />
       </div>

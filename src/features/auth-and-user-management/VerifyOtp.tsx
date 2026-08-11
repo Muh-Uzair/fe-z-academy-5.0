@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { Button } from "@/components/ui/button";
+import AppButton from "@/components/AppButton";
 import {
   Card,
   CardContent,
@@ -64,9 +64,9 @@ const VerifyOtp = () => {
             </InputOTP>
           </div>
 
-          <Button className="w-full" onClick={handleVerifyOtp}>
+          <AppButton className="w-full" onClick={handleVerifyOtp}>
             Verify OTP
-          </Button>
+          </AppButton>
         </CardContent>
       </Card>
     </div>

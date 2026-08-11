@@ -8,7 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { Button } from "@/components/ui/button";
+import AppButton from "@/components/AppButton";
 import {
   Card,
   CardContent,
@@ -125,7 +125,7 @@ const AdminSettings = () => {
                 className="hidden"
                 onChange={handleAvatarChange}
               />
-              <Button
+              <AppButton
                 type="button"
                 variant="outline"
                 size="sm"
@@ -133,7 +133,7 @@ const AdminSettings = () => {
               >
                 <Camera className="mr-2 h-4 w-4" />
                 Edit Avatar
-              </Button>
+              </AppButton>
             </div>
           </div>
 
@@ -189,9 +189,9 @@ const AdminSettings = () => {
                 )}
               />
 
-              <Button type="submit" disabled={form.formState.isSubmitting}>
+              <AppButton type="submit" disabled={form.formState.isSubmitting}>
                 Save Changes
-              </Button>
+              </AppButton>
             </form>
           </Form>
         </CardContent>

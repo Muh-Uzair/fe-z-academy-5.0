@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { Button } from "@/components/ui/button";
+import AppButton from "@/components/AppButton";
 
 import { Role } from "@/types/userTypes";
 
@@ -123,9 +123,9 @@ const PendingVerifications = () => {
             label: "Action",
             render: (_: unknown, row: { _id: string }) => (
               <div className="text-right">
-                <Button onClick={() => console.log("verify", row._id)}>
+                <AppButton onClick={() => console.log("verify", row._id)}>
                   Verify
-                </Button>
+                </AppButton>
               </div>
             ),
           },

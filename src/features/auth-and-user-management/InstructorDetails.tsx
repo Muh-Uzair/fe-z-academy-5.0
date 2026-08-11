@@ -6,7 +6,7 @@ import PageFlexCol from "@/components/PageFlexCol";
 import PageHeader from "@/components/PageHeader";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import AppButton from "@/components/AppButton";
 import {
   Card,
   CardContent,
@@ -168,13 +168,13 @@ const InstructorDetails = () => {
           </div>
 
           <div className="flex justify-end">
-            <Button
+            <AppButton
               variant="destructive"
               onClick={handleCancelVerification}
               disabled={!verificationReason.trim()}
             >
               Cancel Verification
-            </Button>
+            </AppButton>
           </div>
         </CardContent>
       </Card>

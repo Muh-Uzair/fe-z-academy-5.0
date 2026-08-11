@@ -6,7 +6,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { Button } from "@/components/ui/button";
+import AppButton from "@/components/AppButton";
 import {
   Card,
   CardContent,
@@ -106,7 +106,7 @@ const SignIn = () => {
                           autoComplete="current-password"
                           className="pr-10"
                         />
-                        <Button
+                        <AppButton
                           type="button"
                           variant="ghost"
                           size="icon-sm"
@@ -117,7 +117,7 @@ const SignIn = () => {
                           }
                         >
                           {showPassword ? <EyeOff /> : <Eye />}
-                        </Button>
+                        </AppButton>
                       </div>
                     </FormControl>
                     <FormDescription>
@@ -128,13 +128,13 @@ const SignIn = () => {
                 )}
               />
 
-              <Button
+              <AppButton
                 type="submit"
                 className="w-full"
                 disabled={form.formState.isSubmitting}
               >
                 Sign In
-              </Button>
+              </AppButton>
 
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
@@ -145,14 +145,14 @@ const SignIn = () => {
                   <Separator className="flex-1" />
                 </div>
 
-                <Button
+                <AppButton
                   type="button"
                   variant="outline"
                   className="w-full"
                   onClick={handleContinueWithGoogle}
                 >
                   Continue with Google
-                </Button>
+                </AppButton>
               </div>
             </form>
           </Form>

@@ -8,7 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { Button } from "@/components/ui/button";
+import AppButton from "@/components/AppButton";
 import {
   Card,
   CardContent,
@@ -141,7 +141,7 @@ const InstructorSettings = () => {
                 className="hidden"
                 onChange={handleAvatarChange}
               />
-              <Button
+              <AppButton
                 type="button"
                 variant="outline"
                 size="sm"
@@ -149,7 +149,7 @@ const InstructorSettings = () => {
               >
                 <Camera className="mr-2 h-4 w-4" />
                 Edit Avatar
-              </Button>
+              </AppButton>
             </div>
           </div>
 
@@ -186,9 +186,7 @@ const InstructorSettings = () => {
               </Label>
               <div>
                 {mockInstructor.isVerified ? (
-                  <Badge>
-                    <ShieldCheck className="h-3 w-3" /> Verified
-                  </Badge>
+                  <Badge>Verified</Badge>
                 ) : (
                   <Badge variant="destructive">Unverified</Badge>
                 )}
@@ -288,9 +286,9 @@ const InstructorSettings = () => {
                 )}
               />
 
-              <Button type="submit" disabled={form.formState.isSubmitting}>
+              <AppButton type="submit" disabled={form.formState.isSubmitting}>
                 Save Changes
-              </Button>
+              </AppButton>
             </form>
           </Form>
         </CardContent>

@@ -2,17 +2,17 @@
 
 import { useState } from "react";
 
-import { Button } from "@/components/ui/button";
+import AppButton from "@/components/AppButton";
 
 import { Role } from "@/types/userTypes";
 
 import PageFlexCol from "@/components/PageFlexCol";
-import PageHeader from "../../../components/PageHeader";
-import AppTable from "../../../components/AppTable";
 import AppSearchBar from "@/components/AppSearchBar";
 import TableImage from "@/components/TableImage";
 import { Badge } from "@/components/ui/badge";
 import { useRouter } from "next/navigation";
+import PageHeader from "@/components/PageHeader";
+import AppTable from "@/components/AppTable";
 
 const data = [
   {
@@ -125,13 +125,13 @@ const AllInstructors = () => {
             label: "Action",
             render: (_: unknown, row: { _id: string }) => (
               <div className="text-right">
-                <Button
+                <AppButton
                   onClick={() =>
                     router.push("/admin/instructors/instructor-details/1")
                   }
                 >
                   View
-                </Button>
+                </AppButton>
               </div>
             ),
           },

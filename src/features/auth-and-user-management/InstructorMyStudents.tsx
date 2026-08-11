@@ -9,7 +9,7 @@ import AppTable from "@/components/AppTable";
 import AppSearchBar from "@/components/AppSearchBar";
 import TableImage from "@/components/TableImage";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import AppButton from "@/components/AppButton";
 import { usersData } from "@/dummy-data/usersData";
 
 const students = usersData.filter((u) => u.role === "student");
@@ -85,9 +85,9 @@ const InstructorMyStudents = () => {
             label: "Action",
             render: (_: unknown, row: { _id: string }) => (
               <div className="text-right">
-                <Button onClick={() => router.push(`/user-profile/${row._id}`)}>
+                <AppButton onClick={() => router.push(`/user-profile/${row._id}`)}>
                   View Profile
-                </Button>
+                </AppButton>
               </div>
             ),
           },
