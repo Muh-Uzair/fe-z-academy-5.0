@@ -1,4 +1,4 @@
-import InstructorMyStudents from "@/features/instructor-my-students/InstructorMyStudents";
+import InstructorMyStudents from "@/features/auth-and-user-management/InstructorMyStudents";
 
 const InstructorMyStudentsPage = () => {
   return <InstructorMyStudents />;

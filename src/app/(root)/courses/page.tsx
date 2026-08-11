@@ -1,4 +1,4 @@
-import Courses from "@/features/courses/Courses";
+import Courses from "@/features/course-management/Courses";
 import React from "react";
 
 const CoursesPage = () => {

@@ -1,4 +1,4 @@
-import ViewCourseReviews from "@/features/view-course-reviews/ViewCourseReviews";
+import ViewCourseReviews from "@/features/reviews-and-feedback/ViewCourseReviews";
 import React from "react";
 
 const ViewCourseReviewsPage = async ({ params }: { params: Promise<{ id: string }> }) => {

@@ -1,4 +1,4 @@
-import InstructorChat from "@/features/instructor-chat/InstructorChat";
+import InstructorChat from "@/features/communication/InstructorChat";
 
 const InstructorChatPage = () => {
   return <InstructorChat />;

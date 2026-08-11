@@ -1,4 +1,4 @@
-import AllInstructors from "@/features/admin-instructors/AllInstructors";
+import AllInstructors from "@/features/auth-and-user-management/AllInstructors";
 
 const AdminAllInstructorsPage = () => {
   return <AllInstructors />;

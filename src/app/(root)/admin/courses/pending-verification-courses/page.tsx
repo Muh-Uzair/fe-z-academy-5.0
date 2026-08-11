@@ -1,4 +1,4 @@
-import PendingCourses from "@/features/admin-courses/PendingVerificationCourses";
+import PendingCourses from "@/features/course-management/PendingVerificationCourses";
 
 const AdminPendingVerificationCoursesPage = () => {
   return <PendingCourses />;

@@ -1,4 +1,4 @@
-import AllMyCourses from "@/features/instructor-my-courses/AllMyCourses";
+import AllMyCourses from "@/features/course-management/AllMyCourses";
 
 const InstructorAllMyCoursesPage = () => {
   return <AllMyCourses />;

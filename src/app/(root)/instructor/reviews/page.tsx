@@ -1,4 +1,4 @@
-import InstructorReviews from "@/features/instructor-reviews/InstructorReviews";
+import InstructorReviews from "@/features/reviews-and-feedback/InstructorReviews";
 
 const InstructorReviewsPage = () => {
   return <InstructorReviews />;

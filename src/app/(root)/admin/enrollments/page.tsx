@@ -1,4 +1,4 @@
-import AdminEnrollments from "@/features/admin-enrollments/AdminEnrollments";
+import AdminEnrollments from "@/features/financials-and-notifications/AdminEnrollments";
 
 const AdminEnrollmentsPage = () => {
   return <AdminEnrollments />;

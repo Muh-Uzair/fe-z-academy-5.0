@@ -1,4 +1,4 @@
-import AdminCategories from "@/features/admin-categories/AdminCategories";
+import AdminCategories from "@/features/course-management/AdminCategories";
 
 const AdminCategoriesPage = () => {
   return <AdminCategories />;

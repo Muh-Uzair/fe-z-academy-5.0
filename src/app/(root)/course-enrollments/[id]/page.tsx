@@ -1,4 +1,4 @@
-import CourseEnrollments from "@/features/course-enrollments/ui/CourseEnrollments";
+import CourseEnrollments from "@/features/student-learning/CourseEnrollments";
 
 const CourseEnrollmentsPage = () => {
   return <CourseEnrollments />;

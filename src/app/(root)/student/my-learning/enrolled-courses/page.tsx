@@ -1,4 +1,4 @@
-import EnrolledCourses from "@/features/student-my-learning/EnrolledCourses";
+import EnrolledCourses from "@/features/student-learning/EnrolledCourses";
 
 const StudentEnrolledCoursesPage = () => {
   return <EnrolledCourses />;

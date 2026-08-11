@@ -1,4 +1,4 @@
-import CreateNewCourses from "@/features/instructor-my-courses/CreateNewCourses";
+import CreateNewCourses from "@/features/course-management/CreateNewCourses";
 
 const InstructorCreateNewCoursesPage = () => {
   return <CreateNewCourses />;

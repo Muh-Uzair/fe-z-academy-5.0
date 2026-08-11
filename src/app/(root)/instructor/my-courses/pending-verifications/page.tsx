@@ -1,4 +1,4 @@
-import PendingVerifications from "@/features/instructor-my-courses/PendingVerifications";
+import PendingVerifications from "@/features/course-management/PendingVerifications";
 
 const InstructorPendingVerificationsPage = () => {
   return <PendingVerifications />;

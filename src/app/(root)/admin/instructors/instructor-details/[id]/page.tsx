@@ -1,4 +1,4 @@
-import InstructorDetails from '@/features/instructor-management/ui/InstructorDetails'
+import InstructorDetails from '@/features/auth-and-user-management/InstructorDetails'
 import React from 'react'
 
 const AdminInstructorDetailsPage = () => {

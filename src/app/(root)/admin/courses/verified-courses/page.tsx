@@ -1,4 +1,4 @@
-import VerifiedCourses from "@/features/admin-courses/VerifiedCourses";
+import VerifiedCourses from "@/features/course-management/VerifiedCourses";
 
 const AdminVerifiedCoursesPage = () => {
   return <VerifiedCourses />;

@@ -1,4 +1,4 @@
-import AdminDashboard from "@/features/admin-dashboard/AdminDashboard";
+import AdminDashboard from "@/features/analytics-and-dashboards/AdminDashboard";
 
 const AdminDashboardPage = () => {
   return <AdminDashboard />;

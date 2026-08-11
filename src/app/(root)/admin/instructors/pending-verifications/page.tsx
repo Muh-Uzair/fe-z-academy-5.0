@@ -1,4 +1,4 @@
-import PendingVerifications from "@/features/admin-instructors/PendingVerifications";
+import PendingVerifications from "@/features/auth-and-user-management/PendingVerifications";
 
 const AdminPendingVerificationsPage = () => {
   return <PendingVerifications />;

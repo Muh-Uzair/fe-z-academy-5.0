@@ -1,4 +1,4 @@
-import InstructorDashboard from "@/features/instructor-dashboard/InstructorDashboard";
+import InstructorDashboard from "@/features/analytics-and-dashboards/InstructorDashboard";
 
 const InstructorDashboardPage = () => {
   return <InstructorDashboard />;

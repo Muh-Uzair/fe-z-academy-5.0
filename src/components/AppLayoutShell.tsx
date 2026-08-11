@@ -40,7 +40,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/cn";
 
 type AppRole = "admin" | "instructor" | "student";
 

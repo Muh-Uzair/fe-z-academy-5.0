@@ -1,4 +1,4 @@
-import ContinueWatching from "@/features/student-my-learning/ContinueWatching";
+import ContinueWatching from "@/features/student-learning/ContinueWatching";
 
 const StudentContinueWatchingPage = () => {
   return <ContinueWatching />;

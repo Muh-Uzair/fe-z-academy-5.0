@@ -1,4 +1,4 @@
-import ResendOtp from "@/features/auth/ResendOtp";
+import ResendOtp from "@/features/auth-and-user-management/ResendOtp";
 
 const ResendOtpPage = () => {
   return <ResendOtp />;

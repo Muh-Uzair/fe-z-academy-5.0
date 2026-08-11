@@ -26,15 +26,14 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { formatDate, cn } from "@/lib/utils";
+import { cn } from "@/utils/cn";
+import { formatDate } from "@/utils/time";
 import CourseForm, {
   type CourseFormMode,
   type CourseSubmitValues,
 } from "./CourseForm";
-import {
-  categoriesData as courseCategoryOptions,
-  coursesData as courseMockData,
-} from "@/dummy-data";
+import { categoriesData as courseCategoryOptions } from "@/dummy-data/categoriesData";
+import { coursesData as courseMockData } from "@/dummy-data/coursesData";
 import { type CourseRecord } from "@/types/courseTypes";
 import { formatCourseLevel, getCourseVerificationState } from "./courseHelpers";
 
@@ -208,7 +207,10 @@ const CourseDetails = ({ viewerRole }: CourseDetailsProps) => {
                   Back
                 </Button>
                 {viewerRole === "student" && source === "enrolled" && (
-                  <Dialog open={reviewDialogOpen} onOpenChange={setReviewDialogOpen}>
+                  <Dialog
+                    open={reviewDialogOpen}
+                    onOpenChange={setReviewDialogOpen}
+                  >
                     <DialogTrigger asChild>
                       <Button>Add review</Button>
                     </DialogTrigger>
@@ -235,7 +237,7 @@ const CourseDetails = ({ viewerRole }: CourseDetailsProps) => {
                                     "h-6 w-6 cursor-pointer transition-colors",
                                     reviewRating >= star
                                       ? "fill-yellow-400 text-yellow-400"
-                                      : "text-muted-foreground hover:text-yellow-400"
+                                      : "text-muted-foreground hover:text-yellow-400",
                                   )}
                                 />
                               </button>
@@ -254,7 +256,11 @@ const CourseDetails = ({ viewerRole }: CourseDetailsProps) => {
                         </div>
                       </div>
                       <DialogFooter>
-                        <Button type="button" onClick={handleSubmitReview} disabled={!reviewRating || !reviewFeedback.trim()}>
+                        <Button
+                          type="button"
+                          onClick={handleSubmitReview}
+                          disabled={!reviewRating || !reviewFeedback.trim()}
+                        >
                           Submit review
                         </Button>
                       </DialogFooter>

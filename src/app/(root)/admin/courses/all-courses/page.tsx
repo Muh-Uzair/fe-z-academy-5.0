@@ -1,4 +1,4 @@
-import AllCourses from "@/features/admin-courses/AllCourses";
+import AllCourses from "@/features/course-management/AllCourses";
 
 const AdminAllCoursesPage = () => {
   return <AllCourses />;

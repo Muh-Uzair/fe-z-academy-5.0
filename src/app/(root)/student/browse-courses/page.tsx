@@ -1,4 +1,4 @@
-import BrowseCourses from "@/features/student-browse-courses/BrowseCourses";
+import BrowseCourses from "@/features/student-learning/BrowseCourses";
 
 const StudentBrowseCoursesPage = () => {
   return <BrowseCourses />;

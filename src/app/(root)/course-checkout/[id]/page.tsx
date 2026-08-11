@@ -1,4 +1,4 @@
-import CourseCheckout from "@/features/course-checkout/ui/CourseCheckout"
+import CourseCheckout from "@/features/student-learning/CourseCheckout"
 
 
 const CourseCheckoutPage = () => {

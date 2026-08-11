@@ -1,4 +1,4 @@
-import StudentMyLearning from "@/features/student-my-learning/StudentMyLearning";
+import StudentMyLearning from "@/features/student-learning/StudentMyLearning";
 
 const StudentMyLearningPage = () => {
   return <StudentMyLearning />;

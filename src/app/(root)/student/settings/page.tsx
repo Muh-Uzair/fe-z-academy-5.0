@@ -1,4 +1,4 @@
-import StudentSettings from "@/features/student-settings/StudentSettings";
+import StudentSettings from "@/features/auth-and-user-management/StudentSettings";
 
 const StudentSettingsPage = () => {
   return <StudentSettings />;

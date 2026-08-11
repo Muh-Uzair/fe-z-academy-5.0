@@ -1,4 +1,4 @@
-import AdminStudents from "@/features/admin-students/AdminStudents";
+import AdminStudents from "@/features/auth-and-user-management/AdminStudents";
 
 const AdminStudentsPage = () => {
     return (

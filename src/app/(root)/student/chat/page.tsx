@@ -1,4 +1,4 @@
-import StudentChat from "@/features/student-chat/StudentChat";
+import StudentChat from "@/features/communication/StudentChat";
 
 const StudentChatPage = () => {
   return <StudentChat />;

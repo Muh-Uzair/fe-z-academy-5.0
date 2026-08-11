@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import CourseDetails, { CourseViewerRole } from "@/features/course-management/ui/CourseDetails";
+import CourseDetails, { CourseViewerRole } from "@/features/course-management/CourseDetails";
 
 const UnifiedCourseDetailsPage = () => {
   const searchParams = useSearchParams();

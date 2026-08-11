@@ -1,4 +1,4 @@
-import AdminChat from "@/features/admin-chat/AdminChat";
+import AdminChat from "@/features/communication/AdminChat";
 
 const AdminChatPage = () => {
   return <AdminChat />;
