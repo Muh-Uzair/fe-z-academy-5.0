@@ -5,7 +5,7 @@ import PageHeader from "@/components/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import CourseForm, {
   type CourseSubmitValues,
-} from "@/features/course-management/ui/CourseForm";
+} from "@/features/course-management/CourseForm";
 import { categoriesData } from "@/dummy-data";
 
 const CreateNewCourses = () => {
@@ -52,3 +52,4 @@ const CreateNewCourses = () => {
 };
 
 export default CreateNewCourses;
+

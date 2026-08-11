@@ -14,21 +14,16 @@ import { coursesData as courseMockData } from "@/dummy-data";
 import { type CourseRecord } from "@/types/courseTypes";
 import {
   formatCourseLevel,
+  getCourseVerificationBadgeVariant,
   getCourseVerificationLabel,
-  truncateText,
-} from "@/features/course-management/ui/courseHelpers";
+  getCourseVerificationState,
+} from "@/features/course-management/courseHelpers";
 
-const LOGGED_IN_INSTRUCTOR_ID = "user_008";
-const TRUNCATE_REASON_AT = 60;
-
-const PendingVerifications = () => {
+const VerifiedCourses = () => {
   const [search, setSearch] = useState("");
 
   const filteredCourses = courseMockData.filter((course) => {
-    const belongsToInstructor = course.instructor === LOGGED_IN_INSTRUCTOR_ID;
-    const isPendingOrRejected = !course.isVerified;
-
-    if (!belongsToInstructor || !isPendingOrRejected) {
+    if (getCourseVerificationState(course) !== "verified") {
       return false;
     }
 
@@ -40,29 +35,23 @@ const PendingVerifications = () => {
 
     return (
       course.title.toLowerCase().includes(normalizedSearch) ||
-      course.categoryName.toLowerCase().includes(normalizedSearch) ||
-      course.level.toLowerCase().includes(normalizedSearch) ||
-      getCourseVerificationLabel(course, "simple")
-        .toLowerCase()
-        .includes(normalizedSearch) ||
-      (course.verificationRejectionReason ?? "")
-        .toLowerCase()
-        .includes(normalizedSearch)
+      course.instructorName.toLowerCase().includes(normalizedSearch) ||
+      course.categoryName.toLowerCase().includes(normalizedSearch)
     );
   });
 
   return (
     <PageFlexCol>
       <PageHeader
-        pageHeading="Pending Course Verifications"
-        pageDescription="Review your courses that are still awaiting admin approval or were sent back with feedback."
+        pageHeading="Verified Courses"
+        pageDescription="View all admin-approved courses that are currently live from the instructor review flow."
       />
 
       <AppTable
         upperHeader={
           <div className="max-w-sm">
             <AppSearchBar
-              placeholder="Search pending courses..."
+              placeholder="Search verified courses..."
               onChange={(value: string) => setSearch(value)}
             />
           </div>
@@ -84,6 +73,10 @@ const PendingVerifications = () => {
             ),
           },
           {
+            key: "instructorName",
+            label: "Instructor",
+          },
+          {
             key: "price",
             label: "Price",
             render: (value: number) => `$${value}`,
@@ -99,7 +92,7 @@ const PendingVerifications = () => {
           },
           {
             key: "isVerified",
-            label: "Verified",
+            label: "Verification",
             render: (_: boolean, row: CourseRecord) => (
               <>
                 {row.isVerified === false && (
@@ -110,22 +103,24 @@ const PendingVerifications = () => {
             ),
           },
           {
-            key: "verificationRejectionReason",
-            label: "Verification Rejection Reason",
-            render: (value: string | null) => (
-              <span title={value ?? "Not reviewed yet"}>
-                {value
-                  ? truncateText(value, TRUNCATE_REASON_AT)
-                  : "Not reviewed yet"}
-              </span>
-            ),
+            key: "averageRating",
+            label: "Average Rating",
+            render: (value: number) => value.toFixed(1),
+          },
+          {
+            key: "totalReviews",
+            label: "Total Reviews",
+          },
+          {
+            key: "totalStudentsEnrolled",
+            label: "Students Enrolled",
           },
           {
             key: "action",
             label: "Action",
             render: (_: unknown, row: CourseRecord) => (
               <Button asChild>
-                <Link href={`/course-details/${row._id}?role=instructor`}>
+                <Link href={`/course-details/${row._id}?role=admin`}>
                   View Details
                 </Link>
               </Button>
@@ -138,4 +133,5 @@ const PendingVerifications = () => {
   );
 };
 
-export default PendingVerifications;
+export default VerifiedCourses;
+

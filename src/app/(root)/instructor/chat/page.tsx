@@ -1,7 +1,8 @@
-import InstructorChat from "@/features/instructor-chat/ui/InstructorChat";
+import InstructorChat from "@/features/instructor-chat/InstructorChat";
 
 const InstructorChatPage = () => {
   return <InstructorChat />;
 };
 
 export default InstructorChatPage;
+

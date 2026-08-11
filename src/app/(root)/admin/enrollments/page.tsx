@@ -1,7 +1,8 @@
-import AdminEnrollments from "@/features/admin-enrollments/ui/AdminEnrollments";
+import AdminEnrollments from "@/features/admin-enrollments/AdminEnrollments";
 
 const AdminEnrollmentsPage = () => {
   return <AdminEnrollments />;
 };
 
 export default AdminEnrollmentsPage;
+

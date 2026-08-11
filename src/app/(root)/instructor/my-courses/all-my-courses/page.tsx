@@ -1,7 +1,8 @@
-import AllMyCourses from "@/features/instructor-my-courses/ui/AllMyCourses";
+import AllMyCourses from "@/features/instructor-my-courses/AllMyCourses";
 
 const InstructorAllMyCoursesPage = () => {
   return <AllMyCourses />;
 };
 
 export default InstructorAllMyCoursesPage;
+

@@ -1,4 +1,4 @@
-import SignUp from "@/features/auth/ui/SignUp";
+import SignUp from "@/features/auth/SignUp";
 import React from "react";
 
 const SignUpPage = () => {
@@ -6,3 +6,4 @@ const SignUpPage = () => {
 };
 
 export default SignUpPage;
+

@@ -1,4 +1,4 @@
-import Courses from "@/features/courses/ui/Courses";
+import Courses from "@/features/courses/Courses";
 import React from "react";
 
 const CoursesPage = () => {
@@ -6,3 +6,4 @@ const CoursesPage = () => {
 };
 
 export default CoursesPage;
+

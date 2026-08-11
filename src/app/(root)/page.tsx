@@ -1,7 +1,8 @@
-import Home from "@/features/home/ui/Home";
+import Home from "@/features/home/Home";
 
 const HomePage = () => {
   return <Home />;
 };
 
 export default HomePage;
+

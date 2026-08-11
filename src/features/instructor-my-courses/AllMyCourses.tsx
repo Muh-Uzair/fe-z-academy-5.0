@@ -14,16 +14,16 @@ import { coursesData as courseMockData } from "@/dummy-data";
 import { type CourseRecord } from "@/types/courseTypes";
 import {
   formatCourseLevel,
-  getCourseVerificationBadgeVariant,
   getCourseVerificationLabel,
-  getCourseVerificationState,
-} from "@/features/course-management/ui/courseHelpers";
+} from "@/features/course-management/courseHelpers";
 
-const VerifiedCourses = () => {
+const LOGGED_IN_INSTRUCTOR_ID = "user_008";
+
+const AllMyCourses = () => {
   const [search, setSearch] = useState("");
 
   const filteredCourses = courseMockData.filter((course) => {
-    if (getCourseVerificationState(course) !== "verified") {
+    if (course.instructor !== LOGGED_IN_INSTRUCTOR_ID) {
       return false;
     }
 
@@ -35,23 +35,26 @@ const VerifiedCourses = () => {
 
     return (
       course.title.toLowerCase().includes(normalizedSearch) ||
-      course.instructorName.toLowerCase().includes(normalizedSearch) ||
-      course.categoryName.toLowerCase().includes(normalizedSearch)
+      course.categoryName.toLowerCase().includes(normalizedSearch) ||
+      course.level.toLowerCase().includes(normalizedSearch) ||
+      getCourseVerificationLabel(course, "simple")
+        .toLowerCase()
+        .includes(normalizedSearch)
     );
   });
 
   return (
     <PageFlexCol>
       <PageHeader
-        pageHeading="Verified Courses"
-        pageDescription="View all admin-approved courses that are currently live from the instructor review flow."
+        pageHeading="All My Courses"
+        pageDescription="Review all courses created by the logged-in instructor, including verification state and key performance metrics."
       />
 
       <AppTable
         upperHeader={
           <div className="max-w-sm">
             <AppSearchBar
-              placeholder="Search verified courses..."
+              placeholder="Search my courses..."
               onChange={(value: string) => setSearch(value)}
             />
           </div>
@@ -73,10 +76,6 @@ const VerifiedCourses = () => {
             ),
           },
           {
-            key: "instructorName",
-            label: "Instructor",
-          },
-          {
             key: "price",
             label: "Price",
             render: (value: number) => `$${value}`,
@@ -93,7 +92,7 @@ const VerifiedCourses = () => {
           {
             key: "isVerified",
             label: "Verification",
-            render: (_: boolean, row: CourseRecord) => (
+            render: (value: boolean, row: CourseRecord) => (
               <>
                 {row.isVerified === false && (
                   <Badge variant="destructive">Not verified</Badge>
@@ -120,7 +119,7 @@ const VerifiedCourses = () => {
             label: "Action",
             render: (_: unknown, row: CourseRecord) => (
               <Button asChild>
-                <Link href={`/course-details/${row._id}?role=admin`}>
+                <Link href={`/course-details/${row._id}?role=instructor`}>
                   View Details
                 </Link>
               </Button>
@@ -133,4 +132,5 @@ const VerifiedCourses = () => {
   );
 };
 
-export default VerifiedCourses;
+export default AllMyCourses;
+

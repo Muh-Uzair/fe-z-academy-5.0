@@ -16,7 +16,7 @@ import {
   formatCourseLevel,
   getCourseVerificationBadgeVariant,
   getCourseVerificationLabel,
-} from "@/features/course-management/ui/courseHelpers";
+} from "@/features/course-management/courseHelpers";
 
 const AllCourses = () => {
   const [search, setSearch] = useState("");
@@ -132,3 +132,4 @@ const AllCourses = () => {
 };
 
 export default AllCourses;
+

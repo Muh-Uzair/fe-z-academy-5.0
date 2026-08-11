@@ -9,8 +9,8 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import SignUpInstructor from "@/features/auth/ui/SignUpInstructor";
-import SignUpStudent from "@/features/auth/ui/SignUpStudent";
+import SignUpInstructor from "@/features/auth/SignUpInstructor";
+import SignUpStudent from "@/features/auth/SignUpStudent";
 
 const SignUp = () => {
   return (
@@ -44,3 +44,4 @@ const SignUp = () => {
 };
 
 export default SignUp;
+

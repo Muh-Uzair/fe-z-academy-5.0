@@ -14,19 +14,21 @@ import { coursesData as courseMockData } from "@/dummy-data";
 import { type CourseRecord } from "@/types/courseTypes";
 import {
   formatCourseLevel,
-  getCourseVerificationBadgeVariant,
   getCourseVerificationLabel,
-  getCourseVerificationState,
   truncateText,
-} from "@/features/course-management/ui/courseHelpers";
+} from "@/features/course-management/courseHelpers";
 
-const TRUNCATE_REASON_AT = 70;
+const LOGGED_IN_INSTRUCTOR_ID = "user_008";
+const TRUNCATE_REASON_AT = 60;
 
-const PendingVerificationCourses = () => {
+const PendingVerifications = () => {
   const [search, setSearch] = useState("");
 
   const filteredCourses = courseMockData.filter((course) => {
-    if (getCourseVerificationState(course) === "verified") {
+    const belongsToInstructor = course.instructor === LOGGED_IN_INSTRUCTOR_ID;
+    const isPendingOrRejected = !course.isVerified;
+
+    if (!belongsToInstructor || !isPendingOrRejected) {
       return false;
     }
 
@@ -38,8 +40,11 @@ const PendingVerificationCourses = () => {
 
     return (
       course.title.toLowerCase().includes(normalizedSearch) ||
-      course.instructorName.toLowerCase().includes(normalizedSearch) ||
       course.categoryName.toLowerCase().includes(normalizedSearch) ||
+      course.level.toLowerCase().includes(normalizedSearch) ||
+      getCourseVerificationLabel(course, "simple")
+        .toLowerCase()
+        .includes(normalizedSearch) ||
       (course.verificationRejectionReason ?? "")
         .toLowerCase()
         .includes(normalizedSearch)
@@ -49,8 +54,8 @@ const PendingVerificationCourses = () => {
   return (
     <PageFlexCol>
       <PageHeader
-        pageHeading="Pending Verification Courses"
-        pageDescription="Review courses that are still awaiting admin approval or already have rejection feedback saved."
+        pageHeading="Pending Course Verifications"
+        pageDescription="Review your courses that are still awaiting admin approval or were sent back with feedback."
       />
 
       <AppTable
@@ -77,10 +82,6 @@ const PendingVerificationCourses = () => {
             render: (value: string) => (
               <span className="font-medium">{value}</span>
             ),
-          },
-          {
-            key: "instructorName",
-            label: "Instructor",
           },
           {
             key: "price",
@@ -112,7 +113,7 @@ const PendingVerificationCourses = () => {
             key: "verificationRejectionReason",
             label: "Verification Rejection Reason",
             render: (value: string | null) => (
-              <span title={value ?? "No rejection reason yet"}>
+              <span title={value ?? "Not reviewed yet"}>
                 {value
                   ? truncateText(value, TRUNCATE_REASON_AT)
                   : "Not reviewed yet"}
@@ -124,9 +125,7 @@ const PendingVerificationCourses = () => {
             label: "Action",
             render: (_: unknown, row: CourseRecord) => (
               <Button asChild>
-                <Link
-                  href={`/course-details/${row._id}?role=admin&review=true`}
-                >
+                <Link href={`/course-details/${row._id}?role=instructor`}>
                   View Details
                 </Link>
               </Button>
@@ -139,4 +138,5 @@ const PendingVerificationCourses = () => {
   );
 };
 
-export default PendingVerificationCourses;
+export default PendingVerifications;
+

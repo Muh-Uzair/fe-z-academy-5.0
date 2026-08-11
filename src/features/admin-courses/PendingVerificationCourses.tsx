@@ -14,16 +14,19 @@ import { coursesData as courseMockData } from "@/dummy-data";
 import { type CourseRecord } from "@/types/courseTypes";
 import {
   formatCourseLevel,
+  getCourseVerificationBadgeVariant,
   getCourseVerificationLabel,
-} from "@/features/course-management/ui/courseHelpers";
+  getCourseVerificationState,
+  truncateText,
+} from "@/features/course-management/courseHelpers";
 
-const LOGGED_IN_INSTRUCTOR_ID = "user_008";
+const TRUNCATE_REASON_AT = 70;
 
-const AllMyCourses = () => {
+const PendingVerificationCourses = () => {
   const [search, setSearch] = useState("");
 
   const filteredCourses = courseMockData.filter((course) => {
-    if (course.instructor !== LOGGED_IN_INSTRUCTOR_ID) {
+    if (getCourseVerificationState(course) === "verified") {
       return false;
     }
 
@@ -35,9 +38,9 @@ const AllMyCourses = () => {
 
     return (
       course.title.toLowerCase().includes(normalizedSearch) ||
+      course.instructorName.toLowerCase().includes(normalizedSearch) ||
       course.categoryName.toLowerCase().includes(normalizedSearch) ||
-      course.level.toLowerCase().includes(normalizedSearch) ||
-      getCourseVerificationLabel(course, "simple")
+      (course.verificationRejectionReason ?? "")
         .toLowerCase()
         .includes(normalizedSearch)
     );
@@ -46,15 +49,15 @@ const AllMyCourses = () => {
   return (
     <PageFlexCol>
       <PageHeader
-        pageHeading="All My Courses"
-        pageDescription="Review all courses created by the logged-in instructor, including verification state and key performance metrics."
+        pageHeading="Pending Verification Courses"
+        pageDescription="Review courses that are still awaiting admin approval or already have rejection feedback saved."
       />
 
       <AppTable
         upperHeader={
           <div className="max-w-sm">
             <AppSearchBar
-              placeholder="Search my courses..."
+              placeholder="Search pending courses..."
               onChange={(value: string) => setSearch(value)}
             />
           </div>
@@ -76,6 +79,10 @@ const AllMyCourses = () => {
             ),
           },
           {
+            key: "instructorName",
+            label: "Instructor",
+          },
+          {
             key: "price",
             label: "Price",
             render: (value: number) => `$${value}`,
@@ -91,8 +98,8 @@ const AllMyCourses = () => {
           },
           {
             key: "isVerified",
-            label: "Verification",
-            render: (value: boolean, row: CourseRecord) => (
+            label: "Verified",
+            render: (_: boolean, row: CourseRecord) => (
               <>
                 {row.isVerified === false && (
                   <Badge variant="destructive">Not verified</Badge>
@@ -102,24 +109,24 @@ const AllMyCourses = () => {
             ),
           },
           {
-            key: "averageRating",
-            label: "Average Rating",
-            render: (value: number) => value.toFixed(1),
-          },
-          {
-            key: "totalReviews",
-            label: "Total Reviews",
-          },
-          {
-            key: "totalStudentsEnrolled",
-            label: "Students Enrolled",
+            key: "verificationRejectionReason",
+            label: "Verification Rejection Reason",
+            render: (value: string | null) => (
+              <span title={value ?? "No rejection reason yet"}>
+                {value
+                  ? truncateText(value, TRUNCATE_REASON_AT)
+                  : "Not reviewed yet"}
+              </span>
+            ),
           },
           {
             key: "action",
             label: "Action",
             render: (_: unknown, row: CourseRecord) => (
               <Button asChild>
-                <Link href={`/course-details/${row._id}?role=instructor`}>
+                <Link
+                  href={`/course-details/${row._id}?role=admin&review=true`}
+                >
                   View Details
                 </Link>
               </Button>
@@ -132,4 +139,5 @@ const AllMyCourses = () => {
   );
 };
 
-export default AllMyCourses;
+export default PendingVerificationCourses;
+
