@@ -7,7 +7,7 @@ import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 
 import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { Button } from "@/components/ui/button";
+import AppButton from "@/components/AppButton";
 import {
   Form,
   FormControl,
@@ -504,14 +504,14 @@ const CourseForm = ({
                           </p>
                           <div className="flex flex-wrap gap-2">
                             <label htmlFor="course-thumbnail-upload">
-                              <Button
+                              <AppButton
                                 type="button"
                                 variant="outline"
                                 iconLeft={ImagePlus}
                                 asChild
                               >
                                 <span>Choose Another Thumbnail</span>
-                              </Button>
+                              </AppButton>
                             </label>
                           </div>
                         </div>
@@ -601,14 +601,14 @@ const CourseForm = ({
                         {!isReadOnly ? (
                           <div className="flex flex-wrap gap-2">
                             <label htmlFor="course-video-upload">
-                              <Button
+                              <AppButton
                                 type="button"
                                 variant="outline"
                                 iconLeft={Video}
                                 asChild
                               >
                                 <span>Choose Another Video</span>
-                              </Button>
+                              </AppButton>
                             </label>
                           </div>
                         ) : null}
@@ -659,32 +659,32 @@ const CourseForm = ({
         <div className="flex flex-col-reverse gap-2 border-t pt-4 sm:flex-row sm:justify-end">
           {mode === "view" ? (
             <>
-              <Button type="button" variant="outline" onClick={handleClose}>
+              <AppButton type="button" variant="outline" onClick={handleClose}>
                 Close
-              </Button>
+              </AppButton>
               {allowEdit ? (
-                <Button type="button" onClick={() => onModeChange?.("edit")}>
+                <AppButton type="button" onClick={() => onModeChange?.("edit")}>
                   Edit Course
-                </Button>
+                </AppButton>
               ) : null}
               {showEnrollButton && onEnroll ? (
-                <Button type="button" onClick={onEnroll}>
+                <AppButton type="button" onClick={onEnroll}>
                   Enroll Now
-                </Button>
+                </AppButton>
               ) : null}
             </>
           ) : (
             <>
-              <Button
+              <AppButton
                 type="button"
                 variant="outline"
                 onClick={mode === "edit" ? handleViewMode : handleClose}
               >
                 {mode === "edit" ? "Back to View" : "Cancel"}
-              </Button>
-              <Button type="submit" loading={form.formState.isSubmitting}>
+              </AppButton>
+              <AppButton type="submit" loading={form.formState.isSubmitting}>
                 {mode === "edit" ? "Save Changes" : "Create Course"}
-              </Button>
+              </AppButton>
             </>
           )}
         </div>

@@ -6,7 +6,7 @@ import { useState } from "react";
 import PageFlexCol from "@/components/PageFlexCol";
 import PageHeader from "@/components/PageHeader";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import AppButton from "@/components/AppButton";
 import {
   Card,
   CardContent,
@@ -18,6 +18,7 @@ import { Star } from "lucide-react";
 import {
   Dialog,
   DialogContent,
+  DialogBody,
   DialogDescription,
   DialogFooter,
   DialogHeader,
@@ -203,25 +204,26 @@ const CourseDetails = ({ viewerRole }: CourseDetailsProps) => {
             pageDescription={pageDescription}
             pageHeaderRightSection={
               <div className="flex items-center gap-2">
-                <Button variant="outline" onClick={() => router.back()}>
+                <AppButton variant="outline" onClick={() => router.back()}>
                   Back
-                </Button>
+                </AppButton>
                 {viewerRole === "student" && source === "enrolled" && (
                   <Dialog
                     open={reviewDialogOpen}
                     onOpenChange={setReviewDialogOpen}
                   >
                     <DialogTrigger asChild>
-                      <Button>Add review</Button>
+                      <AppButton>Add review</AppButton>
                     </DialogTrigger>
                     <DialogContent className="sm:max-w-[425px]">
-                      <DialogHeader>
+                      <DialogHeader variant="create">
                         <DialogTitle>Write a Review</DialogTitle>
                         <DialogDescription>
                           Share your thoughts about this course to help others.
                         </DialogDescription>
                       </DialogHeader>
-                      <div className="grid gap-4 py-4">
+                      <DialogBody>
+                        <div className="grid gap-4 py-0">
                         <div className="flex flex-col gap-2">
                           <Label>Rating</Label>
                           <div className="flex items-center gap-1">
@@ -255,14 +257,15 @@ const CourseDetails = ({ viewerRole }: CourseDetailsProps) => {
                           />
                         </div>
                       </div>
+                      </DialogBody>
                       <DialogFooter>
-                        <Button
+                        <AppButton
                           type="button"
                           onClick={handleSubmitReview}
                           disabled={!reviewRating || !reviewFeedback.trim()}
                         >
                           Submit review
-                        </Button>
+                        </AppButton>
                       </DialogFooter>
                     </DialogContent>
                   </Dialog>
@@ -411,20 +414,20 @@ const CourseDetails = ({ viewerRole }: CourseDetailsProps) => {
                 </div>
 
                 <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-                  <Button
+                  <AppButton
                     type="button"
                     variant="outline"
                     onClick={handleVerifyCourse}
                   >
                     Verify Course
-                  </Button>
-                  <Button
+                  </AppButton>
+                  <AppButton
                     type="button"
                     onClick={handleRejectCourse}
                     disabled={!adminReviewReason.trim()}
                   >
                     Save Rejection Reason
-                  </Button>
+                  </AppButton>
                 </div>
               </CardContent>
             </Card>

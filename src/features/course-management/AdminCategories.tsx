@@ -9,8 +9,9 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogBody,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import AppButton from "@/components/AppButton";
 import PageFlexCol from "@/components/PageFlexCol";
 import AppSearchBar from "@/components/AppSearchBar";
 import PageHeader from "@/components/PageHeader";
@@ -144,9 +145,9 @@ const AdminCategories = () => {
           pageHeading="Categories"
           pageDescription="Manage all course categories available on the platform."
           pageHeaderRightSection={
-            <Button iconLeft={Plus} onClick={() => setIsCreateDialogOpen(true)}>
+            <AppButton iconLeft={Plus} onClick={() => setIsCreateDialogOpen(true)}>
               Add Category
-            </Button>
+            </AppButton>
           }
         />
 
@@ -197,9 +198,9 @@ const AdminCategories = () => {
               label: "Action",
               render: (_: unknown, row: ICategory) => (
                 <div className="text-right">
-                  <Button onClick={() => handleOpenCategoryDetails(row)}>
+                  <AppButton onClick={() => handleOpenCategoryDetails(row)}>
                     View
-                  </Button>
+                  </AppButton>
                 </div>
               ),
             },
@@ -210,17 +211,19 @@ const AdminCategories = () => {
 
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
         <DialogContent className="sm:max-w-xl">
-          <DialogHeader>
+          <DialogHeader variant="create">
             <DialogTitle>Create Category</DialogTitle>
             <DialogDescription>
               Add a new course category with its name, image, and description.
             </DialogDescription>
           </DialogHeader>
-          <AdminCategoriesForm
-            mode="create"
-            onSubmit={handleCreateCategory}
-            onClose={() => setIsCreateDialogOpen(false)}
-          />
+          <DialogBody>
+            <AdminCategoriesForm
+              mode="create"
+              onSubmit={handleCreateCategory}
+              onClose={() => setIsCreateDialogOpen(false)}
+            />
+          </DialogBody>
         </DialogContent>
       </Dialog>
 
@@ -233,7 +236,7 @@ const AdminCategories = () => {
         }}
       >
         <DialogContent className="sm:max-w-xl">
-          <DialogHeader>
+          <DialogHeader variant={detailsMode === "edit" ? "info" : "default"}>
             <DialogTitle>
               {detailsMode === "edit" ? "Edit Category" : "View Category"}
             </DialogTitle>
@@ -243,16 +246,18 @@ const AdminCategories = () => {
                 : "Review the category details, then switch to edit mode if needed."}
             </DialogDescription>
           </DialogHeader>
-          {selectedCategory ? (
-            <AdminCategoriesForm
-              key={`${selectedCategory._id}-${detailsMode}-${selectedCategory.updatedAt}`}
-              mode={detailsMode}
-              initialData={selectedCategory}
-              onSubmit={handleUpdateCategory}
-              onClose={handleCloseCategoryDetails}
-              onModeChange={setDetailsMode}
-            />
-          ) : null}
+          <DialogBody>
+            {selectedCategory ? (
+              <AdminCategoriesForm
+                key={`${selectedCategory._id}-${detailsMode}-${selectedCategory.updatedAt}`}
+                mode={detailsMode}
+                initialData={selectedCategory}
+                onSubmit={handleUpdateCategory}
+                onClose={handleCloseCategoryDetails}
+                onModeChange={setDetailsMode}
+              />
+            ) : null}
+          </DialogBody>
         </DialogContent>
       </Dialog>
     </>

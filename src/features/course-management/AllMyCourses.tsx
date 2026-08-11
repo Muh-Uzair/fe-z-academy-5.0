@@ -9,7 +9,7 @@ import PageFlexCol from "@/components/PageFlexCol";
 import PageHeader from "@/components/PageHeader";
 import TableImage from "@/components/TableImage";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import AppButton from "@/components/AppButton";
 import { coursesData as courseMockData } from "@/dummy-data/coursesData";
 import { type CourseRecord } from "@/types/courseTypes";
 import {
@@ -118,11 +118,11 @@ const AllMyCourses = () => {
             key: "action",
             label: "Action",
             render: (_: unknown, row: CourseRecord) => (
-              <Button asChild>
+              <AppButton asChild>
                 <Link href={`/course-details/${row._id}?role=instructor`}>
                   View Details
                 </Link>
-              </Button>
+              </AppButton>
             ),
           },
         ]}

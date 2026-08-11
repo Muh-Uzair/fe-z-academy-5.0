@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Search, MonitorPlay, Users, Award, Star, ArrowRight } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
+import AppButton from "@/components/AppButton";
 import { Input } from "@/components/ui/input";
 import PublicNavbar from "@/components/PublicNavbar";
 import PublicFooter from "@/components/PublicFooter";
@@ -56,9 +56,9 @@ export default function Home() {
                   className="w-full pl-12 pr-4 h-14 rounded-full text-base bg-background shadow-sm border-border/60 focus-visible:ring-primary/50"
                 />
               </div>
-              <Button size="lg" className="h-14 px-8 rounded-full shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all font-bold text-base">
+              <AppButton size="lg" className="h-14 px-8 rounded-full shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all font-bold text-base">
                 Search Courses
-              </Button>
+              </AppButton>
             </div>
 
             <div className="flex items-center gap-6 mt-6 text-sm text-muted-foreground font-medium">
@@ -138,7 +138,7 @@ export default function Home() {
                 course={course}
                 footer={
                   <Link href={`/courses/${course._id}`} className="w-full">
-                    <Button className="w-full font-bold">View Details</Button>
+                    <AppButton className="w-full font-bold">View Details</AppButton>
                   </Link>
                 }
               />
@@ -176,9 +176,9 @@ export default function Home() {
                 </li>
               ))}
             </ul>
-            <Button size="lg" variant="outline" className="w-fit mt-4 border-primary text-primary hover:bg-primary/5">
+            <AppButton size="lg" variant="outline" className="w-fit mt-4 border-primary text-primary hover:bg-primary/5">
               Discover Z-Academy Business
-            </Button>
+            </AppButton>
           </div>
         </div>
       </section>
@@ -203,7 +203,7 @@ export default function Home() {
                 course={course}
                 footer={
                   <Link href={`/courses/${course._id}`} className="w-full">
-                    <Button className="w-full font-bold">View Details</Button>
+                    <AppButton className="w-full font-bold">View Details</AppButton>
                   </Link>
                 }
               />

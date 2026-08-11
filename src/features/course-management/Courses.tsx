@@ -9,7 +9,7 @@ import PageFlexCol from "@/components/PageFlexCol";
 import AppSearchBar from "@/components/AppSearchBar";
 import AppCourseCardsGridLayout from "@/components/AppCourseCardsGridLayout";
 
-import { Button } from "@/components/ui/button";
+import AppButton from "@/components/AppButton";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
@@ -81,14 +81,14 @@ const FilterSidebar = ({
     {/* Header */}
     <div className="flex items-center justify-between">
       <h2 className="font-semibold text-base">Filters</h2>
-      <Button
+      <AppButton
         variant="ghost"
         size="sm"
         onClick={onReset}
         className="text-muted-foreground text-xs h-7 px-2"
       >
         Reset all
-      </Button>
+      </AppButton>
     </div>
 
     <Separator />
@@ -319,7 +319,7 @@ const Courses = () => {
             courses={filteredCourses}
             pagination={true}
             renderFooter={(course) => (
-              <Button
+              <AppButton
                 className="w-full"
                 onClick={() =>
                   router.push(
@@ -328,7 +328,7 @@ const Courses = () => {
                 }
               >
                 View Details
-              </Button>
+              </AppButton>
             )}
           />
         </div>

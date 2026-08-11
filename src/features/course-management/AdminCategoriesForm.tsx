@@ -7,7 +7,7 @@ import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 
 import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { Button } from "@/components/ui/button";
+import AppButton from "@/components/AppButton";
 import {
   Form,
   FormControl,
@@ -228,14 +228,14 @@ const AdminCategoriesForm = ({
                       </p>
                       <div className="flex flex-wrap gap-2">
                         <label htmlFor="category-image-upload">
-                          <Button
+                          <AppButton
                             type="button"
                             variant="outline"
                             iconLeft={ImagePlus}
                           asChild
                           >
                             <span>Choose Another Image</span>
-                          </Button>
+                          </AppButton>
                         </label>
                       </div>
                     </div>
@@ -312,25 +312,25 @@ const AdminCategoriesForm = ({
         <div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
           {mode === "view" ? (
             <>
-              <Button type="button" variant="outline" onClick={handleClose}>
+              <AppButton type="button" variant="outline" onClick={handleClose}>
                 Close
-              </Button>
-              <Button type="button" onClick={() => onModeChange?.("edit")}>
+              </AppButton>
+              <AppButton type="button" onClick={() => onModeChange?.("edit")}>
                 Edit
-              </Button>
+              </AppButton>
             </>
           ) : (
             <>
-              <Button
+              <AppButton
                 type="button"
                 variant="outline"
                 onClick={mode === "edit" ? handleViewMode : handleClose}
               >
                 {mode === "edit" ? "Back to View" : "Cancel"}
-              </Button>
-              <Button type="submit" loading={form.formState.isSubmitting}>
+              </AppButton>
+              <AppButton type="submit" loading={form.formState.isSubmitting}>
                 {mode === "edit" ? "Save Changes" : "Create Category"}
-              </Button>
+              </AppButton>
             </>
           )}
         </div>

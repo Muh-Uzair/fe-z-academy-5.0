@@ -15,7 +15,7 @@ import {
 
 import PublicNavbar from "@/components/PublicNavbar";
 import PublicFooter from "@/components/PublicFooter";
-import { Button } from "@/components/ui/button";
+import AppButton from "@/components/AppButton";
 import { Card, CardContent } from "@/components/ui/card";
 
 const AboutUs = () => {
@@ -40,14 +40,14 @@ const AboutUs = () => {
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 pt-4">
                   <Link href="/courses">
-                    <Button size="lg" className="w-full sm:w-auto text-primary-foreground">
+                    <AppButton size="lg" className="w-full sm:w-auto text-primary-foreground">
                       Explore Courses
-                    </Button>
+                    </AppButton>
                   </Link>
                   <Link href="/signup">
-                    <Button size="lg" variant="outline" className="w-full sm:w-auto border-primary text-primary hover:bg-primary/10">
+                    <AppButton size="lg" variant="outline" className="w-full sm:w-auto border-primary text-primary hover:bg-primary/10">
                       Become an Instructor
-                    </Button>
+                    </AppButton>
                   </Link>
                 </div>
               </div>
@@ -193,14 +193,14 @@ const AboutUs = () => {
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4 pt-6">
               <Link href="/courses">
-                <Button size="lg" className="w-full sm:w-auto font-bold shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all">
+                <AppButton size="lg" className="w-full sm:w-auto font-bold shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all">
                   Start Learning
-                </Button>
+                </AppButton>
               </Link>
               <Link href="/signup">
-                <Button size="lg" variant="outline" className="w-full sm:w-auto border-primary text-primary hover:bg-primary/10">
+                <AppButton size="lg" variant="outline" className="w-full sm:w-auto border-primary text-primary hover:bg-primary/10">
                   Teach on Z-Academy
-                </Button>
+                </AppButton>
               </Link>
             </div>
           </div>
