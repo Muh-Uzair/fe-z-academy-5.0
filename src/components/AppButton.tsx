@@ -1,17 +1,26 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
+import { Loader2, LucideIcon } from "lucide-react";
+import AppIcon from "./AppIcon";
 
 export interface AppButtonProps extends React.ComponentProps<typeof Button> {
   isLoading?: boolean;
-  leftIcon?: React.ReactNode;
-  rightIcon?: React.ReactNode;
+  leftIcon?: LucideIcon;
+  rightIcon?: LucideIcon;
 }
 
 const AppButton = React.forwardRef<HTMLButtonElement, AppButtonProps>(
   (
-    { className, children, isLoading, leftIcon, rightIcon, disabled, ...props },
-    ref
+    {
+      className,
+      children,
+      isLoading,
+      leftIcon: LeftIcon,
+      rightIcon: RightIcon,
+      disabled,
+      ...props
+    },
+    ref,
   ) => {
     return (
       <Button
@@ -20,21 +29,13 @@ const AppButton = React.forwardRef<HTMLButtonElement, AppButtonProps>(
         className={className}
         {...props}
       >
-        {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-        {!isLoading && leftIcon && (
-          <span className="flex items-center justify-center mr-2">
-            {leftIcon}
-          </span>
-        )}
+        {isLoading && <AppIcon icon={Loader2} className="mr-1 animate-spin" />}
+        {!isLoading && LeftIcon && <AppIcon icon={LeftIcon} className="mr-1" />}
         {children}
-        {rightIcon && (
-          <span className="flex items-center justify-center ml-2">
-            {rightIcon}
-          </span>
-        )}
+        {RightIcon && <AppIcon icon={RightIcon} className="ml-1" />}
       </Button>
     );
-  }
+  },
 );
 AppButton.displayName = "AppButton";
 

@@ -198,8 +198,10 @@ const StudentDashboard = () => {
               course={course}
               mode="in-progress"
               footer={
-                <AppButton className="w-full mt-2">
-                  <PlayCircle className="w-4 h-4 mr-2" />
+                <AppButton 
+                  className="w-full mt-2" 
+                  leftIcon={PlayCircle}
+                >
                   Resume Course
                 </AppButton>
               }
