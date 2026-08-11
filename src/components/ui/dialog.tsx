@@ -5,7 +5,7 @@ import { Dialog as DialogPrimitive } from "radix-ui"
 
 import { cn } from "@/utils/cn"
 import { Button } from "@/components/ui/button"
-import { XIcon, AlertTriangle, Info, PlusCircle } from "lucide-react"
+import { XIcon, AlertTriangle, Info, PlusCircle, CheckCircle2 } from "lucide-react"
 
 function Dialog({
   ...props
@@ -91,7 +91,7 @@ function DialogHeader({
   children,
   ...props
 }: React.ComponentProps<"div"> & {
-  variant?: "default" | "error" | "info" | "create"
+  variant?: "default" | "error" | "info" | "create" | "success"
 }) {
   const Icon =
     variant === "error"
@@ -100,7 +100,9 @@ function DialogHeader({
         ? Info
         : variant === "create"
           ? PlusCircle
-          : null
+          : variant === "success"
+            ? CheckCircle2
+            : null
   const iconBg =
     variant === "error"
       ? "bg-red-100 text-red-600"
@@ -108,7 +110,9 @@ function DialogHeader({
         ? "bg-blue-100 text-blue-600"
         : variant === "create"
           ? "bg-primary/10 text-primary"
-          : ""
+          : variant === "success"
+            ? "bg-green-100 text-green-600"
+            : ""
 
   return (
     <div

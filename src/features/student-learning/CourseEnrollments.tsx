@@ -1,12 +1,11 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import Link from "next/link";
 import PageHeader from "@/components/PageHeader";
 import AppSearchBar from "@/components/AppSearchBar";
 import AppUserCardsGridLayout from "@/components/AppUserCardsGridLayout";
 import { usersData } from "@/dummy-data/usersData";
-import { Button } from "@/components/ui/button";
+import AppButton from "@/components/AppButton";
 
 const CourseEnrollments = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -41,9 +40,7 @@ const CourseEnrollments = () => {
           </div>
         }
         renderFooter={(user) => (
-          <Button asChild className="w-full">
-            <Link href={`/user-profile/${user._id}`}>View Profile</Link>
-          </Button>
+          <AppButton href={`/user-profile/${user._id}`} className="w-full">View Profile</AppButton>
         )}
       />
     </div>

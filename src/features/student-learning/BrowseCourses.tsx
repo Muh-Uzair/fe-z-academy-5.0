@@ -7,7 +7,7 @@ import PageFlexCol from "@/components/PageFlexCol";
 import PageHeader from "@/components/PageHeader";
 import AppSearchBar from "@/components/AppSearchBar";
 import AppCourseCardsGridLayout from "@/components/AppCourseCardsGridLayout";
-import { Button } from "@/components/ui/button";
+import AppButton from "@/components/AppButton";
 
 import { Course, CourseLevel } from "@/types/courseTypes";
 
@@ -45,7 +45,7 @@ const BrowseCourses = () => {
           </div>
         }
         renderFooter={(course) => (
-          <Button
+          <AppButton
             className="w-full"
             onClick={() =>
               router.push(
@@ -54,7 +54,7 @@ const BrowseCourses = () => {
             }
           >
             View Details
-          </Button>
+          </AppButton>
         )}
         pagination={true}
       />

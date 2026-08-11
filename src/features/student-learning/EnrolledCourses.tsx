@@ -1,7 +1,6 @@
 "use client";
 
 
-import Link from "next/link";
 import { useState } from "react";
 
 import AppSearchBar from "@/components/AppSearchBar";
@@ -9,7 +8,7 @@ import AppTable from "@/components/AppTable";
 import PageFlexCol from "@/components/PageFlexCol";
 import PageHeader from "@/components/PageHeader";
 import TableImage from "@/components/TableImage";
-import { Button } from "@/components/ui/button";
+import AppButton from "@/components/AppButton";
 import { coursesData as enrolledCoursesMockData } from "@/dummy-data/coursesData";
 import { type CourseRecord } from "@/types/courseTypes";
 
@@ -74,13 +73,9 @@ const EnrolledCourses = () => {
             key: "action",
             label: "Action",
             render: (_: unknown, row: CourseRecord) => (
-              <Button asChild>
-                <Link
-                 href={`/course-details/${row._id}?role=student&source=enrolled`}
-                >
-                  View Details
-                </Link>
-              </Button>
+              <AppButton href={`/course-details/${row._id}?role=student&source=enrolled`}>
+                View Details
+              </AppButton>
             ),
           },
         ]}

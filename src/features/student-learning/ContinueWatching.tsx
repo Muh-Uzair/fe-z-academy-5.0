@@ -1,10 +1,9 @@
 "use client";
 
 import React from "react";
-import Link from "next/link";
-import { PlayCircle, Play, BookOpen, Clock } from "lucide-react";
+import { PlayCircle, Clock } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
+import AppButton from "@/components/AppButton";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
@@ -12,7 +11,7 @@ import { AspectRatio } from "@/components/ui/aspect-ratio";
 import PageFlexCol from "@/components/PageFlexCol";
 import PageHeader from "@/components/PageHeader";
 import AppCourseCardsGridLayout from "@/components/AppCourseCardsGridLayout";
-import { Course, CourseLevel } from "@/types/courseTypes";
+import { Course } from "@/types/courseTypes";
 
 import { enrollmentsData } from "@/dummy-data/enrollmentsData";
 import { coursesData } from "@/dummy-data/coursesData";
@@ -46,16 +45,14 @@ const ContinueWatching = () => {
             <div className="flex flex-col md:flex-row">
               {/* Left side: Large Thumbnail */}
               <div className="md:w-5/12 lg:w-4/12 relative overflow-hidden">
-                <Link href={`/course-details/${heroCourse._id}?role=student`}>
-                  <AspectRatio ratio={16 / 9} className="md:h-full">
-                    <img
-                      src={heroCourse.thumbnail}
-                      alt={heroCourse.title}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
-                    <div className="absolute inset-0 bg-black/20 transition-colors group-hover:bg-black/10" />
-                  </AspectRatio>
-                </Link>
+                <AspectRatio ratio={16 / 9} className="md:h-full">
+                  <img
+                    src={heroCourse.thumbnail}
+                    alt={heroCourse.title}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-black/20 transition-colors group-hover:bg-black/10" />
+                </AspectRatio>
               </div>
 
               {/* Right side: Content */}
@@ -91,11 +88,12 @@ const ContinueWatching = () => {
                       {heroCourse.totalDurationWatchedInMinutes}m / {heroCourse.totalDurationInMinutes}m watched
                     </span>
 
-                    <Button asChild>
-                      <Link href={`/course-details/${heroCourse._id}?role=student`}>
-                        <PlayCircle className="h-5 w-5" />Resume Course
-                      </Link>
-                    </Button>
+                    <AppButton
+                      href={`/course-details/${heroCourse._id}?role=student`}
+                      leftIcon={PlayCircle}
+                    >
+                      Resume Course
+                    </AppButton>
                   </div>
                 </div>
               </div>
@@ -112,11 +110,9 @@ const ContinueWatching = () => {
             courses={otherCourses}
             mode="in-progress"
             renderFooter={(course) => (
-              <Button asChild>
-                <Link href={`/course-details/${course._id}?role=student`}>
-                  Resume
-                </Link>
-              </Button>
+              <AppButton href={`/course-details/${course._id}?role=student`}>
+                Resume
+              </AppButton>
             )}
             pagination={true}
           />
