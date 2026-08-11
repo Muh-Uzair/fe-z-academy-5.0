@@ -143,7 +143,7 @@ const AdminCategories = () => {
         <PageHeader
           pageHeading="Categories"
           pageDescription="Manage all course categories available on the platform."
-          pageHeaderLeftSection={
+          pageHeaderRightSection={
             <Button iconLeft={Plus} onClick={() => setIsCreateDialogOpen(true)}>
               Add Category
             </Button>

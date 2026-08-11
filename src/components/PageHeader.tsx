@@ -5,13 +5,13 @@ import React, { ReactNode } from "react";
 interface PageHeaderProps {
   pageHeading: string;
   pageDescription: string;
-  pageHeaderLeftSection?: ReactNode;
+  pageHeaderRightSection?: ReactNode;
 }
 
 const PageHeader = ({
   pageHeading,
   pageDescription,
-  pageHeaderLeftSection,
+  pageHeaderRightSection,
 }: PageHeaderProps) => {
   return (
     <div className="flex justify-between">
@@ -23,7 +23,7 @@ const PageHeader = ({
       </div>
 
       {/* left children */}
-      <div>{pageHeaderLeftSection}</div>
+      <div>{pageHeaderRightSection}</div>
     </div>
   );
 };

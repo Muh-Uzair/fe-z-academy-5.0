@@ -201,7 +201,7 @@ const CourseDetails = ({ viewerRole }: CourseDetailsProps) => {
           <PageHeader
             pageHeading="Course Details"
             pageDescription={pageDescription}
-            pageHeaderLeftSection={
+            pageHeaderRightSection={
               <div className="flex items-center gap-2">
                 <Button variant="outline" onClick={() => router.back()}>
                   Back
