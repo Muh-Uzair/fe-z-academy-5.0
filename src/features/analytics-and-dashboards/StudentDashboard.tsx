@@ -6,8 +6,7 @@ import StatCard from "@/components/dashboard/StatCard";
 import AppTable from "@/components/AppTable";
 import CourseCard from "@/components/CourseCard";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Button } from "@/components/ui/button";
+import AppButton from "@/components/AppButton";
 import {
   BookOpen,
   CheckCircle,
@@ -188,9 +187,9 @@ const StudentDashboard = () => {
           <h2 className="text-2xl font-bold tracking-tight">
             Continue Watching
           </h2>
-          <Button variant="ghost" className="text-primary">
+          <AppButton variant="ghost" className="text-primary">
             View All Courses
-          </Button>
+          </AppButton>
         </div>
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {CONTINUE_WATCHING.map((course) => (
@@ -199,10 +198,10 @@ const StudentDashboard = () => {
               course={course}
               mode="in-progress"
               footer={
-                <Button className="w-full mt-2">
+                <AppButton className="w-full mt-2">
                   <PlayCircle className="w-4 h-4 mr-2" />
                   Resume Course
-                </Button>
+                </AppButton>
               }
             />
           ))}
