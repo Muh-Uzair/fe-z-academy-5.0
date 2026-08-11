@@ -6,7 +6,7 @@ import PageFlexCol from "@/components/PageFlexCol";
 import PageHeader from "@/components/PageHeader";
 import AppCourseCardsGridLayout from "@/components/AppCourseCardsGridLayout";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import AppButton from "@/components/AppButton";
 import { coursesData } from "@/dummy-data/coursesData";
 import { Search } from "lucide-react";
 
@@ -43,16 +43,16 @@ const StudentChat = () => {
         pagination={true}
         renderFooter={(course) => (
           <div className="flex flex-col gap-2 w-full mt-2">
-            <Button asChild variant="default" className="w-full">
+            <AppButton asChild variant="default" className="w-full">
               <Link href={`/public-course-chat/${course._id}`}>
                 Public Chat
               </Link>
-            </Button>
-            <Button asChild variant="outline" className="w-full">
+            </AppButton>
+            <AppButton asChild variant="outline" className="w-full">
               <Link href={`/private-course-chat/${course._id}`}>
                 Private Chat
               </Link>
-            </Button>
+            </AppButton>
           </div>
         )}
       />

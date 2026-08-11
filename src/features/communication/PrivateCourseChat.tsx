@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { ArrowLeft, Send } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
+import AppButton from "@/components/AppButton";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
 import AppSearchBar from "@/components/AppSearchBar";
@@ -115,14 +115,14 @@ export default function PrivateCourseChat() {
       <div className="flex w-[300px] shrink-0 flex-col rounded-2xl border bg-card">
         {/* Sidebar Header */}
         <div className="flex items-center gap-2 border-b p-4">
-          <Button
+          <AppButton
             type="button"
             variant="outline"
             size="icon"
             className="h-9 w-9 shrink-0"
           >
             <ArrowLeft className="h-4 w-4" />
-          </Button>
+          </AppButton>
           <div className="flex-1 min-w-0">
             <AppSearchBar placeholder="Search..." />
           </div>
@@ -236,14 +236,14 @@ export default function PrivateCourseChat() {
               rows={1}
             />
 
-            <Button
+            <AppButton
               size="icon"
               onClick={handleSendMessage}
               disabled={!newMessage.trim()}
               className="h-10 w-10"
             >
               <Send />
-            </Button>
+            </AppButton>
           </div>
           <p className="mt-2 text-center text-xs text-muted-foreground">
             This is a private chat between course students and the instructor

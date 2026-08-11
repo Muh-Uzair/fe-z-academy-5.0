@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { ArrowLeft, Send } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import AppButton from "@/components/AppButton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
@@ -98,9 +98,9 @@ export default function PublicCourseChat() {
       <div className="border-b p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon">
+            <AppButton variant="ghost" size="icon">
               <ArrowLeft className="h-5 w-5" />
-            </Button>
+            </AppButton>
             <div>
               <h2 className="font-semibold">{course.title}</h2>
               <p className="text-sm text-muted-foreground">
@@ -183,14 +183,14 @@ export default function PublicCourseChat() {
             />
           </div>
           <div className="flex items-start">
-            <Button
+            <AppButton
               size="icon"
               onClick={handleSendMessage}
               disabled={!newMessage.trim()}
               className="mb-1"
             >
               <Send className="h-5 w-5" />
-            </Button>
+            </AppButton>
           </div>
         </div>
         <p className="mt-2 text-center text-xs text-muted-foreground">
