@@ -2,7 +2,7 @@
 
 import React from "react";
 import PageFlexCol from "@/components/PageFlexCol";
-import StatCard from "@/components/dashboard/StatCard";
+import StatCard from "@/components/StatCard";
 import AppTable from "@/components/AppTable";
 import CourseCard from "@/components/CourseCard";
 import { Badge } from "@/components/ui/badge";
@@ -198,10 +198,7 @@ const StudentDashboard = () => {
               course={course}
               mode="in-progress"
               footer={
-                <AppButton 
-                  className="w-full mt-2" 
-                  leftIcon={PlayCircle}
-                >
+                <AppButton className="w-full mt-2" leftIcon={PlayCircle}>
                   Resume Course
                 </AppButton>
               }

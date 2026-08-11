@@ -9,7 +9,6 @@ import AppCourseCardsGridLayout from "@/components/AppCourseCardsGridLayout";
 import { Badge } from "@/components/ui/badge";
 import { GraduationCap, Briefcase, Mail } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
-import Link from "next/link";
 import AppButton from "@/components/AppButton";
 
 interface UserProfileProps {
@@ -120,10 +119,8 @@ const UserProfile = ({ userId }: UserProfileProps) => {
             </div>
           }
           renderFooter={(course) => (
-            <AppButton asChild className="w-full">
-              <Link href={`/course-enrollments/${course._id}`}>
-                View Course
-              </Link>
+            <AppButton href={`/course-enrollments/${course._id}`} className="w-full">
+              View Course
             </AppButton>
           )}
         />

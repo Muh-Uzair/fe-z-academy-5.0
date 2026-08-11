@@ -2,7 +2,7 @@
 
 import React from "react";
 import PageFlexCol from "@/components/PageFlexCol";
-import StatCard from "@/components/dashboard/StatCard";
+import StatCard from "@/components/StatCard";
 import AppTable from "@/components/AppTable";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -259,12 +259,23 @@ const InstructorDashboard = () => {
         <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-6 flex flex-col h-auto">
           <div className="mb-4">
             <h3 className="text-lg font-medium">Monthly Earnings</h3>
-            <p className="text-sm text-muted-foreground">Revenue breakdown by course</p>
+            <p className="text-sm text-muted-foreground">
+              Revenue breakdown by course
+            </p>
           </div>
           <ChartContainer config={EARNINGS_CONFIG} className="h-[250px] w-full">
             <PieChart>
               <ChartTooltip content={<ChartTooltipContent />} />
-              <Pie data={EARNINGS_DATA} dataKey="value" nameKey="source" cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={5}>
+              <Pie
+                data={EARNINGS_DATA}
+                dataKey="value"
+                nameKey="source"
+                cx="50%"
+                cy="50%"
+                innerRadius={60}
+                outerRadius={80}
+                paddingAngle={5}
+              >
                 {EARNINGS_DATA.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
@@ -276,15 +287,35 @@ const InstructorDashboard = () => {
         <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-6 flex flex-col h-auto">
           <div className="mb-4">
             <h3 className="text-lg font-medium">Enrollments Trend</h3>
-            <p className="text-sm text-muted-foreground">New students over the last 4 weeks</p>
+            <p className="text-sm text-muted-foreground">
+              New students over the last 4 weeks
+            </p>
           </div>
-          <ChartContainer config={ENROLLMENTS_CONFIG} className="h-[250px] w-full">
-            <LineChart data={ENROLLMENTS_DATA} margin={{ top: 10, left: -20, right: 10, bottom: 0 }}>
+          <ChartContainer
+            config={ENROLLMENTS_CONFIG}
+            className="h-[250px] w-full"
+          >
+            <LineChart
+              data={ENROLLMENTS_DATA}
+              margin={{ top: 10, left: -20, right: 10, bottom: 0 }}
+            >
               <CartesianGrid strokeDasharray="3 3" vertical={false} />
-              <XAxis dataKey="week" tickLine={false} axisLine={false} tickMargin={8} />
+              <XAxis
+                dataKey="week"
+                tickLine={false}
+                axisLine={false}
+                tickMargin={8}
+              />
               <YAxis tickLine={false} axisLine={false} />
               <ChartTooltip content={<ChartTooltipContent />} />
-              <Line type="monotone" dataKey="enrollments" stroke="var(--color-enrollments)" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} />
+              <Line
+                type="monotone"
+                dataKey="enrollments"
+                stroke="var(--color-enrollments)"
+                strokeWidth={2}
+                dot={{ r: 4 }}
+                activeDot={{ r: 6 }}
+              />
             </LineChart>
           </ChartContainer>
         </div>

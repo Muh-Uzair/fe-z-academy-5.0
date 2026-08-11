@@ -2,7 +2,7 @@
 
 import React from "react";
 import PageFlexCol from "@/components/PageFlexCol";
-import StatCard from "@/components/dashboard/StatCard";
+import StatCard from "@/components/StatCard";
 import AppTable from "@/components/AppTable";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -260,15 +260,35 @@ const AdminDashboard = () => {
         <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-6 flex flex-col h-auto">
           <div className="mb-4">
             <h3 className="text-lg font-medium">Revenue Trend</h3>
-            <p className="text-sm text-muted-foreground">Monthly revenue over the last 6 months</p>
+            <p className="text-sm text-muted-foreground">
+              Monthly revenue over the last 6 months
+            </p>
           </div>
           <ChartContainer config={REVENUE_CONFIG} className="h-[250px] w-full">
-            <AreaChart data={REVENUE_DATA} margin={{ top: 10, left: -20, right: 10, bottom: 0 }}>
+            <AreaChart
+              data={REVENUE_DATA}
+              margin={{ top: 10, left: -20, right: 10, bottom: 0 }}
+            >
               <CartesianGrid strokeDasharray="3 3" vertical={false} />
-              <XAxis dataKey="month" tickLine={false} axisLine={false} tickMargin={8} />
-              <YAxis tickLine={false} axisLine={false} tickFormatter={(val) => `$${val / 1000}k`} />
+              <XAxis
+                dataKey="month"
+                tickLine={false}
+                axisLine={false}
+                tickMargin={8}
+              />
+              <YAxis
+                tickLine={false}
+                axisLine={false}
+                tickFormatter={(val) => `$${val / 1000}k`}
+              />
               <ChartTooltip content={<ChartTooltipContent />} />
-              <Area type="monotone" dataKey="revenue" stroke="var(--color-revenue)" fill="var(--color-revenue)" fillOpacity={0.2} />
+              <Area
+                type="monotone"
+                dataKey="revenue"
+                stroke="var(--color-revenue)"
+                fill="var(--color-revenue)"
+                fillOpacity={0.2}
+              />
             </AreaChart>
           </ChartContainer>
         </div>
@@ -276,16 +296,34 @@ const AdminDashboard = () => {
         <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-6 flex flex-col h-auto">
           <div className="mb-4">
             <h3 className="text-lg font-medium">User Growth</h3>
-            <p className="text-sm text-muted-foreground">New students and instructors joined</p>
+            <p className="text-sm text-muted-foreground">
+              New students and instructors joined
+            </p>
           </div>
           <ChartContainer config={USER_CONFIG} className="h-[250px] w-full">
-            <BarChart data={USER_GROWTH_DATA} margin={{ top: 10, left: -20, right: 10, bottom: 0 }}>
+            <BarChart
+              data={USER_GROWTH_DATA}
+              margin={{ top: 10, left: -20, right: 10, bottom: 0 }}
+            >
               <CartesianGrid strokeDasharray="3 3" vertical={false} />
-              <XAxis dataKey="month" tickLine={false} axisLine={false} tickMargin={8} />
+              <XAxis
+                dataKey="month"
+                tickLine={false}
+                axisLine={false}
+                tickMargin={8}
+              />
               <YAxis tickLine={false} axisLine={false} />
               <ChartTooltip content={<ChartTooltipContent />} />
-              <Bar dataKey="students" fill="var(--color-students)" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="instructors" fill="var(--color-instructors)" radius={[4, 4, 0, 0]} />
+              <Bar
+                dataKey="students"
+                fill="var(--color-students)"
+                radius={[4, 4, 0, 0]}
+              />
+              <Bar
+                dataKey="instructors"
+                fill="var(--color-instructors)"
+                radius={[4, 4, 0, 0]}
+              />
             </BarChart>
           </ChartContainer>
         </div>
