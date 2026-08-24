@@ -260,79 +260,84 @@ const Courses = () => {
     <>
       <PublicNavbar />
       <div className="p-4 sm:p-6 md:p-10">
-      <PageFlexCol>
-        {/* Top Bar: Search & Filters */}
-        <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-          <AppSearchBar
-            placeholder="Search by title, category or instructor..."
-            onChange={(value) => setSearch(value)}
-            className="w-full flex-1"
-          />
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full md:w-auto">
-            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-              <SelectTrigger className="w-full md:w-[180px] bg-card">
-                <SelectValue placeholder="Category" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
-                {CATEGORIES.map((cat) => (
-                  <SelectItem key={cat} value={cat}>
-                    {cat}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select value={selectedLevel} onValueChange={setSelectedLevel}>
-              <SelectTrigger className="w-full md:w-[180px] bg-card capitalize">
-                <SelectValue placeholder="Level" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Levels</SelectItem>
-                {Object.values(CourseLevel).map((level) => (
-                  <SelectItem key={level} value={level} className="capitalize">
-                    {level}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
-        {/* Body */}
-        <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-6 items-start">
-          {/* Sidebar */}
-          <FilterSidebar
-            maxPrice={maxPrice}
-            onPriceChange={setMaxPrice}
-            minRating={minRating}
-            onRatingChange={setMinRating}
-            selectedDuration={selectedDuration}
-            onDurationChange={setSelectedDuration}
-            verifiedOnly={verifiedOnly}
-            onVerifiedChange={setVerifiedOnly}
-            onReset={handleReset}
-          />
-
-          {/* Courses grid */}
-          <AppCourseCardsGridLayout
-            courses={filteredCourses}
-            pagination={true}
-            renderFooter={(course) => (
-              <AppButton
-                className="w-full"
-                onClick={() =>
-                  router.push(
-                    `/course-details/${course._id}?role=student`,
-                  )
-                }
+        <PageFlexCol>
+          {/* Top Bar: Search & Filters */}
+          <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+            <AppSearchBar
+              placeholder="Search by title, category or instructor..."
+              onChange={(value) => setSearch(value)}
+              className="w-full flex-1"
+            />
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full md:w-auto">
+              <Select
+                value={selectedCategory}
+                onValueChange={setSelectedCategory}
               >
-                View Details
-              </AppButton>
-            )}
-          />
-        </div>
-      </PageFlexCol>
+                <SelectTrigger className="w-full md:w-[180px] bg-card">
+                  <SelectValue placeholder="Category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Categories</SelectItem>
+                  {CATEGORIES.map((cat) => (
+                    <SelectItem key={cat} value={cat}>
+                      {cat}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select value={selectedLevel} onValueChange={setSelectedLevel}>
+                <SelectTrigger className="w-full md:w-[180px] bg-card capitalize">
+                  <SelectValue placeholder="Level" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Levels</SelectItem>
+                  {Object.values(CourseLevel).map((level) => (
+                    <SelectItem
+                      key={level}
+                      value={level}
+                      className="capitalize"
+                    >
+                      {level}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* Body */}
+          <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-6 items-start">
+            {/* Sidebar */}
+            <FilterSidebar
+              maxPrice={maxPrice}
+              onPriceChange={setMaxPrice}
+              minRating={minRating}
+              onRatingChange={setMinRating}
+              selectedDuration={selectedDuration}
+              onDurationChange={setSelectedDuration}
+              verifiedOnly={verifiedOnly}
+              onVerifiedChange={setVerifiedOnly}
+              onReset={handleReset}
+            />
+
+            {/* Courses grid */}
+            <AppCourseCardsGridLayout
+              courses={filteredCourses}
+              pagination={true}
+              renderFooter={(course) => (
+                <AppButton
+                  className="w-full"
+                  onClick={() =>
+                    router.push(`/course-details/${course._id}?role=student`)
+                  }
+                >
+                  View Details
+                </AppButton>
+              )}
+            />
+          </div>
+        </PageFlexCol>
       </div>
       <PublicFooter />
     </>
