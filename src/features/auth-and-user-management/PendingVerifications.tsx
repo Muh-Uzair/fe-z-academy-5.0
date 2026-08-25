@@ -7,11 +7,11 @@ import AppButton from "@/components/AppButton";
 import { Role } from "@/types/userTypes";
 
 import PageFlexCol from "@/components/PageFlexCol";
-import PageHeader from "../../../components/PageHeader";
-import AppTable from "../../../components/AppTable";
 import AppSearchBar from "@/components/AppSearchBar";
 import TableImage from "@/components/TableImage";
 import { Badge } from "@/components/ui/badge";
+import PageHeader from "@/components/PageHeader";
+import AppTable from "@/components/AppTable";
 
 const data = [
   {

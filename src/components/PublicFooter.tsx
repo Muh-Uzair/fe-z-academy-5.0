@@ -4,6 +4,8 @@ import Link from "next/link";
 import { Globe, Mail, MessageCircle, Video } from "lucide-react";
 import Logo from "@/components/Logo";
 
+const currentYear = 2026;
+
 const PublicFooter = () => {
   return (
     <footer className="bg-primary text-primary-foreground pt-16 pb-8">
@@ -61,7 +63,7 @@ const PublicFooter = () => {
 
         <div className="border-t border-primary-foreground/20 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-primary-foreground/70 text-sm">
-            © {new Date().getFullYear()} Z-Academy. All rights reserved.
+            © {currentYear} Z-Academy. All rights reserved.
           </p>
           <div className="flex items-center gap-6 text-sm text-primary-foreground/70">
             <Link href="#" className="hover:text-primary-foreground transition-colors">English (US)</Link>

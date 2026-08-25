@@ -20,6 +20,8 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
+import { signupAction } from "@/services/auth/mutations";
+import { clientSideMutationWrapper } from "@/utils/clientSideMutationWrapper";
 
 const signUpStudentSchema = z.object({
   fullName: z.string().min(2, "Full name must be at least 2 characters long."),
@@ -51,9 +53,19 @@ const SignUpStudent = () => {
   const router = useRouter();
 
   // FUNCTIONS
-  const onSubmit = (values: SignUpStudentFormValues) => {
-    console.log("student sign up", { ...values, role: "student" });
-    router.push("/verify-otp");
+  const onSubmit = async (values: SignUpStudentFormValues) => {
+    const response = await clientSideMutationWrapper(() =>
+      signupAction({
+        ...values,
+        role: "student",
+      }),
+    );
+
+    // if (response) {
+    //   router.push("/verify-otp");
+    // }
+
+    console.log("student signup response", response);
   };
 
   const handleContinueWithGoogle = () => {

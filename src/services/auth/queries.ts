@@ -1,14 +1,14 @@
 import 'server-only';
 import { cacheTag, cacheLife } from 'next/cache';
-import { fetchClient } from '@/utils/fetchClient';
+import { apiClient } from '@/utils/apiClient';
 import { AUTH_TAGS } from './tags';
 import type { GetMeResponse, PublicUser } from '@/response-types/authResponseTypes';
 
 /**
  * Fetches the current authenticated user.
- * Uses 'use cache: private' — result is cached in the user's own browser,
- * NOT on the shared Next.js server cache. This is correct because every
- * user gets a different response from /me.
+ * Uses 'use cache: private' — the cache entry is scoped to the requesting
+ * user (keyed off the cookies read inside apiClient), so it is never shared
+ * across users, unlike the default Next.js cache which is shared server-side.
  * Use updateTag(AUTH_TAGS.current_user) to immediately invalidate this.
  */
 export async function getMeQuery(): Promise<PublicUser | null> {
@@ -17,7 +17,7 @@ export async function getMeQuery(): Promise<PublicUser | null> {
   cacheLife('hours');
 
   try {
-    const res = await fetchClient('/api/v1/auth/me', {
+    const res = await apiClient('/auth/me', {
       method: 'GET',
     });
 
