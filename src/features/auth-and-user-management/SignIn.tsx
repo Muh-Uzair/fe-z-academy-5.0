@@ -72,8 +72,6 @@ const SignIn = ({ email = "" }: SignInProps) => {
         student: "/student/dashboard",
       } as const;
 
-      localStorage.setItem("currentUser", JSON.stringify(user));
-
       router.push(dashboardRoutes[user.role]);
     }
   };

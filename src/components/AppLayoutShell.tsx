@@ -1,5 +1,8 @@
 "use client";
 
+import { useEffect } from "react";
+import type { AuthUser } from "@/response-types/authResponseTypes";
+
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -56,6 +59,7 @@ type NavigationItem = {
 
 type AppLayoutShellProps = {
   role: AppRole;
+  user: AuthUser;
   children: React.ReactNode;
 };
 
@@ -242,10 +246,16 @@ const roleMeta: Record<
 const isRouteActive = (pathname: string, href: string) =>
   pathname === href || pathname.startsWith(`${href}/`);
 
-const AppLayoutShell = ({ role, children }: AppLayoutShellProps) => {
+const AppLayoutShell = ({ role, user, children }: AppLayoutShellProps) => {
   const pathname = usePathname();
   const navigation = navigationByRole[role];
   const meta = roleMeta[role];
+
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem("currentUser", JSON.stringify(user));
+    }
+  }, [user]);
 
   return (
     <TooltipProvider>
