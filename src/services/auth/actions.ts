@@ -45,14 +45,14 @@ export async function signupAction(
         role: "instructor";
       },
 ): Promise<SignupResponse> {
-  console.log("requestBody ------------------------- \n", data);
+  console.log("------------------------------\n", "requestBody \n", data);
   const res = await apiClient("/auth/signup", {
     method: "POST",
     body: JSON.stringify(data),
   });
 
   const json: SignupResponse = await res.json();
-  console.log("responseBody ------------------------- \n", json);
+  console.log("------------------------------\n", "responseBody \n", json);
 
   return json;
 }
@@ -61,14 +61,14 @@ export async function verifyOtpAction(data: {
   email: string;
   otp: string;
 }): Promise<VerifyOtpResponse> {
-  console.log("requestBody ------------------------- \n", data);
+  console.log("------------------------------\n", "requestBody \n", data);
   const res = await apiClient("/auth/verify-otp", {
     method: "POST",
     body: JSON.stringify(data),
   });
 
   const json: VerifyOtpResponse = await res.json();
-  console.log("responseBody ------------------------- \n", json);
+  console.log("------------------------------\n", "responseBody \n", json);
 
   return json;
 }
@@ -76,14 +76,14 @@ export async function verifyOtpAction(data: {
 export async function resendOtpAction(data: {
   email: string;
 }): Promise<ResendOtpResponse> {
-  console.log("requestBody ------------------------- \n", data);
+  console.log("------------------------------\n", "requestBody \n", data);
   const res = await apiClient("/auth/resend-otp", {
     method: "POST",
     body: JSON.stringify(data),
   });
 
   const json: ResendOtpResponse = await res.json();
-  console.log("responseBody ------------------------- \n", json);
+  console.log("------------------------------\n", "responseBody \n", json);
 
   return json;
 }
@@ -92,14 +92,14 @@ export async function signinAction(data: {
   email: string;
   password: string;
 }): Promise<SigninResponse> {
-  console.log("requestBody ------------------------- \n", data);
+  console.log("------------------------------\n", "requestBody \n", data);
   const res = await apiClient("/auth/signin", {
     method: "POST",
     body: JSON.stringify(data),
   });
 
   const json: SigninResponse = await res.json();
-  console.log("responseBody ------------------------- \n", json);
+  console.log("------------------------------\n", "responseBody \n", json);
 
   // Successful sign-in returns the signed-in user summary and sets cookies.
   // Invalidate the private current-user cache so the next /me fetch sees the
@@ -113,13 +113,13 @@ export async function signinAction(data: {
 }
 
 export async function rotateTokenAction(): Promise<RotateTokenResponse> {
-  console.log("requestBody ------------------------- \n", "no body");
+  console.log("------------------------------\n", "requestBody \n", "no body");
   const res = await apiClient("/auth/rotate-token", {
     method: "POST",
   });
 
   const json: RotateTokenResponse = await res.json();
-  console.log("responseBody ------------------------- \n", json);
+  console.log("------------------------------\n", "responseBody \n", json);
 
   // After token rotation the cookies change — force a fresh /me on next load.
   if (json.status === "success") {
