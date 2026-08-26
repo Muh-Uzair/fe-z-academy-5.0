@@ -2,6 +2,8 @@
 
 import { apiClient } from "@/utils/apiClient";
 import { updateTag } from "next/cache";
+import { cookies } from "next/headers";
+import { parseSetCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { AUTH_TAGS } from "./tags";
 import type {
   SignupResponse,
@@ -10,6 +12,18 @@ import type {
   SigninResponse,
   RotateTokenResponse,
 } from "@/response-types/authResponseTypes";
+
+async function forwardAuthCookies(response: Response) {
+  const cookieStore = await cookies();
+
+  for (const setCookie of response.headers.getSetCookie()) {
+    const cookie = parseSetCookie(setCookie);
+
+    if (cookie) {
+      cookieStore.set(cookie);
+    }
+  }
+}
 
 export async function signupAction(
   data:
@@ -87,9 +101,11 @@ export async function signinAction(data: {
   const json: SigninResponse = await res.json();
   console.log("responseBody ------------------------- \n", json);
 
-  // Immediately invalidate the private 'current-user' cache so the next
-  // call to getMeQuery hits the backend with the fresh session cookies.
+  // Successful sign-in returns the signed-in user summary and sets cookies.
+  // Invalidate the private current-user cache so the next /me fetch sees the
+  // fresh session immediately.
   if (json.status === "success") {
+    await forwardAuthCookies(res);
     updateTag(AUTH_TAGS.currentUser);
   }
 
@@ -107,6 +123,7 @@ export async function rotateTokenAction(): Promise<RotateTokenResponse> {
 
   // After token rotation the cookies change — force a fresh /me on next load.
   if (json.status === "success") {
+    await forwardAuthCookies(res);
     updateTag(AUTH_TAGS.currentUser);
   }
 

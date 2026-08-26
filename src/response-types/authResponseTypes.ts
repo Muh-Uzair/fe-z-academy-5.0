@@ -113,11 +113,33 @@ export type ResendOtpResponse =
 // {
 //   "status": "success",
 //   "message": "Signed in successfully",
-//   "data": null
+//   "data": {
+//     "user": {
+//       "_id": "66d1a1b2c3d4e5f678901234",
+//       "fullName": "John Doe",
+//       "email": "john@example.com",
+//       "role": "student",
+//       "avatar": null,
+//       "isVerified": true
+//     }
+//   }
 // }
 // Side effect: sets accessToken and refreshToken HTTP-only cookies.
+export interface SigninUser {
+  _id: string;
+  fullName: string;
+  email: string;
+  role: "admin" | "instructor" | "student";
+  avatar: string | null;
+  isVerified: boolean;
+}
+
+export interface SigninResponseData {
+  user: SigninUser;
+}
+
 export type SigninResponse =
-  | SuccessApiResponse<EmptyAuthResponseData, "Signed in successfully">
+  | SuccessApiResponse<SigninResponseData, "Signed in successfully">
   | ApiErrorResponse;
 
 // API 5: POST /api/v1/auth/rotate-token

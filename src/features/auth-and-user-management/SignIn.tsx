@@ -2,9 +2,10 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { useRouter } from "next/navigation";
 
 import AppButton from "@/components/AppButton";
 import {
@@ -25,6 +26,8 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import { signinAction } from "@/services/auth/actions";
+import useClientAction from "@/hooks/useClientAction";
 
 const signInSchema = z.object({
   email: z.email("Please enter a valid email address."),
@@ -33,20 +36,46 @@ const signInSchema = z.object({
 
 type SignInFormValues = z.infer<typeof signInSchema>;
 
-const SignIn = () => {
+type SignInProps = {
+  email?: string;
+};
+
+const SignIn = ({ email = "" }: SignInProps) => {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
+  const { run: runSignInClientAction, isLoading: isLoadingSignIn } =
+    useClientAction();
 
   const form = useForm<SignInFormValues>({
     resolver: zodResolver(signInSchema),
     mode: "onChange",
     defaultValues: {
-      email: "",
+      email: email.trim(),
       password: "",
     },
   });
 
-  const onSubmit = (values: SignInFormValues) => {
-    console.log(values);
+  useEffect(() => {
+    if (email) {
+      form.setValue("email", email.trim(), { shouldValidate: true });
+    }
+  }, [email, form]);
+
+  const onSubmit = async (values: SignInFormValues) => {
+    const response = await runSignInClientAction(() => signinAction(values));
+
+    if (response && response.status === "success") {
+      const user = response.data.user;
+      const dashboardRoutes = {
+        admin: "/admin/dashboard",
+        instructor: "/instructor/dashboard",
+        student: "/student/dashboard",
+      } as const;
+
+      localStorage.setItem("currentUser", JSON.stringify(user));
+
+      router.push(dashboardRoutes[user.role]);
+    }
   };
 
   const handleContinueWithGoogle = () => {
@@ -132,6 +161,7 @@ const SignIn = () => {
                 type="submit"
                 className="w-full"
                 disabled={form.formState.isSubmitting}
+                isLoading={isLoadingSignIn}
               >
                 Sign In
               </AppButton>
