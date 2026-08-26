@@ -9,11 +9,11 @@ import type { GetMeResponse, PublicUser } from '@/response-types/authResponseTyp
  * Uses 'use cache: private' — the cache entry is scoped to the requesting
  * user (keyed off the cookies read inside apiClient), so it is never shared
  * across users, unlike the default Next.js cache which is shared server-side.
- * Use updateTag(AUTH_TAGS.current_user) to immediately invalidate this.
+* Use updateTag(AUTH_TAGS.currentUser) to immediately invalidate this.
  */
 export async function getMeQuery(): Promise<PublicUser | null> {
   'use cache: private';
-  cacheTag(AUTH_TAGS.current_user);
+  cacheTag(AUTH_TAGS.currentUser);
   cacheLife('hours');
 
   try {

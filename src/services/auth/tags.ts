@@ -1,3 +1,3 @@
 export const AUTH_TAGS = {
-  current_user: 'current-user',
+  currentUser: 'current-user',
 } as const;

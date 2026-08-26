@@ -31,7 +31,7 @@ export async function signupAction(
         role: "instructor";
       },
 ): Promise<SignupResponse> {
-  console.log("signupAction data ------------------------- \n", data);
+  console.log("requestBody ------------------------- \n", data);
 
   const res = await apiClient("/auth/signup", {
     method: "POST",
@@ -75,7 +75,7 @@ export async function signinAction(data: {
   // Immediately invalidate the private 'current-user' cache so the next
   // call to getMeQuery hits the backend with the fresh session cookies.
   if (json.status === "success") {
-    updateTag(AUTH_TAGS.current_user);
+    updateTag(AUTH_TAGS.currentUser);
   }
 
   return json;
@@ -90,9 +90,8 @@ export async function rotateTokenAction(): Promise<RotateTokenResponse> {
 
   // After token rotation the cookies change — force a fresh /me on next load.
   if (json.status === "success") {
-    updateTag(AUTH_TAGS.current_user);
+    updateTag(AUTH_TAGS.currentUser);
   }
 
   return json;
 }
-

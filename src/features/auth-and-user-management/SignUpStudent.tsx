@@ -20,8 +20,8 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
-import { signupAction } from "@/services/auth/mutations";
-import { clientSideMutationWrapper } from "@/utils/clientSideMutationWrapper";
+import { signupAction } from "@/services/auth/actions";
+import useClientAction from "@/hooks/useClientAction";
 
 const signUpStudentSchema = z.object({
   fullName: z.string().min(2, "Full name must be at least 2 characters long."),
@@ -51,21 +51,25 @@ const SignUpStudent = () => {
     },
   });
   const router = useRouter();
+  const { run: runSignUpClientAction, isLoading: isLoadingSignUp } =
+    useClientAction();
 
   // FUNCTIONS
   const onSubmit = async (values: SignUpStudentFormValues) => {
-    const response = await clientSideMutationWrapper(() =>
+    const response = await runSignUpClientAction(() =>
       signupAction({
         ...values,
         role: "student",
       }),
     );
 
-    // if (response) {
-    //   router.push("/verify-otp");
-    // }
+    if (response) {
+      const params = new URLSearchParams({
+        email: values.email,
+      });
 
-    console.log("student signup response", response);
+      router.push(`/verify-otp?${params.toString()}`);
+    }
   };
 
   const handleContinueWithGoogle = () => {
@@ -79,150 +83,159 @@ const SignUpStudent = () => {
         onSubmit={form.handleSubmit(onSubmit)}
         className="space-y-5"
       >
-        <FormField
-          control={form.control}
-          name="fullName"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Full Name</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="John Doe" autoComplete="name" />
-              </FormControl>
-              <FormDescription>
-                Enter the name you want to use on your student profile.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="email"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Email</FormLabel>
-              <FormControl>
-                <Input
-                  {...field}
-                  type="email"
-                  placeholder="user@example.com"
-                  autoComplete="email"
-                />
-              </FormControl>
-              <FormDescription>
-                This email will be used for your student account.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="password"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Password</FormLabel>
-              <FormControl>
-                <div className="relative">
+        <fieldset
+          disabled={isLoadingSignUp || form.formState.isSubmitting}
+          className="space-y-5"
+        >
+          <FormField
+            control={form.control}
+            name="fullName"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Full Name</FormLabel>
+                <FormControl>
                   <Input
                     {...field}
-                    type={showPassword ? "text" : "password"}
-                    placeholder="password123"
-                    autoComplete="new-password"
-                    className="pr-10"
+                    placeholder="John Doe"
+                    autoComplete="name"
                   />
-                  <AppButton
-                    type="button"
-                    variant="ghost"
-                    size="icon-sm"
-                    className="absolute top-[6px] right-1"
-                    onClick={() => setShowPassword((value) => !value)}
-                    aria-label={
-                      showPassword ? "Hide password" : "Show password"
-                    }
-                  >
-                    {showPassword ? <EyeOff /> : <Eye />}
-                  </AppButton>
-                </div>
-              </FormControl>
-              <FormDescription>
-                Choose a password with at least 8 characters.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+                </FormControl>
+                <FormDescription>
+                  Enter the name you want to use on your student profile.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <FormField
-          control={form.control}
-          name="bio"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Bio</FormLabel>
-              <FormControl>
-                <Textarea
-                  {...field}
-                  placeholder="Computer science student passionate about web development."
-                  className="max-h-75 min-h-24"
-                />
-              </FormControl>
-              <FormDescription>
-                Add a short introduction for your student profile.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Email</FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    type="email"
+                    placeholder="user@example.com"
+                    autoComplete="email"
+                  />
+                </FormControl>
+                <FormDescription>
+                  This email will be used for your student account.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <FormField
-          control={form.control}
-          name="highestEducation"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Highest Education</FormLabel>
-              <FormControl>
-                <Input
-                  {...field}
-                  placeholder="Bachelor of Science"
-                  autoComplete="organization-title"
-                />
-              </FormControl>
-              <FormDescription>
-                Share your current or completed education level.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Password</FormLabel>
+                <FormControl>
+                  <div className="relative">
+                    <Input
+                      {...field}
+                      type={showPassword ? "text" : "password"}
+                      placeholder="password123"
+                      autoComplete="new-password"
+                      className="pr-10"
+                    />
+                    <AppButton
+                      type="button"
+                      variant="ghost"
+                      size="icon-sm"
+                      className="absolute top-[6px] right-1"
+                      onClick={() => setShowPassword((value) => !value)}
+                      aria-label={
+                        showPassword ? "Hide password" : "Show password"
+                      }
+                    >
+                      {showPassword ? <EyeOff /> : <Eye />}
+                    </AppButton>
+                  </div>
+                </FormControl>
+                <FormDescription>
+                  Choose a password with at least 8 characters.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <AppButton
-          type="submit"
-          className="w-full"
-          disabled={form.formState.isSubmitting}
-        >
-          Sign Up
-        </AppButton>
+          <FormField
+            control={form.control}
+            name="bio"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Bio</FormLabel>
+                <FormControl>
+                  <Textarea
+                    {...field}
+                    placeholder="Computer science student passionate about web development."
+                    className="max-h-75 min-h-24"
+                  />
+                </FormControl>
+                <FormDescription>
+                  Add a short introduction for your student profile.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <div className="space-y-4">
-          <div className="flex items-center gap-3">
-            <Separator className="flex-1" />
-            <span className="text-sm text-muted-foreground">
-              Continue with Google
-            </span>
-            <Separator className="flex-1" />
-          </div>
+          <FormField
+            control={form.control}
+            name="highestEducation"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Highest Education</FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    placeholder="Bachelor of Science"
+                    autoComplete="organization-title"
+                  />
+                </FormControl>
+                <FormDescription>
+                  Share your current or completed education level.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           <AppButton
-            type="button"
-            variant="outline"
+            type="submit"
             className="w-full"
-            onClick={handleContinueWithGoogle}
+            isLoading={isLoadingSignUp}
           >
-            Continue with Google
+            Sign Up
           </AppButton>
-        </div>
+
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <Separator className="flex-1" />
+              <span className="text-sm text-muted-foreground">
+                Continue with Google
+              </span>
+              <Separator className="flex-1" />
+            </div>
+
+            <AppButton
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={handleContinueWithGoogle}
+            >
+              Continue with Google
+            </AppButton>
+          </div>
+        </fieldset>
       </form>
     </Form>
   );
