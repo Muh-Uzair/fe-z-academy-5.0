@@ -342,7 +342,12 @@ HTTP `200`
       "email": "john@example.com",
       "role": "student",
       "avatar": null,
-      "isVerified": true
+      "bio": "Computer science student",
+      "highestEducation": "Bachelor's degree",
+      "yearsOfExperience": 0,
+      "isVerified": true,
+      "createdAt": "2026-08-25T10:00:00.000Z",
+      "updatedAt": "2026-08-25T10:00:00.000Z"
     }
   }
 }
@@ -399,8 +404,7 @@ No request body is required; this endpoint ignores it. The request must include 
 
 1. Validates the `accessToken` cookie.
 2. Uses its user ID and role to load the matching user.
-3. The result may be served from the backend cache, but the response shape is identical.
-4. Password is not returned because it is excluded by the user model. The current backend does return `otp`, `otpExpires`, and `__v`; for a user able to call this endpoint, the OTP values are normally `null`.
+3. Returns the same user shape as the sign-in response. Sensitive and internal fields (`password`, `otp`, `otpExpires`, `__v`, `stripeAccountId`, `stripeOnboardingComplete`, `verificationRejectionReason`, `lastVerificationRejectedAt`) are never included.
 
 ### Success response
 
@@ -415,21 +419,14 @@ HTTP `200`
       "_id": "66d1a1b2c3d4e5f678901234",
       "fullName": "John Doe",
       "email": "john@example.com",
+      "role": "student",
+      "avatar": null,
       "bio": "Computer science student",
       "highestEducation": "Bachelor's degree",
       "yearsOfExperience": 0,
-      "avatar": null,
       "isVerified": true,
-      "verificationRejectionReason": null,
-      "lastVerificationRejectedAt": null,
-      "otp": null,
-      "otpExpires": null,
-      "role": "student",
-      "stripeAccountId": null,
-      "stripeOnboardingComplete": false,
       "createdAt": "2026-08-25T10:00:00.000Z",
-      "updatedAt": "2026-08-25T10:00:00.000Z",
-      "__v": 0
+      "updatedAt": "2026-08-25T10:00:00.000Z"
     }
   }
 }
@@ -445,4 +442,4 @@ HTTP `200`
 
 ## Frontend types
 
-Copy [`src/response-types/authResponseTypes.ts`](../src/response-types/authResponseTypes.ts) into the frontend project. It is a pure TypeScript file with no backend imports and exports `SignupResponse`, `VerifyOtpResponse`, `ResendOtpResponse`, `SigninResponse`, `RotateTokenResponse`, and `GetMeResponse`.
+Copy [`src/response-types/authResponseTypes.ts`](../src/response-types/authResponseTypes.ts) into the frontend project. It is a pure TypeScript file with no backend imports and exports `SignupResponse`, `VerifyOtpResponse`, `ResendOtpResponse`, `SigninResponse`, `RotateTokenResponse`, `GetMeResponse`, and the shared `AuthUser` interface used by both `SigninResponse` and `GetMeResponse`.

@@ -1,5 +1,6 @@
 import "server-only";
 import { cacheTag, cacheLife } from "next/cache";
+import { redirect } from "next/navigation";
 import { apiClient } from "@/utils/apiClient";
 import { AUTH_TAGS } from "./tags";
 import type { GetMeResponse } from "@/response-types/authResponseTypes";
@@ -26,5 +27,6 @@ export async function getMeQuery(): Promise<GetMeSuccessResponse> {
     return json;
   }
 
-  throw new Error(json.message);
+  // Redirect to signin if fetching the current user fails (e.g. 401 Unauthorized)
+  redirect("/signin");
 }
