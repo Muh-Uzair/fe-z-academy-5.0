@@ -50,8 +50,6 @@ export async function clientSideActionWrapper<T>(
 ): Promise<T | undefined> {
   const result = await action();
 
-  console.log("responseBody ----------------------------- \n", result);
-
   const payload = result as unknown as ApiPayload;
 
   // If server returned a normalized error payload, show it and return undefined.
@@ -82,15 +80,18 @@ export async function clientSideActionWrapper<T>(
 export function useClientAction() {
   const [isLoading, setIsLoading] = useState(false);
 
-  const run = useCallback(async <T,>(action: () => Promise<T>): Promise<T | undefined> => {
-    setIsLoading(true);
-    try {
-      const res = await clientSideActionWrapper(action);
-      return res;
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  const run = useCallback(
+    async <T>(action: () => Promise<T>): Promise<T | undefined> => {
+      setIsLoading(true);
+      try {
+        const res = await clientSideActionWrapper(action);
+        return res;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [],
+  );
 
   return { run, isLoading } as const;
 }
