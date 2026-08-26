@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 import AppButton from "@/components/AppButton";
 import {
@@ -15,14 +16,48 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
+import { resendOtpAction, verifyOtpAction } from "@/services/auth/actions";
+import useClientAction from "@/hooks/useClientAction";
 
 const OTP_LENGTH = 6;
 
-const VerifyOtp = () => {
-  const [otp, setOtp] = useState("");
+type VerifyOtpProps = {
+  email?: string;
+};
 
-  const handleVerifyOtp = () => {
-    console.log(otp);
+const VerifyOtp = ({ email = "" }: VerifyOtpProps) => {
+  const router = useRouter();
+  const [otp, setOtp] = useState("");
+  const normalizedEmail = email.trim();
+  const { run: runVerifyOtpAction, isLoading: isVerifyLoading } =
+    useClientAction();
+  const { run: runResendOtpAction, isLoading: isResendLoading } =
+    useClientAction();
+
+  const handleVerifyOtp = async () => {
+    if (!normalizedEmail || otp.length !== OTP_LENGTH) return;
+
+    const response = await runVerifyOtpAction(() =>
+      verifyOtpAction({
+        email: normalizedEmail,
+        otp,
+      }),
+    );
+
+    if (response) {
+      const params = new URLSearchParams({ email: normalizedEmail });
+      router.push(`/signin?${params.toString()}`);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    if (!normalizedEmail) return;
+
+    await runResendOtpAction(() =>
+      resendOtpAction({
+        email: normalizedEmail,
+      }),
+    );
   };
 
   return (
@@ -31,7 +66,9 @@ const VerifyOtp = () => {
         <CardHeader>
           <CardTitle>Verify OTP</CardTitle>
           <CardDescription>
-            Enter the 6-digit code sent to your email address.
+            {normalizedEmail
+              ? `Enter the 6-digit code sent to ${normalizedEmail}.`
+              : "Enter the 6-digit code sent to your email address."}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -64,8 +101,24 @@ const VerifyOtp = () => {
             </InputOTP>
           </div>
 
-          <AppButton className="w-full" onClick={handleVerifyOtp}>
+          <AppButton
+            className="w-full"
+            onClick={handleVerifyOtp}
+            isLoading={isVerifyLoading}
+            disabled={!normalizedEmail || otp.length !== OTP_LENGTH}
+          >
             Verify OTP
+          </AppButton>
+
+          <AppButton
+            type="button"
+            variant="outline"
+            className="w-full"
+            onClick={handleResendOtp}
+            isLoading={isResendLoading}
+            disabled={!normalizedEmail}
+          >
+            Resend OTP
           </AppButton>
         </CardContent>
       </Card>
