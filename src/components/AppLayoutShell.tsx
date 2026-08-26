@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import type { AuthUser } from "@/response-types/authResponseTypes";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Bell,
   BookOpen,
@@ -44,6 +44,8 @@ import {
 } from "@/components/ui/sidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "@/utils/cn";
+import { signoutAction } from "@/services/auth/actions";
+import useClientAction from "@/hooks/useClientAction";
 
 type AppRole = "admin" | "instructor" | "student";
 
@@ -248,14 +250,26 @@ const isRouteActive = (pathname: string, href: string) =>
 
 const AppLayoutShell = ({ role, user, children }: AppLayoutShellProps) => {
   const pathname = usePathname();
+  const router = useRouter();
   const navigation = navigationByRole[role];
   const meta = roleMeta[role];
+  const { run: runSignoutAction, isLoading: isSignoutLoading } =
+    useClientAction();
 
   useEffect(() => {
     if (user) {
       localStorage.setItem("currentUser", JSON.stringify(user));
     }
   }, [user]);
+
+  const handleSignout = async () => {
+    const response = await runSignoutAction(() => signoutAction());
+
+    if (response && response.status === "success") {
+      localStorage.removeItem("currentUser");
+      router.push("/signin");
+    }
+  };
 
   return (
     <TooltipProvider>
@@ -378,11 +392,17 @@ const AppLayoutShell = ({ role, user, children }: AppLayoutShellProps) => {
                 </div>
               </div>
               <button
-                onClick={() => console.log("signout clicked")}
-                className="p-2 shrink-0 text-muted-foreground hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors group-data-[collapsible=icon]:w-full group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center"
+                onClick={handleSignout}
+                disabled={isSignoutLoading}
+                className={cn(
+                  "p-2 shrink-0 rounded-xl transition-colors group-data-[collapsible=icon]:w-full group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center",
+                  isSignoutLoading
+                    ? "opacity-50 cursor-not-allowed text-muted-foreground"
+                    : "text-muted-foreground hover:text-red-600 hover:bg-red-50"
+                )}
                 title="Sign out"
               >
-                <LogOut className="size-5" />
+                <LogOut className={cn("size-5", isSignoutLoading && "animate-pulse")} />
               </button>
             </div>
           </SidebarFooter>

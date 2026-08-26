@@ -83,10 +83,7 @@ export type SignupResponse =
 //   "data": null
 // }
 export type VerifyOtpResponse =
-  | SuccessApiResponse<
-      EmptyAuthResponseData,
-      "Account verified successfully"
-    >
+  | SuccessApiResponse<EmptyAuthResponseData, "Account verified successfully">
   | ApiErrorResponse;
 
 // API 3: POST /api/v1/auth/resend-otp
@@ -171,8 +168,18 @@ export type RotateTokenResponse =
 //   }
 // }
 export type GetMeResponse =
-  | SuccessApiResponse<
-      GetMeResponseData,
-      "Current user fetched successfully"
-    >
+  | SuccessApiResponse<GetMeResponseData, "Current user fetched successfully">
+  | ApiErrorResponse;
+
+// API 7: POST /api/v1/auth/signout
+// Status: 200
+// Example response:
+// {
+//   "status": "success",
+//   "message": "Signed out successfully",
+//   "data": null
+// }
+// Side effect: clears accessToken and refreshToken HTTP-only cookies.
+export type SignoutResponse =
+  | SuccessApiResponse<EmptyAuthResponseData, "Signed out successfully">
   | ApiErrorResponse;

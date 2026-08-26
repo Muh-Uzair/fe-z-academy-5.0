@@ -440,6 +440,28 @@ HTTP `200`
 | 401         | `Invalid or expired access token`                   | Access-token cookie cannot be verified.                                       |
 | 404         | `<role> not found`                                  | The user referenced by the token no longer exists or no longer has that role. |
 
+## API 7 — Sign out
+
+`POST /api/v1/auth/signout`
+
+No request body is required.
+
+### Processing
+
+1. Clears both the `accessToken` and `refreshToken` HTTP-only cookies from the browser.
+
+### Success response
+
+HTTP `200`
+
+```json
+{
+  "status": "success",
+  "message": "Signed out successfully",
+  "data": null
+}
+```
+
 ## Frontend types
 
-Copy [`src/response-types/authResponseTypes.ts`](../src/response-types/authResponseTypes.ts) into the frontend project. It is a pure TypeScript file with no backend imports and exports `SignupResponse`, `VerifyOtpResponse`, `ResendOtpResponse`, `SigninResponse`, `RotateTokenResponse`, `GetMeResponse`, and the shared `AuthUser` interface used by both `SigninResponse` and `GetMeResponse`.
+Copy [`src/response-types/authResponseTypes.ts`](../src/response-types/authResponseTypes.ts) into the frontend project. It is a pure TypeScript file with no backend imports and exports `SignupResponse`, `VerifyOtpResponse`, `ResendOtpResponse`, `SigninResponse`, `RotateTokenResponse`, `GetMeResponse`, `SignoutResponse`, and the shared `AuthUser` interface used by both `SigninResponse` and `GetMeResponse`.

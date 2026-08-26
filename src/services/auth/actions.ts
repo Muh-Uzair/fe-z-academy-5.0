@@ -11,6 +11,7 @@ import type {
   ResendOtpResponse,
   SigninResponse,
   RotateTokenResponse,
+  SignoutResponse,
 } from "@/response-types/authResponseTypes";
 
 async function forwardAuthCookies(response: Response) {
@@ -52,7 +53,12 @@ export async function signupAction(
   });
 
   const json: SignupResponse = await res.json();
-  console.log("------------------------------\n", "responseBody \n", json);
+  console.log(
+    "responseBody \n",
+    json,
+    "\n",
+    "------------------------------ \n",
+  );
 
   return json;
 }
@@ -68,7 +74,12 @@ export async function verifyOtpAction(data: {
   });
 
   const json: VerifyOtpResponse = await res.json();
-  console.log("------------------------------\n", "responseBody \n", json);
+  console.log(
+    "responseBody \n",
+    json,
+    "\n",
+    "------------------------------ \n",
+  );
 
   return json;
 }
@@ -83,7 +94,12 @@ export async function resendOtpAction(data: {
   });
 
   const json: ResendOtpResponse = await res.json();
-  console.log("------------------------------\n", "responseBody \n", json);
+  console.log(
+    "responseBody \n",
+    json,
+    "\n",
+    "------------------------------ \n",
+  );
 
   return json;
 }
@@ -99,7 +115,12 @@ export async function signinAction(data: {
   });
 
   const json: SigninResponse = await res.json();
-  console.log("------------------------------\n", "responseBody \n", json);
+  console.log(
+    "responseBody \n",
+    json,
+    "\n",
+    "------------------------------ \n",
+  );
 
   // Successful sign-in returns the signed-in user summary and sets cookies.
   // Invalidate the private current-user cache so the next /me fetch sees the
@@ -119,9 +140,36 @@ export async function rotateTokenAction(): Promise<RotateTokenResponse> {
   });
 
   const json: RotateTokenResponse = await res.json();
-  console.log("------------------------------\n", "responseBody \n", json);
+  console.log(
+    "responseBody \n",
+    json,
+    "\n",
+    "------------------------------ \n",
+  );
 
   // After token rotation the cookies change — force a fresh /me on next load.
+  if (json.status === "success") {
+    await forwardAuthCookies(res);
+    updateTag(AUTH_TAGS.currentUser);
+  }
+
+  return json;
+}
+
+export async function signoutAction(): Promise<SignoutResponse> {
+  console.log("------------------------------\n", "requestBody \n", "no body");
+  const res = await apiClient("/auth/signout", {
+    method: "POST",
+  });
+
+  const json: SignoutResponse = await res.json();
+  console.log(
+    "responseBody \n",
+    json,
+    "\n",
+    "------------------------------ \n",
+  );
+
   if (json.status === "success") {
     await forwardAuthCookies(res);
     updateTag(AUTH_TAGS.currentUser);
