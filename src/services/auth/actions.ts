@@ -12,6 +12,8 @@ import type {
   SigninResponse,
   RotateTokenResponse,
   SignoutResponse,
+  ForgetPasswordResponse,
+  ResetPasswordResponse,
 } from "@/response-types/authResponseTypes";
 
 async function forwardAuthCookies(response: Response) {
@@ -152,6 +154,47 @@ export async function rotateTokenAction(): Promise<RotateTokenResponse> {
     await forwardAuthCookies(res);
     updateTag(AUTH_TAGS.currentUser);
   }
+
+  return json;
+}
+
+export async function forgetPasswordAction(data: {
+  email: string;
+}): Promise<ForgetPasswordResponse> {
+  console.log("------------------------------\n", "requestBody \n", data);
+  const res = await apiClient("/auth/forget-password", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+
+  const json: ForgetPasswordResponse = await res.json();
+  console.log(
+    "responseBody \n",
+    json,
+    "\n",
+    "------------------------------ \n",
+  );
+
+  return json;
+}
+
+export async function resetPasswordAction(data: {
+  otp: string;
+  newPassword: string;
+}): Promise<ResetPasswordResponse> {
+  console.log("------------------------------\n", "requestBody \n", data);
+  const res = await apiClient("/auth/reset-password", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+
+  const json: ResetPasswordResponse = await res.json();
+  console.log(
+    "responseBody \n",
+    json,
+    "\n",
+    "------------------------------ \n",
+  );
 
   return json;
 }

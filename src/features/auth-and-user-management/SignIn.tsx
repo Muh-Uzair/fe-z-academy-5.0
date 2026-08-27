@@ -5,6 +5,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import AppButton from "@/components/AppButton";
@@ -137,7 +138,8 @@ const SignIn = ({ email = "" }: SignInProps) => {
                           type="button"
                           variant="ghost"
                           size="icon-sm"
-                          className="absolute top-[0.5px] right-1"
+                          className="absolute top-1/2 right-1"
+                          style={{ transform: "translateY(-50%)" }}
                           onClick={() => setShowPassword((value) => !value)}
                           aria-label={
                             showPassword ? "Hide password" : "Show password"
@@ -154,6 +156,15 @@ const SignIn = ({ email = "" }: SignInProps) => {
                   </FormItem>
                 )}
               />
+
+              <div className="text-right">
+                <Link
+                  href="/forget-password"
+                  className="text-sm text-muted-foreground hover:text-foreground hover:underline"
+                >
+                  Forgot password?
+                </Link>
+              </div>
 
               <AppButton
                 type="submit"

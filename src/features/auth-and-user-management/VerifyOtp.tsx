@@ -23,19 +23,32 @@ const OTP_LENGTH = 6;
 
 type VerifyOtpProps = {
   email?: string;
+  mode?: string;
 };
 
-const VerifyOtp = ({ email = "" }: VerifyOtpProps) => {
+const VerifyOtp = ({ email = "", mode = "" }: VerifyOtpProps) => {
   const router = useRouter();
   const [otp, setOtp] = useState("");
   const normalizedEmail = email.trim();
+  const isResetPasswordMode = mode === "reset-password";
   const { run: runVerifyOtpAction, isLoading: isVerifyLoading } =
     useClientAction();
   const { run: runResendOtpAction, isLoading: isResendLoading } =
     useClientAction();
 
   const handleVerifyOtp = async () => {
-    if (!normalizedEmail || otp.length !== OTP_LENGTH) return;
+    if (otp.length !== OTP_LENGTH) return;
+
+    // In reset-password mode the OTP is only verified by the backend when
+    // reset-password is called, so we don't hit verify-otp here — just
+    // forward the OTP along to the reset-password page.
+    if (isResetPasswordMode) {
+      const params = new URLSearchParams({ otp });
+      router.push(`/reset-password?${params.toString()}`);
+      return;
+    }
+
+    if (!normalizedEmail) return;
 
     const response = await runVerifyOtpAction(() =>
       verifyOtpAction({
@@ -105,21 +118,26 @@ const VerifyOtp = ({ email = "" }: VerifyOtpProps) => {
             className="w-full"
             onClick={handleVerifyOtp}
             isLoading={isVerifyLoading}
-            disabled={!normalizedEmail || otp.length !== OTP_LENGTH}
+            disabled={
+              otp.length !== OTP_LENGTH ||
+              (!isResetPasswordMode && !normalizedEmail)
+            }
           >
             Verify OTP
           </AppButton>
 
-          <AppButton
-            type="button"
-            variant="outline"
-            className="w-full"
-            onClick={handleResendOtp}
-            isLoading={isResendLoading}
-            disabled={!normalizedEmail}
-          >
-            Resend OTP
-          </AppButton>
+          {!isResetPasswordMode && (
+            <AppButton
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={handleResendOtp}
+              isLoading={isResendLoading}
+              disabled={!normalizedEmail}
+            >
+              Resend OTP
+            </AppButton>
+          )}
         </CardContent>
       </Card>
     </div>
