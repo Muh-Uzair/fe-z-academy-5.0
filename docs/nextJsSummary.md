@@ -1,78 +1,86 @@
-# Next.js 16 — Short Summary (Z-Academy Context)
+# Next.js Summary
 
-Yeh summary Next.js ke tamaam ahem concepts ko asaan Roman Urdu mein, aur Z-Academy ke hawale (context) se bayan karti hai.
+## Project Structure and Organization
 
-### 1. Layouts & Pages
+### Top-level folders
+- `app` – App Router (main routing system).
+- `pages` – Pages Router (older routing system).
+- `public` – Static assets served directly (images, fonts, etc.).
+- `src` – Optional folder to hold all app source code separate from config files.
 
-1. **`page.tsx`:** Har route/URL ka main UI hota hai. Ek folder mein ek hi `page.tsx` hota hai.
-2. **`layout.tsx`:** Yeh shared wrapper hota hai (jaise Navbar ya Sidebar ke liye). Jab user ek page se doosre page par jata hai, toh Layout dubara render nahi hota (is se app fast rehti hai).
-3. **Nesting:** Layouts aur pages nest (ek ke andar ek) ho sakte hain.
-4. **Root Layout:** `app/layout.tsx` poori app ka baap (root) hai. Isme `<html>` aur `<body>` tags zaroori hain.
-5. **`<Link>` vs `router.push()`:** Navigation ke liye hamesha Next.js ka `<Link>` component use karo kyunke yeh agle page ka data background mein pehle se download (prefetch) kar leta hai. `router.push` sirf tab use karo jab `<Link>` use karna mumkin na ho (jaise kisi function ke andar).
+### Top-level files
+- `next.config.js` – Next.js configuration.
+- `package.json` – Dependencies and scripts.
+- `instrumentation.ts` – OpenTelemetry/instrumentation setup.
+- `proxy.ts` – Request proxy.
+- `.env`, `.env.local`, `.env.production`, `.env.development` – Environment variables (not tracked by git).
+- `eslint.config.mjs` – ESLint configuration.
+- `.gitignore` – Git ignore rules.
+- `next-env.d.ts` – Auto-generated TypeScript declarations (not tracked by git).
+- `tsconfig.json` / `jsconfig.json` – TypeScript/JavaScript configuration.
 
-### 2. Server & Client Components
+### Routing files
+Special files inside `app` that control routing behavior:
+- `layout` – Shared UI wrapping child segments.
+- `page` – Makes a route publicly accessible; unique UI for a route.
+- `loading` – Loading UI (Suspense boundary).
+- `not-found` – Not-found UI.
+- `error` – Error UI (error boundary).
+- `global-error` – Global error UI.
+- `route` – API endpoint.
+- `template` – Like layout, but re-renders on navigation instead of persisting.
+- `default` – Fallback UI for parallel routes.
 
-1. **Default Behavior:** Next.js mein har component by default Server Component hota hai.
-2. **Client Components:** Agar tumhe kisi component mein `useState`, `useEffect`, `onClick` ya browser ki koi cheez (jaise `window`) use karni hai, toh file ke top par `'use client'` likhna zaroori hai.
-3. **Z-Academy Rule of Thumb:** Koshish karo ke API fetching aur heavy logic Server Components (`page.tsx`) mein ho, aur wahan se data as props Client Components (jaise interactive tables ya forms) ko bhej do.
-4. **Interleaving:** Ek Server Component ko Client Component ke andar directly import mat karo. Balke usay `{children}` ke zariye pass karo taake woh Server Component hi rahe.
-5. **`server-only`:** Agar kisi file mein database keys hain, toh top par `import 'server-only'` likh do taake ghalti se bhi woh Client side par leak na ho jaye.
+### Nested routes
+- Folders map to URL segments; nested folders create nested URL segments.
+- Layouts wrap their child segments at any level.
+- A route is only publicly accessible once it contains a `page` or `route` file.
 
-### 3. Fetching Data
+### Dynamic routes
+- `[segment]` – single dynamic segment (e.g. `/blog/[slug]`).
+- `[...segment]` – catch-all segments (matches multiple path parts).
+- `[[...segment]]` – optional catch-all (matches even with no extra segments).
+- Values are accessed via the `params` prop.
 
-1. **Server Components mein Fetching:** Hamesha koshish karo ke API (Express) ko Server Components mein hi call karo. Iske liye seedha `async/await` aur `fetch()` use hota hai.
-2. **Memoization:** Agar Next.js mein ek hi API ek page par 3 alag components mein fetch ho rahi ho, toh Next.js server par sirf 1 dafa call jati hai (Duplicate calls ruk jati hain).
-3. **Streaming (`loading.tsx` aur `<Suspense>`):** Agar Express se data aane mein time lag raha ho toh poori app ko freeze hone se bachane ke liye "Streaming" use hoti hai.
-   - `loading.tsx`: Poore page ko block karne ki bajaye full-page skeleton dikhata hai.
-   - `<Suspense>`: Page ke kisi makhsoos (specific) hisse pe skeleton dikhata hai (jaise sirf Table par), jabke page ka Title/Header fauran nazar aa jata hai.
-4. **Sequential vs Parallel Fetching:**
-   - Sequential (Slow): Ek ke baad ek fetch likhna.
-   - Parallel (Fast): Agar APIs aapas mein depend nahi kartin, toh hamesha `Promise.all` use karo taake dono requests ek sath chalein.
-5. **React.cache:** Agar ORM use kar rahe ho toh `cache()` lagana parta hai, lekin hum `fetch` API use kar rahe hain toh Next.js yeh automatically kar deta hai.
+### Route groups and private folders
+- `(group)` – Wrapping a folder name in parentheses organizes routes without affecting the URL; allows different layouts per group.
+- `_folder` – Prefixing with underscore makes a folder private (opted out of routing), including all its subfolders. Useful for separating UI logic from routing, consistent organization, editor sorting, and avoiding naming conflicts with future Next.js conventions. A route segment starting with underscore can still be created using `%5FfolderName`.
 
-### 4. Mutating Data (Server Actions)
+### Parallel and intercepted routes
+- `@folder` – Named slot rendered by a parent layout (e.g. sidebar + main content).
+- `(.)folder` – Intercept a route at the same level.
+- `(..)folder` – Intercept a route one level up.
+- `(..)(..)folder` – Intercept a route two levels up.
+- `(...)folder` – Intercept a route from the root.
+- Used for UI patterns like showing a route as a modal without changing the URL.
 
-1. **Server Actions Kya Hain?** Yeh aise `async` functions hain jo sirf server par chalte hain lekin Client Components se seedha call kiye ja sakte hain (jaise form submit par). Inhe `'use server'` se mark kiya jata hai.
-2. **Z-Academy Structure:** `services/courses/mutations.ts` mein `'use server'` likh kar Express par POST/PUT/DELETE ki requests maro.
-3. **Form Handling:** Zod se client par validation karo, aur sahi data milne par Server Action ko bhej do.
-4. **Pending State:** Button ko loading state mein dikhane ke liye `useTransition` ka `isPending` use karo.
-5. **Search Query Problem:** Client component mein search hone par `useState` ki bajaye URL update karo (`router.push('?search=React')`). Server component ko `searchParams` prop mein yeh mil jayega aur woh nayi API call kar lega.
+### Metadata file conventions
+- **App icons**: `favicon`, `icon`, `apple-icon` (static files or generated via `.js/.ts/.tsx`).
+- **Open Graph / Twitter images**: `opengraph-image`, `twitter-image` (static or generated).
+- **SEO**: `sitemap` (static `.xml` or generated via `.js/.ts`), `robots` (static `.txt` or generated).
 
-### 5. Caching & Revalidating
+### Component hierarchy
+Rendering order (outer to inner) for special files in a route segment:
+`layout` → `template` → `error` (boundary) → `loading` (Suspense) → `not-found` (boundary) → `page` or nested `layout`.
+Components render recursively, so a child segment's components nest inside the parent segment's components.
 
-1. **Golden Rule:** Jo data sab ke liye same hai (All Courses), usay Next.js server pe cache karo. Jo data user-specific hai (My Profile), usay private cache karo ya har baar fresh mangwao.
-2. **`'use cache'` aur Tags:** Global data fetch karte waqt `'use cache'` lagao aur usay ek naam (tag) de do (`cacheTag('courses')`).
-3. **Revalidation (Cache Update):** Jab koi form submit ho aur data change ho jaye:
-   - `updateTag('courses')`: Fauran cache urra do (User ko apna naya data fauran dikhega).
-   - `revalidateTag('courses')`: Background mein cache refresh hoga (Slight delay OK ho tab).
-   - `revalidatePath('/courses')`: Jab tag yaad na ho toh poore page ka cache clear kar do.
-4. **`'use cache: private'`:** Yeh data ko server ki bajaye makhsoos user ke browser mein cache karta hai (Security ke liye best).
+### Colocation
+- Folders in `app` define route structure, but a route is not routable until it has a `page.js` or `route.js` file.
+- Only the content returned by `page.js`/`route.js` is sent to the client.
+- This makes it safe to colocate project files (components, styles, tests, etc.) inside route segments without them becoming routable.
 
-### 6. Error Handling
+### `src` folder
+- Optional folder to store all application code (including `app`) separately from root-level config files.
 
-1. **Expected Errors (Mutations):** Agar form submit karte waqt koi masla aaye, toh `throw` mat karo. Balke ek error message return kar do (`return { error: 'Failed' }`) aur UI mein dikha do.
-2. **Uncaught Exceptions (Crash):** Agar achanak koi bara error aa jaye, toh Next.js poori app band nahi karta agar tumne `error.tsx` file banai ho. Yeh fallback UI dikhata hai.
-3. **`error.tsx` Rules:** Yeh lazmi `'use client'` hona chahiye. Isme `retry()` ka function milta hai taake user dobara try kar sake.
-4. **404 Errors:** Agar data (jaise ID) na mile, toh `notFound()` call karo, jisse `not-found.tsx` wala page chal jayega.
+### Organization strategies
+Next.js is unopinionated about file organization. Common strategies:
+1. Store project files outside `app` (in root-level shared folders), keeping `app` purely for routing.
+2. Store project files in top-level folders inside `app`.
+3. Split project files by feature/route – global shared code in root `app`, feature-specific code colocated within its route segment.
+Key recommendation: pick one strategy and stay consistent across the team/project.
 
-### 7. Proxy (Middleware)
-
-1. **Darban (Guard):** Proxy (`src/proxy.ts`) ek guard ki tarah hai jo har page load hone se pehle chalta hai.
-2. **Z-Academy Use Case:** Iska sabse ahem kaam yeh check karna hai ke user ke paas Token (Cookie) hai ya nahi. Agar nahi hai aur woh `/admin` par jana chahta hai, toh Proxy usay fauran `/signin` par redirect kar dega.
-3. **Important Note:** Proxy mein kabhi Express se data fetch karne ki koshish mat karo. Yeh sirf headers, cookies, aur URLs check karne ke liye hai.
-
-### 8. Image, Font & CSS
-
-1. **Images:** HTML ke `<img>` ki bajaye Next.js ka `<Image>` tag use karo. Yeh images ko WebP mein convert karke optimize karta hai aur lazy loading deta hai.
-   - **S3 Images:** AWS S3 ke URLs use karne ke liye unhe `next.config.ts` mein allow (whitelist) karna zaroori hai.
-2. **S3 Upload Flow:** Client se Express ko bolo "Mujhe Presigned URL do", phir Client se seedha S3 par upload karo, aur aakhir mein S3 ka URL Server Action ke zariye Express ko bhej do.
-3. **Fonts:** `next/font/google` use karo. Yeh fonts ko server par rakh leta hai taake loading fast ho. Ise Root Layout mein laga do.
-4. **CSS:** Z-Academy mein Tailwind CSS best hai. CSS ki order bohot matter karti hai, isliye imports ka khayal rakho.
-
-### 9. Route Handlers & Metadata
-
-1. **Route Handlers:** Yeh Next.js ki apni APIs hoti hain (`app/api/route.ts`). Z-Academy mein inki zaroorat kam paregi kyunke Express server pehle se mojood hai. Yeh Stripe webhooks wagera ke liye use hote hain.
-2. **Metadata:** Har page ke liye `title` aur `description` lazmi do (SEO ke liye).
-   - Static: `export const metadata = { title: 'Z-Academy' }`
-   - Dynamic (jaise course details): `generateMetadata` function use karo.
-3. **OG Images:** `opengraph-image.jpg` rakh do taake social media par link share karne par image nazar aaye.
+### Practical patterns
+- **Organize routes without affecting URL**: Use route groups like `(marketing)` and `(shop)`; each group can have its own `layout.js` nested within the main app layout.
+- **Opt specific segments into a layout**: Create a route group (e.g. `(shop)`) and move only the routes that should share a layout into it; routes outside the group won't share it.
+- **Loading skeleton for a specific route**: Place `loading.tsx` inside a route group (e.g. `(overview)`) so it only applies to that specific page, without affecting the URL structure.
+- **Multiple root layouts**: Remove the top-level `layout.js` and add a `layout.js` inside each route group; each root layout must include its own `<html>` and `<body>` tags. Useful for sections of an app with completely different UI/experience.
