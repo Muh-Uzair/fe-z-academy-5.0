@@ -121,3 +121,47 @@ Key recommendation: pick one strategy and stay consistent across the team/projec
 - **Dynamic route** (`[id]`, `[slug]`) → use **`PageProps`/`LayoutProps`** for `params`, since the helper correctly infers the exact param shape from the route path.
 - **Exception**: even on a dynamic route, if `searchParams` needs strict/specific keys, take a hybrid approach — use `PageProps` for `params` but define a custom narrowed type for `searchParams`.
 - Route Props Helpers only apply to route files (`page.tsx`/`layout.tsx`); regular reusable components (e.g. client feature components) always need their own custom prop types regardless of this rule.
+
+## Linking and Navigating
+
+### How navigation works
+- **Server Rendering**: Layouts/Pages are React Server Components by default; the Server Component Payload is generated server-side. Two modes: **Prerendering** (build time/revalidation, cached) and **Dynamic Rendering** (per-request).
+- **Prefetching**: `<Link>` automatically prefetches routes as they enter the viewport (or on hover). Static routes are fully prefetched; dynamic routes are skipped or only partially prefetched (if `loading.tsx` exists). Plain `<a>` tags do not get prefetching.
+- **Streaming**: A route's `loading.tsx` wraps `page.tsx` in a `<Suspense>` boundary automatically, letting the server send ready parts first. Enables partial prefetching for dynamic routes, immediate navigation feedback, interactive shared layouts, and better Core Web Vitals (TTFB/FCP/TTI).
+- **Client-side transitions**: `<Link>` navigation avoids full page reloads — it keeps shared layouts/UI and swaps in the new content (prefetched loading state or full page), preserving state and scroll behavior (auto-scrolls to top; use `scroll-padding-top` for sticky headers).
+
+### What can make transitions slow, and fixes
+- **Dynamic routes without `loading.tsx`** → add `loading.tsx` to enable partial prefetch + immediate loading UI.
+- **Dynamic segments without `generateStaticParams`** → route falls back to dynamic (per-request) rendering instead of being prerendered; add `generateStaticParams` to prerender at build time when the segment's data is public, relatively stable, and bounded in count.
+- **Slow networks** → prefetch may not finish before click; use the `useLinkStatus` hook to show a (debounced) pending indicator during the transition.
+- **Disabling prefetching** (`<Link prefetch={false}>`) saves resources for large link lists (e.g. infinite scroll) but static routes then fetch only on click and dynamic routes must render server-side first; a middle ground is prefetch-on-hover only.
+- **Hydration not completed** — `<Link>` is a Client Component and needs hydration before it can prefetch; reduce bundle size (`@next/bundle-analyzer`) and move logic server-side where possible.
+
+### Native History API
+- `window.history.pushState`/`replaceState` integrate with the Next.js router (sync with `usePathname`/`useSearchParams`) but are pure client-side browser APIs: they only change the URL — **no request to the Next.js server, and the Server Component (`page.tsx`) does NOT re-run**. Only already-rendered Client Components using `useSearchParams`/`usePathname` re-render to reflect the new URL.
+- Use `pushState` for reversible URL-only state (adds a history entry, e.g. client-side sort where data is already loaded).
+- Use `replaceState` for non-reversible URL-only state (replaces current entry, e.g. locale switch, skipping intermediate wizard steps in back-navigation).
+- Contrast: Next.js's own `router.push()` (from `useRouter`, `next/navigation`) DOES send a request to the Next.js server and DOES re-run `page.tsx` with new `searchParams` — this is the correct choice whenever fresh server/backend data (e.g. an Express API call) is needed in response to a client action (e.g. applying a dashboard filter). History API is only appropriate when no new server data is needed.
+
+## Server and Client Components
+
+- Layouts/pages are **Server Components** by default (data fetching, secrets/API keys, less client JS, better FCP + streaming). Add `"use client"` only where interactivity/browser APIs/hooks are needed (state, event handlers, `useEffect`, `localStorage`/`window`, custom hooks).
+- **Project pattern (this app)**: `page.tsx`/`layout.tsx` stay Server Components that fetch data (via `apiClient` → Express) and pass it as props to a Client Component that renders the interactive UI (e.g. `admin/layout.tsx` → `getMeQuery()` → `AppLayoutShell`). This matches the docs' recommended split and is the preferred pattern going forward.
+- `"use client"` marks a **boundary**: everything that file imports/renders directly joins the client bundle — no need to re-mark every child. Exception: Server Components passed as `children`/props to a Client Component are NOT pulled into the client bundle; they're rendered server-side and only their output crosses the boundary (the "interleaving" pattern, e.g. `<Modal><Cart /></Modal>`).
+- Rendering pipeline: Server Components → RSC Payload (serialized tree + Client Component placeholders/props) → used to prerender HTML. First load: HTML shown immediately, RSC Payload reconciles the tree, JS hydrates Client Components. Later navigations: RSC Payload is prefetched/cached, Client Components render fully client-side.
+- React Context isn't supported in Server Components — wrap it in a small Client Component provider and render it as deep in the tree as possible (not around `<html>`), so Next.js can still statically optimize the rest.
+- Third-party components that use client-only features (state, hooks) but lack `"use client"` must be wrapped in your own `"use client"` file before using them in a Server Component.
+- **Critical for this stack (Express backend)**: any module making Express calls with secrets/tokens (e.g. `src/lib/apiClient.ts`) should `import "server-only"` at the top — this causes a build-time error if ever imported into a Client Component, preventing secret leakage. Only `NEXT_PUBLIC_`-prefixed env vars are safe to reach the client bundle.
+
+## Runtime APIs with cached functions
+
+- `cookies()`, `headers()`, `searchParams`, `params` are only known at request time, not build time. A component reading them directly must be wrapped in `<Suspense>` (it can't be part of the static prerendered shell).
+- To cache a result that depends on one of these, two options: (1) `"use cache: private"` on the function itself — lets it read cookies/headers directly and still be cached, scoped per-user (this project's `getMeQuery` pattern — simplest, no `<Suspense>` needed). (2) Extract the runtime value in a small non-cached wrapper component, then pass just that value as a prop into a separately `"use cache"`-marked function — the value becomes part of the cache key. Use this when you want only a specific extracted value (not the whole cookie/request) to determine the cache entry.
+- **Use case**: any per-user cached fetch that depends on the session cookie (e.g. `getMeQuery` → `/auth/me`) is the "use cache: private" case — prefer it for simplicity over the extract-and-pass pattern unless you specifically need a narrower cache key.
+
+## Random values & timestamps
+
+- `Math.random()`, `Date.now()`, `crypto.randomUUID()` are non-deterministic — calling them in a Server Component needs an explicit choice about caching behavior, otherwise the result may get frozen at build time and served identically to everyone.
+- **Need a fresh value per request/user** (e.g. a per-request random ID): call `connection()` before generating it, and wrap the component in `<Suspense>` — this opts the component into dynamic (request-time) execution instead of build-time.
+- **Need the same value shared across users until it changes** (e.g. a "quote of the day"): generate it inside a `"use cache"` function with an appropriate `cacheLife` — it computes once and is reused for all requests until the cache entry expires.
+- **Use case**: not currently used in this app (OTP/token randomness happens on the Express backend, not in Next.js) — relevant if a future feature generates any random/time-based value directly in a Server Component (e.g. a client-tracking ID, A/B test variant assignment).
