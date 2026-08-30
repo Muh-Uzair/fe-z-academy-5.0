@@ -1,7 +1,7 @@
 import "server-only";
 import { cacheTag, cacheLife } from "next/cache";
 import { redirect } from "next/navigation";
-import { apiClient } from "@/utils/apiClient";
+import { apiClient } from "@/lib/apiClient";
 import { AUTH_TAGS } from "./tags";
 import type { GetMeResponse } from "@/response-types/authResponseTypes";
 

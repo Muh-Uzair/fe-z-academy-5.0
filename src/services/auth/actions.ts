@@ -1,6 +1,6 @@
 "use server";
 
-import { apiClient } from "@/utils/apiClient";
+import { apiClient } from "@/lib/apiClient";
 import { updateTag } from "next/cache";
 import { cookies } from "next/headers";
 import { parseSetCookie } from "next/dist/compiled/@edge-runtime/cookies";
