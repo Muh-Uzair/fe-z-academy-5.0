@@ -57,6 +57,7 @@ const InstructorDetails = ({ instructor }: InstructorDetailsProps) => {
       <PageHeader
         pageHeading="Instructor Details"
         pageDescription="Review instructor profile details and manage instructor verification status."
+        backButton
       />
 
       <div className="grid gap-4 lg:grid-cols-3">
