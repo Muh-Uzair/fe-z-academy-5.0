@@ -8,6 +8,21 @@ import type {
   GetInstructorOnboardingLinkResponse,
 } from "@/response-types/userResponseTypes";
 
+// Each query below throws on a non-success response instead of returning it,
+// so the resolved type only ever needs to describe the success shape.
+type GetInstructorsSuccessResponse = Extract<
+  GetInstructorsResponse,
+  { status: "success" }
+>;
+type GetUserDetailsSuccessResponse = Extract<
+  GetUserDetailsResponse,
+  { status: "success" }
+>;
+type GetInstructorOnboardingLinkSuccessResponse = Extract<
+  GetInstructorOnboardingLinkResponse,
+  { status: "success" }
+>;
+
 type GetInstructorsParams = {
   isVerified?: "true" | "false";
   search?: string;
@@ -39,7 +54,7 @@ function buildQueryString(params: Record<string, string | number | undefined>) {
  */
 export async function getInstructorsQuery(
   params: GetInstructorsParams = {},
-): Promise<GetInstructorsResponse> {
+): Promise<GetInstructorsSuccessResponse> {
   "use cache: private";
   cacheTag(USER_TAGS.instructors);
   cacheLife("minutes");
@@ -71,7 +86,7 @@ export async function getInstructorsQuery(
 export async function getUserDetailsQuery(
   id: string,
   role?: "student" | "instructor" | "admin",
-): Promise<GetUserDetailsResponse> {
+): Promise<GetUserDetailsSuccessResponse> {
   "use cache: private";
   cacheTag(USER_TAGS.userDetails(id));
   cacheLife("minutes");
@@ -100,7 +115,7 @@ export async function getUserDetailsQuery(
  * Intentionally NOT cached — the link is single-use/short-lived per
  * Stripe's rules, a new one must be requested every time.
  */
-export async function getInstructorOnboardingLinkQuery(): Promise<GetInstructorOnboardingLinkResponse> {
+export async function getInstructorOnboardingLinkQuery(): Promise<GetInstructorOnboardingLinkSuccessResponse> {
   try {
     const res = await apiClient("/users/get-instructor-onboarding-link", {
       method: "GET",

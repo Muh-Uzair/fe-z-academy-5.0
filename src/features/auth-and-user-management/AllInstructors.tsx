@@ -1,86 +1,118 @@
 "use client";
 
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { User } from "lucide-react";
 
 import AppButton from "@/components/AppButton";
-
-import { Role } from "@/types/userTypes";
 
 import PageFlexCol from "@/components/PageFlexCol";
 import AppSearchBar from "@/components/AppSearchBar";
 import TableImage from "@/components/TableImage";
-import { Badge } from "@/components/ui/badge";
-import { useRouter } from "next/navigation";
+import InstructorVerificationBadge from "@/components/InstructorVerificationBadge";
 import PageHeader from "@/components/PageHeader";
 import AppTable from "@/components/AppTable";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import type {
+  Pagination,
+  UserDetails,
+} from "@/response-types/userResponseTypes";
 
-const data = [
-  {
-    _id: "6823f1a9c1d2e3f4a5b6c701",
-    fullName: "Liam Anderson",
-    email: "liam.anderson@example.com",
-    highestEducation: "BS Computer Science",
-    yearsOfExperience: 5,
-    avatar: "https://randomuser.me/api/portraits/men/1.jpg",
-    isVerified: false,
-    role: Role.Instructor,
-  },
-  {
-    _id: "6823f1a9c1d2e3f4a5b6c702",
-    fullName: "Emma Johnson",
-    email: "emma.johnson@example.com",
-    highestEducation: "BS Software Engineering",
-    yearsOfExperience: 3,
-    avatar: "https://randomuser.me/api/portraits/women/2.jpg",
-    isVerified: false,
-    role: Role.Instructor,
-  },
-  {
-    _id: "6823f1a9c1d2e3f4a5b6c703",
-    fullName: "Noah Williams",
-    email: "noah.williams@example.com",
-    highestEducation: "MS Computer Science",
-    yearsOfExperience: 7,
-    avatar: "https://randomuser.me/api/portraits/men/3.jpg",
-    isVerified: false,
-    role: Role.Instructor,
-  },
-];
+type IsVerifiedFilter = "all" | "true" | "false";
 
-const AllInstructors = () => {
-  const [search, setSearch] = useState("");
+type AllInstructorsProps = {
+  instructors: UserDetails[];
+  pagination: Pagination;
+  search: string;
+  isVerified: IsVerifiedFilter;
+};
+
+// CMP CMP CMP
+const AllInstructors = ({
+  instructors,
+  pagination,
+  search,
+  isVerified,
+}: AllInstructorsProps) => {
+  // VARS
   const router = useRouter();
 
-  const filteredData = data.filter((user) => {
-    return (
-      user.fullName.toLowerCase().includes(search.toLowerCase()) ||
-      user.email.toLowerCase().includes(search.toLowerCase())
-    );
-  });
+  // FUNCTIONS
+  const updateQuery = (next: {
+    search?: string;
+    page?: number;
+    isVerified?: IsVerifiedFilter;
+  }) => {
+    const nextSearch = next.search ?? search;
+    const nextPage = next.page ?? pagination.page ?? 1;
+    const nextIsVerified = next.isVerified ?? isVerified;
 
+    const searchParams = new URLSearchParams();
+    if (nextSearch) searchParams.set("search", nextSearch);
+    if (nextIsVerified !== "all") searchParams.set("isVerified", nextIsVerified);
+    if (nextPage > 1) searchParams.set("page", String(nextPage));
+
+    const query = searchParams.toString();
+    router.push(
+      `/admin/instructors/all-instructors${query ? `?${query}` : ""}`,
+    );
+  };
+
+  // JSX JSX JSX
   return (
     <PageFlexCol>
       <PageHeader
-        pageHeading="Pending Instructor Verifications"
-        pageDescription="Review and manage instructor applications awaiting approval."
+        pageHeading="All Instructors"
+        pageDescription="Browse and manage every instructor account on the platform."
       />
 
       <AppTable
         upperHeader={
-          <div className="max-w-sm">
-            <AppSearchBar
-              placeholder="Search instructors by name or email..."
-              onChange={(value: string) => setSearch(value)}
-            />
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="max-w-sm flex-1">
+              <AppSearchBar
+                placeholder="Search instructors by name or email..."
+                defaultValue={search}
+                onChange={(value: string) =>
+                  updateQuery({ search: value, page: 1 })
+                }
+              />
+            </div>
+
+            <Select
+              value={isVerified}
+              onValueChange={(value: IsVerifiedFilter) =>
+                updateQuery({ isVerified: value, page: 1 })
+              }
+            >
+              <SelectTrigger className="w-[160px]">
+                <SelectValue placeholder="Verification status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All statuses</SelectItem>
+                <SelectItem value="true">Verified</SelectItem>
+                <SelectItem value="false">Not verified</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         }
-        data={filteredData}
+        data={instructors}
         columns={[
           {
             key: "avatar",
             label: "Avatar",
             render: (value: string, row: { fullName: string }) => (
-              <TableImage src={value} alt={row.fullName} shape="circle" />
+              <TableImage
+                src={value}
+                alt={row.fullName}
+                shape="circle"
+                fallbackIcon={User}
+              />
             ),
           },
           {
@@ -107,10 +139,7 @@ const AllInstructors = () => {
             key: "isVerified",
             label: "Verified",
             render: (value: boolean) => (
-              <>
-                {!value && <Badge variant="destructive">Not verified</Badge>}
-                {value && <Badge>Verified</Badge>}
-              </>
+              <InstructorVerificationBadge isVerified={value} />
             ),
           },
           {
@@ -127,7 +156,9 @@ const AllInstructors = () => {
               <div className="text-right">
                 <AppButton
                   onClick={() =>
-                    router.push("/admin/instructors/instructor-details/1")
+                    router.push(
+                      `/admin/instructors/instructor-details/${row._id}`,
+                    )
                   }
                 >
                   View
@@ -137,6 +168,8 @@ const AllInstructors = () => {
           },
         ]}
         pagination={true}
+        paginationMeta={pagination}
+        onPageChange={(page) => updateQuery({ page })}
       />
     </PageFlexCol>
   );

@@ -1,3 +1,4 @@
+import type { LucideIcon } from "lucide-react";
 import { cn } from "@/utils/cn";
 
 type TableImageShape = "circle" | "rectangle" | "square";
@@ -7,6 +8,7 @@ interface TableImageProps {
   alt: string;
   shape?: TableImageShape;
   className?: string;
+  fallbackIcon?: LucideIcon;
 }
 
 const shapeClasses: Record<TableImageShape, string> = {
@@ -20,14 +22,29 @@ const TableImage = ({
   alt,
   shape = "square",
   className,
+  fallbackIcon: FallbackIcon,
 }: TableImageProps) => {
   const imageClasses = cn(
-    "object-cover bg-gray-200",
+    "object-cover bg-stone-100/70",
     shapeClasses[shape],
-    className
+    className,
   );
 
   if (!src) {
+    if (FallbackIcon) {
+      return (
+        <div
+          aria-hidden="true"
+          className={cn(
+            "flex items-center justify-center text-stone-100",
+            imageClasses,
+          )}
+        >
+          <FallbackIcon className="h-1/2 w-1/2" />
+        </div>
+      );
+    }
+
     return <div aria-hidden="true" className={imageClasses} />;
   }
 

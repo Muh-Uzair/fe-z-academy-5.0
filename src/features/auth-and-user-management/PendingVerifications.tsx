@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { User } from "lucide-react";
 
 import AppButton from "@/components/AppButton";
 
@@ -84,7 +85,12 @@ const PendingVerifications = ({
             key: "avatar",
             label: "Avatar",
             render: (value: string, row: { fullName: string }) => (
-              <TableImage src={value} alt={row.fullName} shape="circle" />
+              <TableImage
+                src={value}
+                alt={row.fullName}
+                shape="circle"
+                fallbackIcon={User}
+              />
             ),
           },
           {

@@ -398,11 +398,13 @@ const AppLayoutShell = ({ role, user, children }: AppLayoutShellProps) => {
                   "p-2 shrink-0 rounded-xl transition-colors group-data-[collapsible=icon]:w-full group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center",
                   isSignoutLoading
                     ? "opacity-50 cursor-not-allowed text-muted-foreground"
-                    : "text-muted-foreground hover:text-red-600 hover:bg-red-50"
+                    : "text-muted-foreground hover:text-red-600 hover:bg-red-50",
                 )}
                 title="Sign out"
               >
-                <LogOut className={cn("size-5", isSignoutLoading && "animate-pulse")} />
+                <LogOut
+                  className={cn("size-5", isSignoutLoading && "animate-pulse")}
+                />
               </button>
             </div>
           </SidebarFooter>
