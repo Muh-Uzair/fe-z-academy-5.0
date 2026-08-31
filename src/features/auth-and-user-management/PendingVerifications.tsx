@@ -38,14 +38,10 @@ const PendingVerifications = ({
   // FUNCTIONS
   const handleVerify = async (id: string) => {
     setVerifyingId(id);
-    const response = await runVerifyAction(() =>
+    await runVerifyAction(() =>
       updateUserVerificationAction(id, "instructor", { isVerified: true }),
     );
     setVerifyingId(null);
-
-    if (response && response.status === "success") {
-      router.refresh();
-    }
   };
 
   const updateQuery = (next: { search?: string; page?: number }) => {
@@ -74,7 +70,7 @@ const PendingVerifications = ({
         upperHeader={
           <div className="max-w-sm">
             <AppSearchBar
-              placeholder="Search instructors by name or email..."
+              placeholder="Search instructors by full name or email..."
               defaultValue={search}
               onChange={(value: string) =>
                 updateQuery({ search: value, page: 1 })
