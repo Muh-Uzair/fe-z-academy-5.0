@@ -18,9 +18,7 @@ type GetInstructorsParams = {
   sortOrder?: "asc" | "desc";
 };
 
-function buildQueryString(
-  params: Record<string, string | number | undefined>,
-) {
+function buildQueryString(params: Record<string, string | number | undefined>) {
   const searchParams = new URLSearchParams();
 
   for (const [key, value] of Object.entries(params)) {
@@ -47,11 +45,21 @@ export async function getInstructorsQuery(
   cacheLife("minutes");
 
   const query = buildQueryString(params);
-  const res = await apiClient(`/users/instructors${query}`, {
-    method: "GET",
-  });
 
-  return res.json();
+  try {
+    const res = await apiClient(`/users/instructors${query}`, {
+      method: "GET",
+    });
+    const json: GetInstructorsResponse = await res.json();
+
+    if (json.status !== "success") {
+      throw new Error(json.message);
+    }
+
+    return json;
+  } catch (err) {
+    throw err;
+  }
 }
 
 /**
@@ -69,11 +77,22 @@ export async function getUserDetailsQuery(
   cacheLife("minutes");
 
   const query = buildQueryString({ role });
-  const res = await apiClient(`/users/user/${id}${query}`, {
-    method: "GET",
-  });
 
-  return res.json();
+  try {
+    const res = await apiClient(`/users/user/${id}${query}`, {
+      method: "GET",
+    });
+    const json: GetUserDetailsResponse = await res.json();
+
+    if (json.status !== "success") {
+      throw new Error(json.message);
+    }
+
+    return json;
+  } catch (err) {
+    console.error("getUserDetailsQuery failed:", err);
+    throw err;
+  }
 }
 
 /**
@@ -82,9 +101,19 @@ export async function getUserDetailsQuery(
  * Stripe's rules, a new one must be requested every time.
  */
 export async function getInstructorOnboardingLinkQuery(): Promise<GetInstructorOnboardingLinkResponse> {
-  const res = await apiClient("/users/get-instructor-onboarding-link", {
-    method: "GET",
-  });
+  try {
+    const res = await apiClient("/users/get-instructor-onboarding-link", {
+      method: "GET",
+    });
+    const json: GetInstructorOnboardingLinkResponse = await res.json();
 
-  return res.json();
+    if (json.status !== "success") {
+      throw new Error(json.message);
+    }
+
+    return json;
+  } catch (err) {
+    console.error("getInstructorOnboardingLinkQuery failed:", err);
+    throw err;
+  }
 }

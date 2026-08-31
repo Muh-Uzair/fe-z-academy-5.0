@@ -14,9 +14,21 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import type { AuthUser } from "@/response-types/authResponseTypes";
 
-const PublicNavbar = () => {
+const DASHBOARD_PATH_BY_ROLE: Record<AuthUser["role"], string> = {
+  admin: "/admin/dashboard",
+  instructor: "/instructor/dashboard",
+  student: "/student/dashboard",
+};
+
+type PublicNavbarProps = {
+  user: AuthUser | null;
+};
+
+const PublicNavbar = ({ user }: PublicNavbarProps) => {
   const pathname = usePathname();
+  const dashboardPath = user ? DASHBOARD_PATH_BY_ROLE[user.role] : null;
 
   const isActive = (path: string) => {
     if (path === "/") {
@@ -36,7 +48,9 @@ const PublicNavbar = () => {
           href="/"
           className={cn(
             "relative py-2 transition-all duration-300 hover:text-primary",
-            isActive("/") ? "text-primary font-bold after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-primary after:rounded-full" : "text-muted-foreground"
+            isActive("/")
+              ? "text-primary font-bold after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-primary after:rounded-full"
+              : "text-muted-foreground",
           )}
         >
           Home
@@ -45,7 +59,9 @@ const PublicNavbar = () => {
           href="/courses"
           className={cn(
             "relative py-2 transition-all duration-300 hover:text-primary",
-            isActive("/courses") ? "text-primary font-bold after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-primary after:rounded-full" : "text-muted-foreground"
+            isActive("/courses")
+              ? "text-primary font-bold after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-primary after:rounded-full"
+              : "text-muted-foreground",
           )}
         >
           Courses
@@ -54,7 +70,9 @@ const PublicNavbar = () => {
           href="/about-us"
           className={cn(
             "relative py-2 transition-all duration-300 hover:text-primary",
-            isActive("/about-us") ? "text-primary font-bold after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-primary after:rounded-full" : "text-muted-foreground"
+            isActive("/about-us")
+              ? "text-primary font-bold after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-primary after:rounded-full"
+              : "text-muted-foreground",
           )}
         >
           About Us
@@ -65,12 +83,29 @@ const PublicNavbar = () => {
       <div className="flex items-center gap-3">
         {/* Desktop Auth */}
         <div className="hidden md:flex items-center gap-3">
-          <Link href="/signin">
-            <Button variant="ghost" className="hover:text-primary hover:bg-primary/10 transition-colors">Sign In</Button>
-          </Link>
-          <Link href="/signup">
-            <Button className="shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-all">Sign Up</Button>
-          </Link>
+          {dashboardPath ? (
+            <Link href={dashboardPath}>
+              <Button className="shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-all">
+                Dashboard
+              </Button>
+            </Link>
+          ) : (
+            <>
+              <Link href="/signin">
+                <Button
+                  variant="ghost"
+                  className="hover:text-primary hover:bg-primary/10 transition-colors"
+                >
+                  Sign In
+                </Button>
+              </Link>
+              <Link href="/signup">
+                <Button className="shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-all">
+                  Sign Up
+                </Button>
+              </Link>
+            </>
+          )}
         </div>
 
         {/* Mobile Dropdown */}
@@ -83,21 +118,67 @@ const PublicNavbar = () => {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuItem asChild>
-                <Link href="/" className={cn("w-full cursor-pointer", isActive("/") && "bg-primary/10 text-primary font-bold")}>Home</Link>
+                <Link
+                  href="/"
+                  className={cn(
+                    "w-full cursor-pointer",
+                    isActive("/") && "bg-primary/10 text-primary font-bold",
+                  )}
+                >
+                  Home
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link href="/courses" className={cn("w-full cursor-pointer", isActive("/courses") && "bg-primary/10 text-primary font-bold")}>Courses</Link>
+                <Link
+                  href="/courses"
+                  className={cn(
+                    "w-full cursor-pointer",
+                    isActive("/courses") &&
+                      "bg-primary/10 text-primary font-bold",
+                  )}
+                >
+                  Courses
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link href="/about-us" className={cn("w-full cursor-pointer", isActive("/about-us") && "bg-primary/10 text-primary font-bold")}>About Us</Link>
+                <Link
+                  href="/about-us"
+                  className={cn(
+                    "w-full cursor-pointer",
+                    isActive("/about-us") &&
+                      "bg-primary/10 text-primary font-bold",
+                  )}
+                >
+                  About Us
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <Link href="/signin" className="w-full cursor-pointer">Sign In</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href="/signup" className="w-full cursor-pointer font-bold text-primary">Sign Up</Link>
-              </DropdownMenuItem>
+              {dashboardPath ? (
+                <DropdownMenuItem asChild>
+                  <Link
+                    href={dashboardPath}
+                    className="w-full cursor-pointer font-bold text-primary"
+                  >
+                    Dashboard
+                  </Link>
+                </DropdownMenuItem>
+              ) : (
+                <>
+                  <DropdownMenuItem asChild>
+                    <Link href="/signin" className="w-full cursor-pointer">
+                      Sign In
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link
+                      href="/signup"
+                      className="w-full cursor-pointer font-bold text-primary"
+                    >
+                      Sign Up
+                    </Link>
+                  </DropdownMenuItem>
+                </>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

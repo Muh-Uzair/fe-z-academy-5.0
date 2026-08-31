@@ -12,6 +12,7 @@ import CourseCard from "@/components/CourseCard";
 import { Badge } from "@/components/ui/badge";
 
 import { coursesData as mockCourses } from "@/dummy-data/coursesData";
+import type { AuthUser } from "@/response-types/authResponseTypes";
 
 const categories = [
   { name: "Development", icon: <MonitorPlay className="h-6 w-6" />, count: "1.2k Courses" },
@@ -20,12 +21,16 @@ const categories = [
   { name: "Marketing", icon: <Award className="h-6 w-6" />, count: "400 Courses" },
 ];
 
-export default function Home() {
+type HomeProps = {
+  user: AuthUser | null;
+};
+
+export default function Home({ user }: HomeProps) {
   const [search, setSearch] = useState("");
 
   return (
     <div className="w-full min-h-screen flex flex-col bg-background overflow-x-hidden">
-      <PublicNavbar />
+      <PublicNavbar user={user} />
 
       {/* Modern Hero Section */}
       <section className="relative w-full pt-20 pb-24 lg:pb-32 overflow-hidden">
