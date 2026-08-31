@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Search } from "lucide-react";
 
@@ -27,13 +27,21 @@ const AppSearchBar = ({
 }: AppSearchBarProps) => {
   const [search, setSearch] = useState(defaultValue);
 
+  // Keep the latest onChange without making it a timer dependency — callers
+  // often pass a new inline function on every render, which would otherwise
+  // restart the debounce and re-fire onChange with a stale search value.
+  const onChangeRef = useRef(onChange);
+  useEffect(() => {
+    onChangeRef.current = onChange;
+  }, [onChange]);
+
   useEffect(() => {
     const timeout = setTimeout(() => {
-      onChange?.(search);
+      onChangeRef.current?.(search);
     }, debounceTime);
 
     return () => clearTimeout(timeout);
-  }, [search, debounceTime, onChange]);
+  }, [search, debounceTime]);
 
   return (
     <div className={cn("relative", className)}>

@@ -12,6 +12,15 @@ import {
 
 import { Button } from "@/components/ui/button";
 
+interface PaginationMeta {
+  page: number;
+  limit: number;
+  totalDocuments: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
+}
+
 interface AppTableProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   columns?: any[];
@@ -19,6 +28,8 @@ interface AppTableProps {
   data?: any[];
   upperHeader?: ReactNode;
   pagination?: boolean;
+  paginationMeta?: PaginationMeta;
+  onPageChange?: (page: number) => void;
 }
 
 const AppTable = ({
@@ -26,6 +37,8 @@ const AppTable = ({
   data = [],
   upperHeader = null,
   pagination = false,
+  paginationMeta,
+  onPageChange,
 }: AppTableProps) => {
   return (
     <div className="flex flex-col w-full min-w-0">
@@ -62,14 +75,35 @@ const AppTable = ({
         </Table>
       </div>
 
-      {pagination && (
+      {pagination && paginationMeta && (
         <div className="shrink-0 flex justify-between items-center">
           <span className="text-sm text-muted-foreground">
-            Showing 1–5 of 24
+            Showing{" "}
+            {paginationMeta.totalDocuments === 0
+              ? 0
+              : (paginationMeta.page - 1) * paginationMeta.limit + 1}
+            –
+            {Math.min(
+              paginationMeta.page * paginationMeta.limit,
+              paginationMeta.totalDocuments,
+            )}{" "}
+            of {paginationMeta.totalDocuments}
           </span>
           <div className="flex gap-2">
-            <Button variant="outline">Previous</Button>
-            <Button variant="outline">Next</Button>
+            <Button
+              variant="outline"
+              disabled={!paginationMeta.hasPrevPage}
+              onClick={() => onPageChange?.(paginationMeta.page - 1)}
+            >
+              Previous
+            </Button>
+            <Button
+              variant="outline"
+              disabled={!paginationMeta.hasNextPage}
+              onClick={() => onPageChange?.(paginationMeta.page + 1)}
+            >
+              Next
+            </Button>
           </div>
         </div>
       )}

@@ -1,10 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 import AppButton from "@/components/AppButton";
-
-import { Role } from "@/types/userTypes";
 
 import PageFlexCol from "@/components/PageFlexCol";
 import AppSearchBar from "@/components/AppSearchBar";
@@ -12,49 +11,53 @@ import TableImage from "@/components/TableImage";
 import { Badge } from "@/components/ui/badge";
 import PageHeader from "@/components/PageHeader";
 import AppTable from "@/components/AppTable";
+import useClientAction from "@/hooks/useClientAction";
+import { updateUserVerificationAction } from "@/services/user/actions";
+import type {
+  Pagination,
+  UserDetails,
+} from "@/response-types/userResponseTypes";
 
-const data = [
-  {
-    _id: "6823f1a9c1d2e3f4a5b6c701",
-    fullName: "Liam Anderson",
-    email: "liam.anderson@example.com",
-    highestEducation: "BS Computer Science",
-    yearsOfExperience: 5,
-    avatar: "https://randomuser.me/api/portraits/men/1.jpg",
-    isVerified: false,
-    role: Role.Instructor,
-  },
-  {
-    _id: "6823f1a9c1d2e3f4a5b6c702",
-    fullName: "Emma Johnson",
-    email: "emma.johnson@example.com",
-    highestEducation: "BS Software Engineering",
-    yearsOfExperience: 3,
-    avatar: "https://randomuser.me/api/portraits/women/2.jpg",
-    isVerified: false,
-    role: Role.Instructor,
-  },
-  {
-    _id: "6823f1a9c1d2e3f4a5b6c703",
-    fullName: "Noah Williams",
-    email: "noah.williams@example.com",
-    highestEducation: "MS Computer Science",
-    yearsOfExperience: 7,
-    avatar: "https://randomuser.me/api/portraits/men/3.jpg",
-    isVerified: false,
-    role: Role.Instructor,
-  },
-];
+type PendingVerificationsProps = {
+  instructors: UserDetails[];
+  pagination: Pagination | null;
+  search: string;
+};
 
-const PendingVerifications = () => {
-  const [search, setSearch] = useState("");
+const PendingVerifications = ({
+  instructors,
+  pagination,
+  search,
+}: PendingVerificationsProps) => {
+  const router = useRouter();
+  const { run: runVerifyAction, isLoading: isVerifying } = useClientAction();
+  const [verifyingId, setVerifyingId] = useState<string | null>(null);
 
-  const filteredData = data.filter((user) => {
-    return (
-      user.fullName.toLowerCase().includes(search.toLowerCase()) ||
-      user.email.toLowerCase().includes(search.toLowerCase())
+  const handleVerify = async (id: string) => {
+    setVerifyingId(id);
+    const response = await runVerifyAction(() =>
+      updateUserVerificationAction(id, "instructor", { isVerified: true }),
     );
-  });
+    setVerifyingId(null);
+
+    if (response && response.status === "success") {
+      router.refresh();
+    }
+  };
+
+  const updateQuery = (next: { search?: string; page?: number }) => {
+    const nextSearch = next.search ?? search;
+    const nextPage = next.page ?? pagination?.page ?? 1;
+
+    const searchParams = new URLSearchParams();
+    if (nextSearch) searchParams.set("search", nextSearch);
+    if (nextPage > 1) searchParams.set("page", String(nextPage));
+
+    const query = searchParams.toString();
+    router.push(
+      `/admin/instructors/pending-verifications${query ? `?${query}` : ""}`,
+    );
+  };
 
   return (
     <PageFlexCol>
@@ -68,11 +71,14 @@ const PendingVerifications = () => {
           <div className="max-w-sm">
             <AppSearchBar
               placeholder="Search instructors by name or email..."
-              onChange={(value: string) => setSearch(value)}
+              defaultValue={search}
+              onChange={(value: string) =>
+                updateQuery({ search: value, page: 1 })
+              }
             />
           </div>
         }
-        data={filteredData}
+        data={instructors}
         columns={[
           {
             key: "avatar",
@@ -123,7 +129,11 @@ const PendingVerifications = () => {
             label: "Action",
             render: (_: unknown, row: { _id: string }) => (
               <div className="text-right">
-                <AppButton onClick={() => console.log("verify", row._id)}>
+                <AppButton
+                  onClick={() => handleVerify(row._id)}
+                  disabled={isVerifying}
+                  isLoading={isVerifying && verifyingId === row._id}
+                >
                   Verify
                 </AppButton>
               </div>
@@ -131,6 +141,8 @@ const PendingVerifications = () => {
           },
         ]}
         pagination={true}
+        paginationMeta={pagination ?? undefined}
+        onPageChange={(page) => updateQuery({ page })}
       />
     </PageFlexCol>
   );
