@@ -8,7 +8,7 @@ import AppButton from "@/components/AppButton";
 import PageFlexCol from "@/components/PageFlexCol";
 import AppSearchBar from "@/components/AppSearchBar";
 import TableImage from "@/components/TableImage";
-import { Badge } from "@/components/ui/badge";
+import InstructorVerificationBadge from "@/components/InstructorVerificationBadge";
 import PageHeader from "@/components/PageHeader";
 import AppTable from "@/components/AppTable";
 import useClientAction from "@/hooks/useClientAction";
@@ -24,15 +24,18 @@ type PendingVerificationsProps = {
   search: string;
 };
 
+// CMP CMP CMP
 const PendingVerifications = ({
   instructors,
   pagination,
   search,
 }: PendingVerificationsProps) => {
+  // VARS
   const router = useRouter();
   const { run: runVerifyAction, isLoading: isVerifying } = useClientAction();
   const [verifyingId, setVerifyingId] = useState<string | null>(null);
 
+  // FUNCTIONS
   const handleVerify = async (id: string) => {
     setVerifyingId(id);
     const response = await runVerifyAction(() =>
@@ -59,6 +62,7 @@ const PendingVerifications = ({
     );
   };
 
+  // JSX JSX JSX
   return (
     <PageFlexCol>
       <PageHeader
@@ -111,10 +115,7 @@ const PendingVerifications = ({
             key: "isVerified",
             label: "Verified",
             render: (value: boolean) => (
-              <>
-                {!value && <Badge variant="destructive">Not verified</Badge>}
-                {value && <Badge>Verified</Badge>}
-              </>
+              <InstructorVerificationBadge isVerified={value} />
             ),
           },
           {
