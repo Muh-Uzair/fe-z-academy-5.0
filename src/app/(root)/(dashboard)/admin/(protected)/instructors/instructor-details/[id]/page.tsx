@@ -1,10 +1,17 @@
-import InstructorDetails from '@/features/auth-and-user-management/InstructorDetails'
-import React from 'react'
+import InstructorDetails from "@/features/auth-and-user-management/InstructorDetails";
+import { getUserDetailsQuery } from "@/services/user/queries";
 
-const AdminInstructorDetailsPage = () => {
-  return (
-    <InstructorDetails />
-  )
-}
+type InstructorDetailsPageProps = {
+  params: Promise<{ id: string }>;
+};
 
-export default AdminInstructorDetailsPage
+const AdminInstructorDetailsPage = async ({
+  params,
+}: InstructorDetailsPageProps) => {
+  const { id } = await params;
+  const response = await getUserDetailsQuery(id, "instructor");
+
+  return <InstructorDetails instructor={response.data.user} />;
+};
+
+export default AdminInstructorDetailsPage;

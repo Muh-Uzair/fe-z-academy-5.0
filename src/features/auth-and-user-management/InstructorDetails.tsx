@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { User } from "lucide-react";
 
 import PageFlexCol from "@/components/PageFlexCol";
 import PageHeader from "@/components/PageHeader";
 
 import { Badge } from "@/components/ui/badge";
+import InstructorVerificationBadge from "@/components/InstructorVerificationBadge";
 import AppButton from "@/components/AppButton";
 import {
   Card,
@@ -15,21 +17,39 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
+import TableImage from "@/components/TableImage";
+import useClientAction from "@/hooks/useClientAction";
+import { updateUserVerificationAction } from "@/services/user/actions";
+import type { UserDetails } from "@/response-types/userResponseTypes";
 
-import { Role } from "@/types/userTypes";
+type InstructorDetailsProps = {
+  instructor: UserDetails;
+};
 
-import { usersData } from "@/dummy-data/usersData";
-
-const dummyInstructor = usersData.find(u => u.role === Role.Instructor) || usersData[0];
-
-const InstructorDetails = () => {
+const InstructorDetails = ({ instructor }: InstructorDetailsProps) => {
   const [verificationReason, setVerificationReason] = useState("");
+  const { run: runRejectAction, isLoading: isRejecting } = useClientAction();
+  const { run: runVerifyAction, isLoading: isVerifying } = useClientAction();
 
-  const handleCancelVerification = () => {
-    console.log("cancel verification", {
-      instructorId: dummyInstructor._id,
-      verificationReason,
-    });
+  const handleCancelVerification = async () => {
+    const response = await runRejectAction(() =>
+      updateUserVerificationAction(instructor._id, "instructor", {
+        isVerified: false,
+        verificationRejectionReason: verificationReason,
+      }),
+    );
+
+    if (response && response.status === "success") {
+      setVerificationReason("");
+    }
+  };
+
+  const handleVerify = async () => {
+    await runVerifyAction(() =>
+      updateUserVerificationAction(instructor._id, "instructor", {
+        isVerified: true,
+      }),
+    );
   };
 
   return (
@@ -43,28 +63,30 @@ const InstructorDetails = () => {
         <Card className="lg:col-span-2">
           <CardHeader>
             <div className="flex items-start gap-4">
-              <img
-                src={dummyInstructor.avatar ?? ""}
-                alt={dummyInstructor.fullName}
-                className="h-20 w-20 rounded-full object-cover border"
+              <TableImage
+                src={instructor.avatar}
+                alt={instructor.fullName}
+                shape="circle"
+                fallbackIcon={User}
+                className="h-20 w-20 border"
               />
 
               <div className="space-y-2">
                 <div>
-                  <CardTitle>{dummyInstructor.fullName}</CardTitle>
+                  <CardTitle>{instructor.fullName}</CardTitle>
 
-                  <CardDescription>{dummyInstructor.email}</CardDescription>
+                  <CardDescription>{instructor.email}</CardDescription>
                 </div>
 
                 <div className="flex flex-wrap gap-2">
-                  <Badge>
-                    {dummyInstructor.isVerified ? "Verified" : "Not Verified"}
-                  </Badge>
+                  <InstructorVerificationBadge
+                    isVerified={instructor.isVerified}
+                  />
 
-                  <Badge variant="outline">{dummyInstructor.role}</Badge>
+                  <Badge variant="outline">{instructor.role}</Badge>
 
                   <Badge variant="outline">
-                    {dummyInstructor.yearsOfExperience} Years Experience
+                    {instructor.yearsOfExperience} Years Experience
                   </Badge>
                 </div>
               </div>
@@ -75,7 +97,7 @@ const InstructorDetails = () => {
             <div>
               <p className="text-sm text-muted-foreground mb-1">Bio</p>
 
-              <p className="text-sm leading-7">{dummyInstructor.bio}</p>
+              <p className="text-sm leading-7">{instructor.bio}</p>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
@@ -84,9 +106,7 @@ const InstructorDetails = () => {
                   Highest Education
                 </p>
 
-                <p className="font-medium">
-                  {dummyInstructor.highestEducation}
-                </p>
+                <p className="font-medium">{instructor.highestEducation}</p>
               </div>
 
               <div>
@@ -95,7 +115,7 @@ const InstructorDetails = () => {
                 </p>
 
                 <p className="font-medium">
-                  {dummyInstructor.yearsOfExperience} Years
+                  {instructor.yearsOfExperience} Years
                 </p>
               </div>
             </div>
@@ -114,7 +134,7 @@ const InstructorDetails = () => {
               </p>
 
               <p className="font-medium">
-                {dummyInstructor.isVerified
+                {instructor.isVerified
                   ? "Verified Instructor"
                   : "Pending Verification"}
               </p>
@@ -126,7 +146,7 @@ const InstructorDetails = () => {
               </p>
 
               <p className="font-medium">
-                {new Date(dummyInstructor.createdAt).toLocaleDateString()}
+                {new Date(instructor.createdAt).toLocaleDateString()}
               </p>
             </div>
 
@@ -134,50 +154,76 @@ const InstructorDetails = () => {
               <p className="text-sm text-muted-foreground mb-1">Last Updated</p>
 
               <p className="font-medium">
-                {new Date(dummyInstructor.updatedAt).toLocaleDateString()}
+                {new Date(instructor.updatedAt).toLocaleDateString()}
               </p>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Verification Management</CardTitle>
+      {instructor.isVerified ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>Verification Management</CardTitle>
 
-          <CardDescription>
-            Cancel instructor verification if the account no longer meets
-            platform requirements.
-          </CardDescription>
-        </CardHeader>
+            <CardDescription>
+              Cancel instructor verification if the account no longer meets
+              platform requirements.
+            </CardDescription>
+          </CardHeader>
 
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <p className="text-sm font-medium">Verification Rejection Reason</p>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <p className="text-sm font-medium">
+                Verification Rejection Reason
+              </p>
 
-            <Textarea
-              value={verificationReason}
-              onChange={(event) => setVerificationReason(event.target.value)}
-              placeholder="Explain why the instructor verification is being cancelled."
-              className="min-h-32"
-            />
+              <Textarea
+                value={verificationReason}
+                onChange={(event) => setVerificationReason(event.target.value)}
+                placeholder="Explain why the instructor verification is being cancelled."
+                className="min-h-32"
+              />
 
-            <p className="text-sm text-muted-foreground">
-              This message can later be shown to the instructor.
-            </p>
-          </div>
+              <p className="text-sm text-muted-foreground">
+                This message can later be shown to the instructor.
+              </p>
+            </div>
 
-          <div className="flex justify-end">
+            <div className="flex justify-end">
+              <AppButton
+                variant="destructive"
+                onClick={handleCancelVerification}
+                disabled={!verificationReason.trim() || isRejecting}
+                isLoading={isRejecting}
+              >
+                Cancel Verification
+              </AppButton>
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card>
+          <CardHeader>
+            <CardTitle>Verification Management</CardTitle>
+
+            <CardDescription>
+              This instructor is not verified yet. Approve their account to
+              give them access to instructor features.
+            </CardDescription>
+          </CardHeader>
+
+          <CardContent className="flex justify-end">
             <AppButton
-              variant="destructive"
-              onClick={handleCancelVerification}
-              disabled={!verificationReason.trim()}
+              onClick={handleVerify}
+              disabled={isVerifying}
+              isLoading={isVerifying}
             >
-              Cancel Verification
+              Verify Instructor
             </AppButton>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
     </PageFlexCol>
   );
 };

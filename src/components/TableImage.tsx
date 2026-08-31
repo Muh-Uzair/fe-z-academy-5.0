@@ -25,7 +25,7 @@ const TableImage = ({
   fallbackIcon: FallbackIcon,
 }: TableImageProps) => {
   const imageClasses = cn(
-    "object-cover bg-stone-100/70",
+    "object-cover bg-stone-100/80",
     shapeClasses[shape],
     className,
   );
@@ -36,7 +36,7 @@ const TableImage = ({
         <div
           aria-hidden="true"
           className={cn(
-            "flex items-center justify-center text-stone-100",
+            "flex items-center justify-center text-stone-300",
             imageClasses,
           )}
         >
