@@ -1,6 +1,7 @@
 import "server-only";
 import { cacheTag, cacheLife } from "next/cache";
 import { apiClient } from "@/lib/apiClient";
+import { buildQueryString } from "@/lib/buildQueryString";
 import { USER_TAGS } from "./tags";
 import type {
   GetInstructorsResponse,
@@ -32,19 +33,6 @@ type GetInstructorsParams = {
   sortBy?: string;
   sortOrder?: "asc" | "desc";
 };
-
-function buildQueryString(params: Record<string, string | number | undefined>) {
-  const searchParams = new URLSearchParams();
-
-  for (const [key, value] of Object.entries(params)) {
-    if (value !== undefined) {
-      searchParams.set(key, String(value));
-    }
-  }
-
-  const query = searchParams.toString();
-  return query ? `?${query}` : "";
-}
 
 /**
  * Admin only. Fetches a paginated, filterable, searchable list of

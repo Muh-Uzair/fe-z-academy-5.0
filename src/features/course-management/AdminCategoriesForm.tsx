@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Category as ICategory } from "@/types/categoryTypes";
+import type { Category } from "@/response-types/categoryResponseTypes";
 
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png"];
 
@@ -50,10 +50,11 @@ interface AdminCategorySubmitValues {
 
 interface AdminCategoriesFormProps {
   mode: AdminCategoryFormMode;
-  initialData?: ICategory | null;
+  initialData?: Category | null;
   onSubmit: (values: AdminCategorySubmitValues) => void;
   onClose: () => void;
   onModeChange?: (mode: Exclude<AdminCategoryFormMode, "create">) => void;
+  isLoading?: boolean;
 }
 
 const emptyValues: AdminCategoryFormValues = {
@@ -63,7 +64,7 @@ const emptyValues: AdminCategoryFormValues = {
 };
 
 const getDefaultValues = (
-  initialData?: ICategory | null,
+  initialData?: Category | null,
 ): AdminCategoryFormValues => ({
   name: initialData?.name ?? "",
   imageFile: undefined,
@@ -76,9 +77,10 @@ const AdminCategoriesForm = ({
   onSubmit,
   onClose,
   onModeChange,
+  isLoading = false,
 }: AdminCategoriesFormProps) => {
   const [previewUrl, setPreviewUrl] = useState<string | null>(
-    initialData?.image ?? null,
+    initialData?.imageUrl ?? null,
   );
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -120,9 +122,11 @@ const AdminCategoriesForm = ({
   };
 
   const handleSubmit = (values: AdminCategoryFormValues) => {
-    const imageUrl = previewUrl ?? initialData?.image ?? null;
+    const imageUrl = previewUrl ?? initialData?.imageUrl ?? null;
 
-    if (!imageUrl) {
+    // Only creating a category requires an image; editing keeps the
+    // existing image unless the admin explicitly chooses a new one.
+    if (mode === "create" && !imageUrl) {
       form.setError("imageFile", {
         type: "manual",
         message: "Category image is required.",
@@ -146,7 +150,7 @@ const AdminCategoriesForm = ({
   const handleViewMode = () => {
     revokeUnsavedPreview();
     form.reset(getDefaultValues(initialData));
-    setPreviewUrl(initialData?.image ?? null);
+    setPreviewUrl(initialData?.imageUrl ?? null);
     onModeChange?.("view");
 
     if (fileInputRef.current) {
@@ -157,7 +161,7 @@ const AdminCategoriesForm = ({
   const handleClose = () => {
     revokeUnsavedPreview();
     form.reset(mode === "create" ? emptyValues : getDefaultValues(initialData));
-    setPreviewUrl(initialData?.image ?? null);
+    setPreviewUrl(initialData?.imageUrl ?? null);
     onClose();
 
     if (fileInputRef.current) {
@@ -201,9 +205,7 @@ const AdminCategoriesForm = ({
             <FormItem>
               <FormLabel>Category Image</FormLabel>
               <FormDescription>
-                Upload a `.jpg`, `.jpeg`, or `.png` image. We will later upload
-                it to S3 with a presigned URL and store the public URL in the
-                backend.
+                Upload a `.jpg`, `.jpeg`, or `.png` image.
               </FormDescription>
 
               {previewUrl ? (
@@ -324,11 +326,12 @@ const AdminCategoriesForm = ({
               <AppButton
                 type="button"
                 variant="outline"
+                disabled={isLoading}
                 onClick={mode === "edit" ? handleViewMode : handleClose}
               >
                 {mode === "edit" ? "Back to View" : "Cancel"}
               </AppButton>
-              <AppButton type="submit" loading={form.formState.isSubmitting}>
+              <AppButton type="submit" loading={isLoading} disabled={isLoading}>
                 {mode === "edit" ? "Save Changes" : "Create Category"}
               </AppButton>
             </>

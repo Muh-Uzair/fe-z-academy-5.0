@@ -1,17 +1,25 @@
 import "server-only";
 import { cookies } from "next/headers";
 
-export async function apiClient(endpoint: string, init: RequestInit = {}) {
-  const cookieStore = await cookies();
-  const cookieHeader = cookieStore
-    .getAll()
-    .map((cookie) => `${cookie.name}=${cookie.value}`)
-    .join("; ");
+export async function apiClient(
+  endpoint: string,
+  init: RequestInit = {},
+  options: { includeCookies?: boolean } = {},
+) {
+  const { includeCookies = true } = options;
 
   const headers = new Headers(init.headers);
 
-  if (cookieHeader) {
-    headers.set("Cookie", cookieHeader);
+  if (includeCookies) {
+    const cookieStore = await cookies();
+    const cookieHeader = cookieStore
+      .getAll()
+      .map((cookie) => `${cookie.name}=${cookie.value}`)
+      .join("; ");
+
+    if (cookieHeader) {
+      headers.set("Cookie", cookieHeader);
+    }
   }
 
   const method = (init.method || "GET").toUpperCase();

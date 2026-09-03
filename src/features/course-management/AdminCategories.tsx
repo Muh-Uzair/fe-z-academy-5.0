@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
 
 import {
@@ -18,83 +19,118 @@ import PageHeader from "@/components/PageHeader";
 import AppTable from "@/components/AppTable";
 import TableImage from "@/components/TableImage";
 import { formatDate } from "@/utils/time";
-import { Category as ICategory } from "@/types/categoryTypes";
+import useClientAction from "@/hooks/useClientAction";
+import {
+  uploadCategoryImageAction,
+  createCategoryAction,
+  updateCategoryAction,
+} from "@/services/category/actions";
+import type {
+  Category,
+  UploadCategoryImageResponse,
+} from "@/response-types/categoryResponseTypes";
+import type { Pagination } from "@/response-types/userResponseTypes";
 import AdminCategoriesForm, {
   type AdminCategoryFormMode,
   type AdminCategorySubmitValues,
 } from "./AdminCategoriesForm";
 
-const initialData: ICategory[] = [
-  {
-    _id: "cat_001",
-    name: "Web Development",
-    image: "https://picsum.photos/200/200?random=1",
-    description: "All courses related to web development technologies.",
-    createdAt: "2026-01-10T10:00:00Z",
-    updatedAt: "2026-01-15T12:00:00Z",
-  },
-  {
-    _id: "cat_002",
-    name: "Mobile App Development",
-    image: "https://picsum.photos/200/200?random=2",
-    description: "Android and iOS application development courses.",
-    createdAt: "2026-01-12T10:00:00Z",
-    updatedAt: "2026-01-18T12:00:00Z",
-  },
-  {
-    _id: "cat_003",
-    name: "Data Science",
-    image: "https://picsum.photos/200/200?random=3",
-    description: "Machine learning, AI, and data analysis courses.",
-    createdAt: "2026-01-14T10:00:00Z",
-    updatedAt: "2026-01-20T12:00:00Z",
-  },
-];
+type AdminCategoriesProps = {
+  categories: Category[];
+  pagination: Pagination;
+  search: string;
+};
 
-const AdminCategories = () => {
-  const [categories, setCategories] = useState<ICategory[]>(initialData);
-  const [search, setSearch] = useState("");
+async function uploadImageToS3(
+  uploadData: Extract<
+    UploadCategoryImageResponse,
+    { status: "success" }
+  >["data"],
+  file: File,
+) {
+  const formData = new FormData();
+
+  Object.entries(uploadData.fields).forEach(([key, value]) => {
+    formData.append(key, value);
+  });
+  formData.append("file", file);
+
+  const res = await fetch(uploadData.uploadUrl, {
+    method: "POST",
+    body: formData,
+  });
+
+  return res.ok;
+}
+
+const AdminCategories = ({
+  categories,
+  pagination,
+  search,
+}: AdminCategoriesProps) => {
+  const router = useRouter();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
   const [detailsMode, setDetailsMode] = useState<AdminCategoryFormMode>("view");
-  const [selectedCategory, setSelectedCategory] = useState<ICategory | null>(
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(
     null,
   );
+  const { run: runCreateAction, isLoading: isCreating } = useClientAction();
+  const { run: runUpdateAction, isLoading: isUpdating } = useClientAction();
 
-  const filteredData = categories.filter((category) => {
-    return (
-      category.name.toLowerCase().includes(search.toLowerCase()) ||
-      (category.description?.toLowerCase() || "").includes(search.toLowerCase())
-    );
-  });
+  const updateQuery = (next: { search?: string; page?: number }) => {
+    const nextSearch = next.search ?? search;
+    const nextPage = next.page ?? pagination.page ?? 1;
 
-  const handleCreateCategory = (values: AdminCategorySubmitValues) => {
-    const timestamp = new Date().toISOString();
+    const searchParams = new URLSearchParams();
+    if (nextSearch) searchParams.set("search", nextSearch);
+    if (nextPage > 1) searchParams.set("page", String(nextPage));
 
-    console.log("create category form data", {
-      name: values.name,
-      description: values.description,
-      imageFile: values.imageFile,
-      imageFileName: values.imageFile?.name ?? null,
-      imageFileType: values.imageFile?.type ?? null,
-      imageUrlForBackend: values.imageUrl,
-    });
-
-    setCategories((currentCategories) => [
-      {
-        _id: `cat_${Date.now()}`,
-        name: values.name,
-        image: values.imageUrl ?? "",
-        description: values.description,
-        createdAt: timestamp,
-        updatedAt: timestamp,
-      },
-      ...currentCategories,
-    ]);
-    setIsCreateDialogOpen(false);
+    const query = searchParams.toString();
+    router.push(`/admin/categories${query ? `?${query}` : ""}`);
   };
 
-  const handleOpenCategoryDetails = (category: ICategory) => {
+  const handleCreateCategory = async (values: AdminCategorySubmitValues) => {
+    if (!values.imageFile) {
+      return;
+    }
+
+    const imageFile = values.imageFile;
+
+    const response = await runCreateAction(async () => {
+      const uploadResponse = await uploadCategoryImageAction({
+        fileName: imageFile.name,
+        fileType: imageFile.type as "image/jpeg" | "image/png",
+      });
+
+      if (uploadResponse.status !== "success") {
+        return uploadResponse;
+      }
+
+      const uploaded = await uploadImageToS3(uploadResponse.data, imageFile);
+
+      if (!uploaded) {
+        return {
+          status: "error" as const,
+          message: "Failed to upload the category image. Please try again.",
+          data: null,
+        };
+      }
+
+      return createCategoryAction({
+        name: values.name,
+        description: values.description,
+        imageKey: uploadResponse.data.key,
+      });
+    });
+
+    if (response?.status === "success") {
+      setIsCreateDialogOpen(false);
+      router.refresh();
+    }
+  };
+
+  const handleOpenCategoryDetails = (category: Category) => {
     setSelectedCategory(category);
     setDetailsMode("view");
     setIsDetailsDialogOpen(true);
@@ -106,36 +142,53 @@ const AdminCategories = () => {
     setSelectedCategory(null);
   };
 
-  const handleUpdateCategory = (values: AdminCategorySubmitValues) => {
+  const handleUpdateCategory = async (values: AdminCategorySubmitValues) => {
+    console.log("Updating category with values:", values);
+
     if (!selectedCategory) {
       return;
     }
 
-    console.log("update category form data", {
-      categoryId: selectedCategory._id,
-      name: values.name,
-      description: values.description,
-      imageFile: values.imageFile,
-      imageFileName: values.imageFile?.name ?? null,
-      imageFileType: values.imageFile?.type ?? null,
-      imageUrlForBackend: values.imageUrl,
+    const categoryId = selectedCategory._id;
+    const imageFile = values.imageFile;
+
+    const response = await runUpdateAction(async () => {
+      let imageKey: string | undefined;
+
+      if (imageFile) {
+        const uploadResponse = await uploadCategoryImageAction({
+          fileName: imageFile.name,
+          fileType: imageFile.type as "image/jpeg" | "image/png",
+        });
+
+        if (uploadResponse.status !== "success") {
+          return uploadResponse;
+        }
+
+        const uploaded = await uploadImageToS3(uploadResponse.data, imageFile);
+
+        if (!uploaded) {
+          return {
+            status: "error" as const,
+            message: "Failed to upload the category image. Please try again.",
+            data: null,
+          };
+        }
+
+        imageKey = uploadResponse.data.key;
+      }
+
+      return updateCategoryAction(categoryId, {
+        name: values.name,
+        description: values.description,
+        ...(imageKey ? { imageKey } : {}),
+      });
     });
 
-    const updatedCategory: ICategory = {
-      ...selectedCategory,
-      name: values.name,
-      image: values.imageUrl ?? "",
-      description: values.description,
-      updatedAt: new Date().toISOString(),
-    };
-
-    setCategories((currentCategories) =>
-      currentCategories.map((category) =>
-        category._id === selectedCategory._id ? updatedCategory : category,
-      ),
-    );
-    setSelectedCategory(updatedCategory);
-    setDetailsMode("view");
+    if (response?.status === "success") {
+      handleCloseCategoryDetails();
+      router.refresh();
+    }
   };
 
   return (
@@ -145,7 +198,10 @@ const AdminCategories = () => {
           pageHeading="Categories"
           pageDescription="Manage all course categories available on the platform."
           pageHeaderRightSection={
-            <AppButton iconLeft={Plus} onClick={() => setIsCreateDialogOpen(true)}>
+            <AppButton
+              iconLeft={Plus}
+              onClick={() => setIsCreateDialogOpen(true)}
+            >
               Add Category
             </AppButton>
           }
@@ -156,16 +212,19 @@ const AdminCategories = () => {
             <div className="max-w-sm">
               <AppSearchBar
                 placeholder="Search categories..."
-                onChange={(value: string) => setSearch(value)}
+                defaultValue={search}
+                onChange={(value: string) =>
+                  updateQuery({ search: value, page: 1 })
+                }
               />
             </div>
           }
-          data={filteredData}
+          data={categories}
           columns={[
             {
-              key: "image",
+              key: "imageUrl",
               label: "Image",
-              render: (value: string | null, row: ICategory) => (
+              render: (value: string | null, row: Category) => (
                 <TableImage src={value} alt={row.name} shape="rectangle" />
               ),
             },
@@ -196,7 +255,7 @@ const AdminCategories = () => {
             {
               key: "action",
               label: "Action",
-              render: (_: unknown, row: ICategory) => (
+              render: (_: unknown, row: Category) => (
                 <div className="text-right">
                   <AppButton onClick={() => handleOpenCategoryDetails(row)}>
                     View
@@ -206,6 +265,8 @@ const AdminCategories = () => {
             },
           ]}
           pagination={true}
+          paginationMeta={pagination}
+          onPageChange={(page) => updateQuery({ page })}
         />
       </PageFlexCol>
 
@@ -222,6 +283,7 @@ const AdminCategories = () => {
               mode="create"
               onSubmit={handleCreateCategory}
               onClose={() => setIsCreateDialogOpen(false)}
+              isLoading={isCreating}
             />
           </DialogBody>
         </DialogContent>
@@ -255,6 +317,7 @@ const AdminCategories = () => {
                 onSubmit={handleUpdateCategory}
                 onClose={handleCloseCategoryDetails}
                 onModeChange={setDetailsMode}
+                isLoading={isUpdating}
               />
             ) : null}
           </DialogBody>
