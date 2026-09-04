@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus } from "lucide-react";
+import { Plus, MoreVertical } from "lucide-react";
 
 import {
   Dialog,
@@ -12,6 +12,23 @@ import {
   DialogTitle,
   DialogBody,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 import AppButton from "@/components/AppButton";
 import PageFlexCol from "@/components/PageFlexCol";
 import AppSearchBar from "@/components/AppSearchBar";
@@ -24,6 +41,7 @@ import {
   uploadCategoryImageAction,
   createCategoryAction,
   updateCategoryAction,
+  deleteCategoryAction,
 } from "@/services/category/actions";
 import type {
   Category,
@@ -68,6 +86,7 @@ const AdminCategories = ({
   pagination,
   search,
 }: AdminCategoriesProps) => {
+  console.log("categories ---------------------------- \n", categories);
   const router = useRouter();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
@@ -75,8 +94,12 @@ const AdminCategories = ({
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(
     null,
   );
+  const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(
+    null,
+  );
   const { run: runCreateAction, isLoading: isCreating } = useClientAction();
   const { run: runUpdateAction, isLoading: isUpdating } = useClientAction();
+  const { run: runDeleteAction, isLoading: isDeleting } = useClientAction();
 
   const updateQuery = (next: { search?: string; page?: number }) => {
     const nextSearch = next.search ?? search;
@@ -143,8 +166,6 @@ const AdminCategories = ({
   };
 
   const handleUpdateCategory = async (values: AdminCategorySubmitValues) => {
-    console.log("Updating category with values:", values);
-
     if (!selectedCategory) {
       return;
     }
@@ -187,6 +208,21 @@ const AdminCategories = ({
 
     if (response?.status === "success") {
       handleCloseCategoryDetails();
+      router.refresh();
+    }
+  };
+
+  const handleConfirmDeleteCategory = async () => {
+    if (!categoryToDelete) {
+      return;
+    }
+
+    const response = await runDeleteAction(() =>
+      deleteCategoryAction(categoryToDelete._id),
+    );
+
+    if (response?.status === "success") {
+      setCategoryToDelete(null);
       router.refresh();
     }
   };
@@ -257,9 +293,26 @@ const AdminCategories = ({
               label: "Action",
               render: (_: unknown, row: Category) => (
                 <div className="text-right">
-                  <AppButton onClick={() => handleOpenCategoryDetails(row)}>
-                    View
-                  </AppButton>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon">
+                        <MoreVertical />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem
+                        onClick={() => handleOpenCategoryDetails(row)}
+                      >
+                        View
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        variant="destructive"
+                        onClick={() => setCategoryToDelete(row)}
+                      >
+                        Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               ),
             },
@@ -323,6 +376,38 @@ const AdminCategories = ({
           </DialogBody>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog
+        open={!!categoryToDelete}
+        onOpenChange={(open) => {
+          if (!open) {
+            setCategoryToDelete(null);
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Category</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete &quot;{categoryToDelete?.name}
+              &quot;? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              disabled={isDeleting}
+              onClick={(event) => {
+                event.preventDefault();
+                handleConfirmDeleteCategory();
+              }}
+            >
+              {isDeleting ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 };

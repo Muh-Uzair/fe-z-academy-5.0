@@ -11,7 +11,6 @@ import AppButton from "@/components/AppButton";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -189,10 +188,6 @@ const AdminCategoriesForm = ({
                   disabled={isReadOnly}
                 />
               </FormControl>
-              <FormDescription>
-                Use a clear category title that admins and students can scan
-                quickly.
-              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -204,9 +199,6 @@ const AdminCategoriesForm = ({
           render={() => (
             <FormItem>
               <FormLabel>Category Image</FormLabel>
-              <FormDescription>
-                Upload a `.jpg`, `.jpeg`, or `.png` image.
-              </FormDescription>
 
               {previewUrl ? (
                 <div className="space-y-3">
@@ -302,10 +294,6 @@ const AdminCategoriesForm = ({
                   disabled={isReadOnly}
                 />
               </FormControl>
-              <FormDescription>
-                Describe what this category covers in a short admin-friendly
-                summary.
-              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
