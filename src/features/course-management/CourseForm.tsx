@@ -321,12 +321,7 @@ const CourseForm = ({
                       disabled={isReadOnly}
                     />
                   </FormControl>
-                  {!isReadOnly && (
-                    <FormDescription>
-                      Keep the title clear, outcome-focused, and easy for
-                      students to scan quickly.
-                    </FormDescription>
-                  )}
+
                   <FormMessage />
                 </FormItem>
               )}
@@ -346,12 +341,7 @@ const CourseForm = ({
                       disabled={isReadOnly}
                     />
                   </FormControl>
-                  {!isReadOnly && (
-                    <FormDescription>
-                      Match the backend model by collecting a full course
-                      summary that can later go directly into the API payload.
-                    </FormDescription>
-                  )}
+
                   <FormMessage />
                 </FormItem>
               )}
@@ -376,11 +366,7 @@ const CourseForm = ({
                         }
                       />
                     </FormControl>
-                    {!isReadOnly && (
-                      <FormDescription>
-                        Free courses are not supported in this flow.
-                      </FormDescription>
-                    )}
+
                     <FormMessage />
                   </FormItem>
                 )}
@@ -415,12 +401,7 @@ const CourseForm = ({
                         </SelectContent>
                       </Select>
                     </FormControl>
-                    {!isReadOnly && (
-                      <FormDescription>
-                        This should match the course difficulty promised to
-                        students.
-                      </FormDescription>
-                    )}
+
                     <FormMessage />
                   </FormItem>
                 )}
@@ -454,12 +435,6 @@ const CourseForm = ({
                         </SelectContent>
                       </Select>
                     </FormControl>
-                    {!isReadOnly && (
-                      <FormDescription>
-                        Categories are already admin-managed, so the instructor
-                        only selects from approved options.
-                      </FormDescription>
-                    )}
                     <FormMessage />
                   </FormItem>
                 )}
@@ -476,9 +451,7 @@ const CourseForm = ({
                   <FormLabel>Course Thumbnail</FormLabel>
                   {!isReadOnly && (
                     <FormDescription>
-                      Upload a `.jpg`, `.jpeg`, or `.png` image from your local
-                      computer. We will replace this preview with an S3 upload
-                      flow later.
+                      Supported formats (.jpg, .jpeg, or .png).
                     </FormDescription>
                   )}
 
