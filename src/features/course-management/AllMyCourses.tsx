@@ -9,6 +9,13 @@ import PageHeader from "@/components/PageHeader";
 import TableImage from "@/components/TableImage";
 import { Badge } from "@/components/ui/badge";
 import AppButton from "@/components/AppButton";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import type {
   CourseListItem,
   CourseCategorySummary,
@@ -20,23 +27,35 @@ import {
   getCourseVerificationLabel,
 } from "@/features/course-management/courseHelpers";
 
+type IsVerifiedFilter = "all" | "true" | "false";
+
 type AllMyCoursesProps = {
   courses: CourseListItem[];
   pagination: Pagination;
   search: string;
+  isVerified: IsVerifiedFilter;
 };
 
-const AllMyCourses = ({ courses, pagination, search }: AllMyCoursesProps) => {
-  console.log("All My Courses:==========================", courses);
-
+const AllMyCourses = ({
+  courses,
+  pagination,
+  search,
+  isVerified,
+}: AllMyCoursesProps) => {
   const router = useRouter();
 
-  const updateQuery = (next: { search?: string; page?: number }) => {
+  const updateQuery = (next: {
+    search?: string;
+    page?: number;
+    isVerified?: IsVerifiedFilter;
+  }) => {
     const nextSearch = next.search ?? search;
     const nextPage = next.page ?? pagination.page ?? 1;
+    const nextIsVerified = next.isVerified ?? isVerified;
 
     const searchParams = new URLSearchParams();
     if (nextSearch) searchParams.set("search", nextSearch);
+    if (nextIsVerified !== "all") searchParams.set("isVerified", nextIsVerified);
     if (nextPage > 1) searchParams.set("page", String(nextPage));
 
     const query = searchParams.toString();
@@ -54,14 +73,32 @@ const AllMyCourses = ({ courses, pagination, search }: AllMyCoursesProps) => {
 
       <AppTable
         upperHeader={
-          <div className="max-w-sm">
-            <AppSearchBar
-              placeholder="Search my courses..."
-              defaultValue={search}
-              onChange={(value: string) =>
-                updateQuery({ search: value, page: 1 })
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="max-w-sm flex-1">
+              <AppSearchBar
+                placeholder="Search my courses..."
+                defaultValue={search}
+                onChange={(value: string) =>
+                  updateQuery({ search: value, page: 1 })
+                }
+              />
+            </div>
+
+            <Select
+              value={isVerified}
+              onValueChange={(value: IsVerifiedFilter) =>
+                updateQuery({ isVerified: value, page: 1 })
               }
-            />
+            >
+              <SelectTrigger className="w-[160px]">
+                <SelectValue placeholder="Verification status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All statuses</SelectItem>
+                <SelectItem value="true">Verified</SelectItem>
+                <SelectItem value="false">Not verified</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         }
         data={courses}

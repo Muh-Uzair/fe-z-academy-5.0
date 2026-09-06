@@ -26,11 +26,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { CourseLevel, type CourseRecord } from "@/types/courseTypes";
+import { CourseLevel } from "@/types/courseTypes";
 import PagedSearchSelect, {
   type PagedSearchSelectItem,
 } from "@/components/PagedSearchSelect";
 import type { Pagination } from "@/response-types/userResponseTypes";
+import type { CourseListItem } from "@/response-types/courseResponseTypes";
 
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png"];
 const ACCEPTED_VIDEO_TYPES = ["video/mp4", "video/webm"];
@@ -119,7 +120,7 @@ interface CourseFormProps {
   categorySearch: string;
   onCategorySearchChange: (value: string) => void;
   onCategoryPageChange: (page: number) => void;
-  initialData?: CourseRecord | null;
+  initialData?: CourseListItem | null;
   // Return `false` (or resolve to it) to signal failure — the form then
   // keeps the entered values instead of resetting, so the caller can retry.
   onSubmit: (
@@ -145,13 +146,13 @@ const emptyValues: CourseFormValues = {
 };
 
 const getDefaultValues = (
-  initialData?: CourseRecord | null,
+  initialData?: CourseListItem | null,
 ): CourseFormValues => ({
   title: initialData?.title ?? "",
   description: initialData?.description ?? "",
   price: initialData?.price ?? 1,
   level: (initialData?.level as CourseLevel) ?? CourseLevel.Beginner,
-  categoryId: initialData?.category ?? "",
+  categoryId: initialData?.categoryDetails._id ?? "",
   thumbnailFile: undefined,
   videoFile: undefined,
 });
@@ -188,7 +189,7 @@ const CourseForm = ({
   isLoading = false,
 }: CourseFormProps) => {
   const [thumbnailPreviewUrl, setThumbnailPreviewUrl] = useState<string | null>(
-    initialData?.thumbnail ?? null,
+    initialData?.thumbnailUrl ?? null,
   );
   const [videoPreviewUrl, setVideoPreviewUrl] = useState<string | null>(
     initialData?.videoUrl ?? null,
@@ -225,7 +226,7 @@ const CourseForm = ({
   const resetToInitialState = () => {
     revokeObjectUrl(thumbnailPreviewUrl);
     revokeObjectUrl(videoPreviewUrl);
-    setThumbnailPreviewUrl(initialData?.thumbnail ?? null);
+    setThumbnailPreviewUrl(initialData?.thumbnailUrl ?? null);
     setVideoPreviewUrl(initialData?.videoUrl ?? null);
     form.reset(mode === "create" ? emptyValues : getDefaultValues(initialData));
     clearFileInputs();
@@ -272,7 +273,7 @@ const CourseForm = ({
   };
 
   const handleSubmit = async (values: CourseFormValues) => {
-    const thumbnailUrl = thumbnailPreviewUrl ?? initialData?.thumbnail ?? null;
+    const thumbnailUrl = thumbnailPreviewUrl ?? initialData?.thumbnailUrl ?? null;
     const videoUrl = videoPreviewUrl ?? initialData?.videoUrl ?? null;
 
     if (!thumbnailUrl) {
@@ -317,6 +318,13 @@ const CourseForm = ({
       setThumbnailPreviewUrl(null);
       setVideoPreviewUrl(null);
       clearFileInputs();
+      return;
+    }
+
+    // Same as create mode — only leave edit mode if the update actually
+    // succeeded, so a failed save doesn't silently discard the admin's/
+    // instructor's edits.
+    if (result === false) {
       return;
     }
 
@@ -456,7 +464,7 @@ const CourseForm = ({
                         onValueChange={field.onChange}
                         onSearchChange={onCategorySearchChange}
                         onPageChange={onCategoryPageChange}
-                        selectedLabel={initialData?.categoryName}
+                        selectedLabel={initialData?.categoryDetails.name}
                         placeholder="Select category"
                         searchPlaceholder="Search categories..."
                         disabled={isReadOnly}
@@ -581,6 +589,9 @@ const CourseForm = ({
                         <video
                           src={videoPreviewUrl}
                           controls
+                          controlsList="nodownload"
+                          disablePictureInPicture
+                          onContextMenu={(event) => event.preventDefault()}
                           preload="metadata"
                           className="aspect-video w-full rounded-lg border bg-black"
                         />
@@ -657,9 +668,15 @@ const CourseForm = ({
         <div className="flex flex-col-reverse gap-2 border-t pt-4 sm:flex-row sm:justify-end">
           {mode === "view" ? (
             <>
-              <AppButton type="button" variant="outline" onClick={handleClose}>
-                Close
-              </AppButton>
+              {!allowEdit ? (
+                <AppButton
+                  type="button"
+                  variant="outline"
+                  onClick={handleClose}
+                >
+                  Close
+                </AppButton>
+              ) : null}
               {allowEdit ? (
                 <AppButton type="button" onClick={() => onModeChange?.("edit")}>
                   Edit Course

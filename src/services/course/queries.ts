@@ -72,25 +72,26 @@ export async function getCoursesQuery(
 }
 
 /**
- * Uses optionalAuth, but applies no visibility filtering — any caller can
- * fetch any course by id regardless of its verification status. The result
- * doesn't vary by caller, but `videoUrl` is a freshly signed, time-limited
- * URL, so this is only cached briefly.
- * Shared cache — the same result is served to every caller.
+ * Requires an authenticated session (unlike getCoursesQuery, anonymous
+ * callers are rejected with 401). Visibility depends on the caller's role:
+ * admins can fetch any course, instructors only their own, students only a
+ * course they're enrolled in — so the response varies by caller identity.
+ * Uses 'use cache: private' so the cache entry is scoped to the requesting
+ * caller, based on the cookies read inside apiClient.
  * Use updateTag(COURSE_TAGS.courseDetails(id)) to invalidate this after an
  * update/verification change.
  */
 export async function getCourseDetailsQuery(
   id: string,
 ): Promise<GetCourseDetailsSuccessResponse> {
-  "use cache";
+  "use cache: private";
   cacheTag(COURSE_TAGS.courseDetails(id));
   cacheLife("minutes");
 
   try {
     const res = await apiClient(`/courses/${id}`, {
       method: "GET",
-    }, { includeCookies: false });
+    });
     const json: GetCourseDetailsResponse = await res.json();
 
     if (json.status !== "success") {

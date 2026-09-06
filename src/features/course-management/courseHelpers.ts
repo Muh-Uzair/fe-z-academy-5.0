@@ -27,7 +27,7 @@ export const getCourseVerificationLabel = (
   const state = getCourseVerificationState(course);
 
   if (state === "verified") {
-    return "Approved";
+    return "Verified";
   }
 
   if (state === "rejected") {

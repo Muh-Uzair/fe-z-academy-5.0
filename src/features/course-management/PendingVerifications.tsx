@@ -1,7 +1,6 @@
 "use client";
 
-import Link from "next/link";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 import AppSearchBar from "@/components/AppSearchBar";
 import AppTable from "@/components/AppTable";
@@ -10,46 +9,46 @@ import PageHeader from "@/components/PageHeader";
 import TableImage from "@/components/TableImage";
 import { Badge } from "@/components/ui/badge";
 import AppButton from "@/components/AppButton";
-import { coursesData as courseMockData } from "@/dummy-data/coursesData";
-import { type CourseRecord } from "@/types/courseTypes";
+import type {
+  CourseListItem,
+  CourseCategorySummary,
+} from "@/response-types/courseResponseTypes";
+import type { Pagination } from "@/response-types/userResponseTypes";
 import {
   formatCourseLevel,
+  getCourseVerificationBadgeVariant,
   getCourseVerificationLabel,
   truncateText,
 } from "@/features/course-management/courseHelpers";
 
-const LOGGED_IN_INSTRUCTOR_ID = "user_008";
 const TRUNCATE_REASON_AT = 60;
 
-const PendingVerifications = () => {
-  const [search, setSearch] = useState("");
+type PendingVerificationsProps = {
+  courses: CourseListItem[];
+  pagination: Pagination;
+  search: string;
+};
 
-  const filteredCourses = courseMockData.filter((course) => {
-    const belongsToInstructor = course.instructor === LOGGED_IN_INSTRUCTOR_ID;
-    const isPendingOrRejected = !course.isVerified;
+const PendingVerifications = ({
+  courses,
+  pagination,
+  search,
+}: PendingVerificationsProps) => {
+  const router = useRouter();
 
-    if (!belongsToInstructor || !isPendingOrRejected) {
-      return false;
-    }
+  const updateQuery = (next: { search?: string; page?: number }) => {
+    const nextSearch = next.search ?? search;
+    const nextPage = next.page ?? pagination.page ?? 1;
 
-    const normalizedSearch = search.trim().toLowerCase();
+    const searchParams = new URLSearchParams();
+    if (nextSearch) searchParams.set("search", nextSearch);
+    if (nextPage > 1) searchParams.set("page", String(nextPage));
 
-    if (!normalizedSearch) {
-      return true;
-    }
-
-    return (
-      course.title.toLowerCase().includes(normalizedSearch) ||
-      course.categoryName.toLowerCase().includes(normalizedSearch) ||
-      course.level.toLowerCase().includes(normalizedSearch) ||
-      getCourseVerificationLabel(course, "simple")
-        .toLowerCase()
-        .includes(normalizedSearch) ||
-      (course.verificationRejectionReason ?? "")
-        .toLowerCase()
-        .includes(normalizedSearch)
+    const query = searchParams.toString();
+    router.push(
+      `/instructor/my-courses/pending-verifications${query ? `?${query}` : ""}`,
     );
-  });
+  };
 
   return (
     <PageFlexCol>
@@ -63,16 +62,19 @@ const PendingVerifications = () => {
           <div className="max-w-sm">
             <AppSearchBar
               placeholder="Search pending courses..."
-              onChange={(value: string) => setSearch(value)}
+              defaultValue={search}
+              onChange={(value: string) =>
+                updateQuery({ search: value, page: 1 })
+              }
             />
           </div>
         }
-        data={filteredCourses}
+        data={courses}
         columns={[
           {
-            key: "thumbnail",
+            key: "thumbnailUrl",
             label: "Thumbnail",
-            render: (value: string, row: CourseRecord) => (
+            render: (value: string, row: CourseListItem) => (
               <TableImage src={value} alt={row.title} shape="rectangle" />
             ),
           },
@@ -94,19 +96,17 @@ const PendingVerifications = () => {
             render: (value: string) => formatCourseLevel(value),
           },
           {
-            key: "categoryName",
+            key: "categoryDetails",
             label: "Category",
+            render: (value: CourseCategorySummary) => value.name,
           },
           {
             key: "isVerified",
-            label: "Verified",
-            render: (_: boolean, row: CourseRecord) => (
-              <>
-                {row.isVerified === false && (
-                  <Badge variant="destructive">Not verified</Badge>
-                )}
-                {row.isVerified && <Badge>Verified</Badge>}
-              </>
+            label: "Verification",
+            render: (_: boolean, row: CourseListItem) => (
+              <Badge variant={getCourseVerificationBadgeVariant(row)}>
+                {getCourseVerificationLabel(row)}
+              </Badge>
             ),
           },
           {
@@ -123,20 +123,19 @@ const PendingVerifications = () => {
           {
             key: "action",
             label: "Action",
-            render: (_: unknown, row: CourseRecord) => (
-              <AppButton asChild>
-                <Link href={`/course-details/${row._id}?role=instructor`}>
-                  View Details
-                </Link>
+            render: (_: unknown, row: CourseListItem) => (
+              <AppButton href={`/course-details/${row._id}?role=instructor`}>
+                View Details
               </AppButton>
             ),
           },
         ]}
         pagination={true}
+        paginationMeta={pagination}
+        onPageChange={(page) => updateQuery({ page })}
       />
     </PageFlexCol>
   );
 };
 
 export default PendingVerifications;
-

@@ -1,6 +1,6 @@
 "use client";
 
-import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 import PageFlexCol from "@/components/PageFlexCol";
@@ -14,7 +14,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Star } from "lucide-react";
+import { ArrowLeft, Star } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -29,87 +29,84 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/utils/cn";
 import { formatDate } from "@/utils/time";
+import useClientAction from "@/hooks/useClientAction";
 import CourseForm, {
   type CourseFormMode,
   type CourseSubmitValues,
 } from "./CourseForm";
-import { categoriesData as courseCategoryOptions } from "@/dummy-data/categoriesData";
-import { coursesData as courseMockData } from "@/dummy-data/coursesData";
-import { type CourseRecord } from "@/types/courseTypes";
+import {
+  uploadCourseThumbnailAction,
+  uploadCourseVideoAction,
+  updateCourseAction,
+  updateCourseVerificationAction,
+} from "@/services/course/actions";
+import type {
+  CourseListItem,
+  UploadCourseThumbnailResponse,
+  UploadCourseVideoResponse,
+} from "@/response-types/courseResponseTypes";
+import type { Category } from "@/response-types/categoryResponseTypes";
+import type { Pagination } from "@/response-types/userResponseTypes";
 import { formatCourseLevel, getCourseVerificationState } from "./courseHelpers";
-
-const CATEGORY_PAGE_SIZE = 10;
-
-// This screen is still driven by dummy data end-to-end (see courseMockData
-// above), so category search/pagination is faked client-side here instead of
-// going through the real categories API — see CreateNewCourses.tsx for the
-// real, server-backed implementation of the same PagedSearchSelect pattern.
-const paginateCategories = (search: string, page: number) => {
-  const normalizedSearch = search.trim().toLowerCase();
-  const filtered = normalizedSearch
-    ? courseCategoryOptions.filter((category) =>
-        category.name.toLowerCase().includes(normalizedSearch),
-      )
-    : courseCategoryOptions;
-
-  const totalDocuments = filtered.length;
-  const totalPages = Math.max(1, Math.ceil(totalDocuments / CATEGORY_PAGE_SIZE));
-  const currentPage = Math.min(Math.max(page, 1), totalPages);
-  const start = (currentPage - 1) * CATEGORY_PAGE_SIZE;
-
-  return {
-    items: filtered.slice(start, start + CATEGORY_PAGE_SIZE),
-    pagination: {
-      page: currentPage,
-      limit: CATEGORY_PAGE_SIZE,
-      totalDocuments,
-      totalPages,
-      hasNextPage: currentPage < totalPages,
-      hasPrevPage: currentPage > 1,
-    },
-  };
-};
 
 type CourseViewerRole = "student" | "instructor" | "admin";
 
 interface CourseDetailsProps {
   viewerRole: CourseViewerRole;
+  course: CourseListItem;
+  categories: Category[];
+  categoriesPagination: Pagination;
+  categorySearch: string;
 }
 
-const CourseDetails = ({ viewerRole }: CourseDetailsProps) => {
-  const params = useParams<{ id?: string | string[] }>();
+// Both upload-URL responses share this shape: an S3 POST policy plus the
+// object key to send back when updating the course.
+async function uploadFileToS3(
+  uploadData: Extract<
+    UploadCourseThumbnailResponse | UploadCourseVideoResponse,
+    { status: "success" }
+  >["data"],
+  file: File,
+) {
+  const formData = new FormData();
+
+  Object.entries(uploadData.fields).forEach(([key, value]) => {
+    formData.append(key, value);
+  });
+  formData.append("file", file);
+
+  const res = await fetch(uploadData.uploadUrl, {
+    method: "POST",
+    body: formData,
+  });
+
+  return res.ok;
+}
+
+const CourseDetails = ({
+  viewerRole,
+  course,
+  categories,
+  categoriesPagination,
+  categorySearch,
+}: CourseDetailsProps) => {
+  console.log("Course Details:==========================", course);
+
   const router = useRouter();
   const searchParams = useSearchParams();
-  const routeCourseId = Array.isArray(params?.id) ? params.id[0] : params?.id;
 
-  const [coursesById, setCoursesById] = useState<Record<string, CourseRecord>>(
-    () =>
-      Object.fromEntries(
-        courseMockData.map((mockCourse) => [mockCourse._id, mockCourse]),
-      ),
-  );
   const [formMode, setFormMode] = useState<CourseFormMode>("view");
-  const [adminReviewReasonById, setAdminReviewReasonById] = useState<
-    Record<string, string>
-  >(() =>
-    Object.fromEntries(
-      courseMockData.map((mockCourse) => [
-        mockCourse._id,
-        mockCourse.verificationRejectionReason ?? "",
-      ]),
-    ),
+  const [adminReviewReason, setAdminReviewReason] = useState(
+    course.verificationRejectionReason ?? "",
   );
 
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
   const [reviewRating, setReviewRating] = useState(0);
   const [reviewFeedback, setReviewFeedback] = useState("");
-  const [categorySearch, setCategorySearch] = useState("");
-  const [categoryPage, setCategoryPage] = useState(1);
-  const { items: categoryItems, pagination: categoryPagination } =
-    paginateCategories(categorySearch, categoryPage);
 
-  const course =
-    (routeCourseId ? coursesById[routeCourseId] : null) ?? courseMockData[0];
+  const { run: runUpdateAction, isLoading: isUpdating } = useClientAction();
+  const { run: runVerifyAction, isLoading: isVerifying } = useClientAction();
+  const { run: runRejectAction, isLoading: isRejecting } = useClientAction();
 
   const isInstructorViewer = viewerRole === "instructor";
   const isAdminViewer = viewerRole === "admin";
@@ -117,7 +114,6 @@ const CourseDetails = ({ viewerRole }: CourseDetailsProps) => {
     isAdminViewer && searchParams.get("review") === "true";
   const source = searchParams.get("source");
   const isFromBrowse = source === "browse";
-  const adminReviewReason = adminReviewReasonById[course._id] ?? "";
   const courseVerificationState = getCourseVerificationState(course);
 
   const pageDescription = isInstructorViewer
@@ -128,50 +124,102 @@ const CourseDetails = ({ viewerRole }: CourseDetailsProps) => {
         ? "View the submitted course details exactly as the instructor sees them."
         : "Review the course details.";
 
-  const handleUpdateCourse = (values: CourseSubmitValues) => {
-    if (!course) {
-      return;
+  const updateCategoryQuery = (next: { search?: string; page?: number }) => {
+    const nextSearch = next.search ?? categorySearch;
+    const nextPage = next.page ?? categoriesPagination.page ?? 1;
+
+    const nextSearchParams = new URLSearchParams(searchParams.toString());
+    if (nextSearch) {
+      nextSearchParams.set("categorySearch", nextSearch);
+    } else {
+      nextSearchParams.delete("categorySearch");
+    }
+    if (nextPage > 1) {
+      nextSearchParams.set("categoryPage", String(nextPage));
+    } else {
+      nextSearchParams.delete("categoryPage");
     }
 
-    const selectedCategory = courseCategoryOptions.find(
-      (categoryOption) => categoryOption._id === values.category,
-    );
+    const query = nextSearchParams.toString();
+    router.push(`/course-details/${course._id}${query ? `?${query}` : ""}`, {
+      scroll: false,
+    });
+  };
 
-    console.log("update course form data", {
-      courseId: course._id,
-      title: values.title,
-      description: values.description,
-      price: values.price,
-      level: values.level,
-      category: values.category,
-      thumbnailFile: values.thumbnailFile,
-      thumbnailFileName: values.thumbnailFile?.name ?? null,
-      thumbnailFileType: values.thumbnailFile?.type ?? null,
-      thumbnailPreviewUrl: values.thumbnailUrl,
-      videoFile: values.videoFile,
-      videoFileName: values.videoFile?.name ?? null,
-      videoFileType: values.videoFile?.type ?? null,
-      videoPreviewUrl: values.videoUrl,
+  const handleUpdateCourse = async (values: CourseSubmitValues) => {
+    const response = await runUpdateAction(async () => {
+      let thumbnailKey: string | undefined;
+      let videoKey: string | undefined;
+
+      if (values.thumbnailFile) {
+        const thumbnailUploadResponse = await uploadCourseThumbnailAction({
+          fileName: values.thumbnailFile.name,
+          fileType: values.thumbnailFile.type as "image/jpeg" | "image/png",
+        });
+
+        if (thumbnailUploadResponse.status !== "success") {
+          return thumbnailUploadResponse;
+        }
+
+        const isThumbnailUploaded = await uploadFileToS3(
+          thumbnailUploadResponse.data,
+          values.thumbnailFile,
+        );
+
+        if (!isThumbnailUploaded) {
+          return {
+            status: "error" as const,
+            message: "Failed to upload the course thumbnail. Please try again.",
+            data: null,
+          };
+        }
+
+        thumbnailKey = thumbnailUploadResponse.data.key;
+      }
+
+      if (values.videoFile) {
+        const videoUploadResponse = await uploadCourseVideoAction({
+          fileName: values.videoFile.name,
+          fileType: values.videoFile.type as "video/mp4" | "video/webm",
+        });
+
+        if (videoUploadResponse.status !== "success") {
+          return videoUploadResponse;
+        }
+
+        const isVideoUploaded = await uploadFileToS3(
+          videoUploadResponse.data,
+          values.videoFile,
+        );
+
+        if (!isVideoUploaded) {
+          return {
+            status: "error" as const,
+            message: "Failed to upload the course video. Please try again.",
+            data: null,
+          };
+        }
+
+        videoKey = videoUploadResponse.data.key;
+      }
+
+      return updateCourseAction(course._id, {
+        title: values.title,
+        description: values.description,
+        price: values.price,
+        level: values.level,
+        category: values.category,
+        ...(thumbnailKey ? { thumbnailKey } : {}),
+        ...(videoKey ? { videoKey } : {}),
+      });
     });
 
-    const updatedCourse: CourseRecord = {
-      ...course,
-      title: values.title,
-      description: values.description,
-      price: values.price,
-      level: values.level,
-      category: values.category,
-      categoryName: selectedCategory?.name ?? course.categoryName,
-      thumbnail: values.thumbnailUrl ?? course.thumbnail,
-      videoUrl: values.videoUrl ?? course.videoUrl,
-      updatedAt: new Date().toISOString(),
-    };
+    if (response?.status === "success") {
+      router.refresh();
+      return true;
+    }
 
-    setCoursesById((currentCoursesById) => ({
-      ...currentCoursesById,
-      [course._id]: updatedCourse,
-    }));
-    setFormMode("view");
+    return false;
   };
 
   const handleSubmitReview = () => {
@@ -184,51 +232,34 @@ const CourseDetails = ({ viewerRole }: CourseDetailsProps) => {
     setReviewFeedback("");
   };
 
-  const handleVerifyCourse = () => {
-    console.log("verify course", {
-      courseId: course._id,
-    });
+  const handleVerifyCourse = async () => {
+    const response = await runVerifyAction(() =>
+      updateCourseVerificationAction(course._id, { isVerified: true }),
+    );
 
-    const verifiedCourse: CourseRecord = {
-      ...course,
-      isVerified: true,
-      verificationRejectionReason: null,
-      updatedAt: new Date().toISOString(),
-    };
-
-    setCoursesById((currentCoursesById) => ({
-      ...currentCoursesById,
-      [course._id]: verifiedCourse,
-    }));
-    setAdminReviewReasonById((currentReasons) => ({
-      ...currentReasons,
-      [course._id]: "",
-    }));
+    if (response?.status === "success") {
+      setAdminReviewReason("");
+      router.refresh();
+    }
   };
 
-  const handleRejectCourse = () => {
+  const handleRejectCourse = async () => {
     const trimmedReason = adminReviewReason.trim();
 
     if (!trimmedReason) {
       return;
     }
 
-    console.log("reject course", {
-      courseId: course._id,
-      verificationRejectionReason: trimmedReason,
-    });
+    const response = await runRejectAction(() =>
+      updateCourseVerificationAction(course._id, {
+        isVerified: false,
+        verificationRejectionReason: trimmedReason,
+      }),
+    );
 
-    const rejectedCourse: CourseRecord = {
-      ...course,
-      isVerified: false,
-      verificationRejectionReason: trimmedReason,
-      updatedAt: new Date().toISOString(),
-    };
-
-    setCoursesById((currentCoursesById) => ({
-      ...currentCoursesById,
-      [course._id]: rejectedCourse,
-    }));
+    if (response?.status === "success") {
+      router.refresh();
+    }
   };
 
   return (
@@ -240,7 +271,11 @@ const CourseDetails = ({ viewerRole }: CourseDetailsProps) => {
             pageDescription={pageDescription}
             pageHeaderRightSection={
               <div className="flex items-center gap-2">
-                <AppButton variant="outline" onClick={() => router.back()}>
+                <AppButton
+                  variant="ghost"
+                  iconLeft={ArrowLeft}
+                  onClick={() => router.back()}
+                >
                   Back
                 </AppButton>
                 {viewerRole === "student" && source === "enrolled" && (
@@ -260,39 +295,41 @@ const CourseDetails = ({ viewerRole }: CourseDetailsProps) => {
                       </DialogHeader>
                       <DialogBody>
                         <div className="grid gap-4 py-0">
-                        <div className="flex flex-col gap-2">
-                          <Label>Rating</Label>
-                          <div className="flex items-center gap-1">
-                            {[1, 2, 3, 4, 5].map((star) => (
-                              <button
-                                key={star}
-                                type="button"
-                                className="focus:outline-none"
-                                onClick={() => setReviewRating(star)}
-                              >
-                                <Star
-                                  className={cn(
-                                    "h-6 w-6 cursor-pointer transition-colors",
-                                    reviewRating >= star
-                                      ? "fill-yellow-400 text-yellow-400"
-                                      : "text-muted-foreground hover:text-yellow-400",
-                                  )}
-                                />
-                              </button>
-                            ))}
+                          <div className="flex flex-col gap-2">
+                            <Label>Rating</Label>
+                            <div className="flex items-center gap-1">
+                              {[1, 2, 3, 4, 5].map((star) => (
+                                <button
+                                  key={star}
+                                  type="button"
+                                  className="focus:outline-none"
+                                  onClick={() => setReviewRating(star)}
+                                >
+                                  <Star
+                                    className={cn(
+                                      "h-6 w-6 cursor-pointer transition-colors",
+                                      reviewRating >= star
+                                        ? "fill-yellow-400 text-yellow-400"
+                                        : "text-muted-foreground hover:text-yellow-400",
+                                    )}
+                                  />
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                          <div className="flex flex-col gap-2">
+                            <Label htmlFor="feedback">Feedback</Label>
+                            <Textarea
+                              id="feedback"
+                              placeholder="Tell us what you liked or what could be improved..."
+                              value={reviewFeedback}
+                              onChange={(e) =>
+                                setReviewFeedback(e.target.value)
+                              }
+                              className="min-h-[100px]"
+                            />
                           </div>
                         </div>
-                        <div className="flex flex-col gap-2">
-                          <Label htmlFor="feedback">Feedback</Label>
-                          <Textarea
-                            id="feedback"
-                            placeholder="Tell us what you liked or what could be improved..."
-                            value={reviewFeedback}
-                            onChange={(e) => setReviewFeedback(e.target.value)}
-                            className="min-h-[100px]"
-                          />
-                        </div>
-                      </div>
                       </DialogBody>
                       <DialogFooter>
                         <AppButton
@@ -314,7 +351,7 @@ const CourseDetails = ({ viewerRole }: CourseDetailsProps) => {
             <Card className="lg:col-span-2">
               <CardHeader>
                 <CardTitle>{course.title}</CardTitle>
-                <CardDescription>{course.categoryName}</CardDescription>
+                <CardDescription>{course.categoryDetails.name}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3 text-sm">
                 <div className="flex flex-wrap items-center gap-2">
@@ -368,7 +405,9 @@ const CourseDetails = ({ viewerRole }: CourseDetailsProps) => {
               <CardContent className="space-y-3 text-sm">
                 <div>
                   <p className="text-muted-foreground">Instructor</p>
-                  <p className="font-medium">{course.instructorName}</p>
+                  <p className="font-medium">
+                    {course.instructorDetails.fullName}
+                  </p>
                 </div>
                 <div>
                   <p className="text-muted-foreground">Created At</p>
@@ -406,17 +445,16 @@ const CourseDetails = ({ viewerRole }: CourseDetailsProps) => {
                 key={`${course._id}-${viewerRole}-${formMode}-${course.updatedAt}`}
                 mode={isInstructorViewer ? formMode : "view"}
                 initialData={course}
-                categoryItems={categoryItems.map((category) => ({
+                categoryItems={categories.map((category) => ({
                   id: category._id,
                   label: category.name,
                 }))}
-                categoryPagination={categoryPagination}
+                categoryPagination={categoriesPagination}
                 categorySearch={categorySearch}
-                onCategorySearchChange={(value) => {
-                  setCategorySearch(value);
-                  setCategoryPage(1);
-                }}
-                onCategoryPageChange={setCategoryPage}
+                onCategorySearchChange={(value) =>
+                  updateCategoryQuery({ search: value, page: 1 })
+                }
+                onCategoryPageChange={(page) => updateCategoryQuery({ page })}
                 onSubmit={handleUpdateCourse}
                 onClose={() => router.back()}
                 onModeChange={isInstructorViewer ? setFormMode : undefined}
@@ -424,6 +462,7 @@ const CourseDetails = ({ viewerRole }: CourseDetailsProps) => {
                 hideVideo={isFromBrowse}
                 showEnrollButton={isFromBrowse}
                 onEnroll={() => router.push(`/course-checkout/${course._id}`)}
+                isLoading={isUpdating}
               />
             </CardContent>
           </Card>
@@ -446,10 +485,7 @@ const CourseDetails = ({ viewerRole }: CourseDetailsProps) => {
                   <Textarea
                     value={adminReviewReason}
                     onChange={(event) =>
-                      setAdminReviewReasonById((currentReasons) => ({
-                        ...currentReasons,
-                        [course._id]: event.target.value,
-                      }))
+                      setAdminReviewReason(event.target.value)
                     }
                     placeholder="Explain what the instructor needs to fix before this course can be approved."
                     className="min-h-32"
@@ -463,14 +499,19 @@ const CourseDetails = ({ viewerRole }: CourseDetailsProps) => {
                   <AppButton
                     type="button"
                     variant="outline"
+                    disabled={isVerifying || isRejecting}
+                    isLoading={isVerifying}
                     onClick={handleVerifyCourse}
                   >
                     Verify Course
                   </AppButton>
                   <AppButton
                     type="button"
+                    disabled={
+                      !adminReviewReason.trim() || isVerifying || isRejecting
+                    }
+                    isLoading={isRejecting}
                     onClick={handleRejectCourse}
-                    disabled={!adminReviewReason.trim()}
                   >
                     Save Rejection Reason
                   </AppButton>
