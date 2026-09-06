@@ -86,7 +86,6 @@ const AdminCategories = ({
   pagination,
   search,
 }: AdminCategoriesProps) => {
-  console.log("categories ---------------------------- \n", categories);
   const router = useRouter();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);

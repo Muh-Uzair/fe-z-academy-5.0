@@ -83,7 +83,10 @@ export type SignupResponse =
 //   "data": null
 // }
 export type VerifyOtpResponse =
-  | SuccessApiResponse<EmptyAuthResponseData, "Account verified successfully">
+  | SuccessApiResponse<
+      EmptyAuthResponseData,
+      "Account verified successfully"
+    >
   | ApiErrorResponse;
 
 // API 3: POST /api/v1/auth/resend-otp
@@ -168,7 +171,10 @@ export type RotateTokenResponse =
 //   }
 // }
 export type GetMeResponse =
-  | SuccessApiResponse<GetMeResponseData, "Current user fetched successfully">
+  | SuccessApiResponse<
+      GetMeResponseData,
+      "Current user fetched successfully"
+    >
   | ApiErrorResponse;
 
 // API 7: POST /api/v1/auth/signout
