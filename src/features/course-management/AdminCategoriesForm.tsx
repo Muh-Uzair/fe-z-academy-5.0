@@ -23,7 +23,11 @@ import type { Category } from "@/response-types/categoryResponseTypes";
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png"];
 
 const adminCategorySchema = z.object({
-  name: z.string().trim().min(1, "Category name is required."),
+  name: z
+    .string()
+    .trim()
+    .min(2, "Category name must be at least 2 characters.")
+    .max(50, "Category name must be at most 50 characters."),
   imageFile: z
     .custom<File | null | undefined>(
       (value) =>
@@ -34,7 +38,11 @@ const adminCategorySchema = z.object({
       (file) => !file || ACCEPTED_IMAGE_TYPES.includes(file.type),
       "Only .jpg, .jpeg, and .png formats are supported.",
     ),
-  description: z.string().trim().min(1, "Description is required."),
+  description: z
+    .string()
+    .trim()
+    .min(10, "Description must be at least 10 characters.")
+    .max(500, "Description must be at most 500 characters."),
 });
 
 type AdminCategoryFormValues = z.infer<typeof adminCategorySchema>;
