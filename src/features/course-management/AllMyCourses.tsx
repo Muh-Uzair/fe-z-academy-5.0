@@ -1,7 +1,6 @@
 "use client";
 
-import Link from "next/link";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 import AppSearchBar from "@/components/AppSearchBar";
 import AppTable from "@/components/AppTable";
@@ -10,44 +9,47 @@ import PageHeader from "@/components/PageHeader";
 import TableImage from "@/components/TableImage";
 import { Badge } from "@/components/ui/badge";
 import AppButton from "@/components/AppButton";
-import { coursesData as courseMockData } from "@/dummy-data/coursesData";
-import { type CourseRecord } from "@/types/courseTypes";
+import type {
+  CourseListItem,
+  CourseCategorySummary,
+} from "@/response-types/courseResponseTypes";
+import type { Pagination } from "@/response-types/userResponseTypes";
 import {
   formatCourseLevel,
+  getCourseVerificationBadgeVariant,
   getCourseVerificationLabel,
 } from "@/features/course-management/courseHelpers";
 
-const LOGGED_IN_INSTRUCTOR_ID = "user_008";
+type AllMyCoursesProps = {
+  courses: CourseListItem[];
+  pagination: Pagination;
+  search: string;
+};
 
-const AllMyCourses = () => {
-  const [search, setSearch] = useState("");
+const AllMyCourses = ({ courses, pagination, search }: AllMyCoursesProps) => {
+  console.log("All My Courses:==========================", courses);
 
-  const filteredCourses = courseMockData.filter((course) => {
-    if (course.instructor !== LOGGED_IN_INSTRUCTOR_ID) {
-      return false;
-    }
+  const router = useRouter();
 
-    const normalizedSearch = search.trim().toLowerCase();
+  const updateQuery = (next: { search?: string; page?: number }) => {
+    const nextSearch = next.search ?? search;
+    const nextPage = next.page ?? pagination.page ?? 1;
 
-    if (!normalizedSearch) {
-      return true;
-    }
+    const searchParams = new URLSearchParams();
+    if (nextSearch) searchParams.set("search", nextSearch);
+    if (nextPage > 1) searchParams.set("page", String(nextPage));
 
-    return (
-      course.title.toLowerCase().includes(normalizedSearch) ||
-      course.categoryName.toLowerCase().includes(normalizedSearch) ||
-      course.level.toLowerCase().includes(normalizedSearch) ||
-      getCourseVerificationLabel(course, "simple")
-        .toLowerCase()
-        .includes(normalizedSearch)
+    const query = searchParams.toString();
+    router.push(
+      `/instructor/my-courses/all-my-courses${query ? `?${query}` : ""}`,
     );
-  });
+  };
 
   return (
     <PageFlexCol>
       <PageHeader
         pageHeading="All My Courses"
-        pageDescription="Review all courses created by the logged-in instructor, including verification state and key performance metrics."
+        pageDescription="Review all courses created by you, including verification state and key performance metrics."
       />
 
       <AppTable
@@ -55,16 +57,19 @@ const AllMyCourses = () => {
           <div className="max-w-sm">
             <AppSearchBar
               placeholder="Search my courses..."
-              onChange={(value: string) => setSearch(value)}
+              defaultValue={search}
+              onChange={(value: string) =>
+                updateQuery({ search: value, page: 1 })
+              }
             />
           </div>
         }
-        data={filteredCourses}
+        data={courses}
         columns={[
           {
-            key: "thumbnail",
+            key: "thumbnailUrl",
             label: "Thumbnail",
-            render: (value: string, row: CourseRecord) => (
+            render: (value: string, row: CourseListItem) => (
               <TableImage src={value} alt={row.title} shape="rectangle" />
             ),
           },
@@ -86,19 +91,17 @@ const AllMyCourses = () => {
             render: (value: string) => formatCourseLevel(value),
           },
           {
-            key: "categoryName",
+            key: "categoryDetails",
             label: "Category",
+            render: (value: CourseCategorySummary) => value.name,
           },
           {
             key: "isVerified",
             label: "Verification",
-            render: (value: boolean, row: CourseRecord) => (
-              <>
-                {row.isVerified === false && (
-                  <Badge variant="destructive">Not verified</Badge>
-                )}
-                {row.isVerified && <Badge>Verified</Badge>}
-              </>
+            render: (_: boolean, row: CourseListItem) => (
+              <Badge variant={getCourseVerificationBadgeVariant(row)}>
+                {getCourseVerificationLabel(row)}
+              </Badge>
             ),
           },
           {
@@ -117,20 +120,19 @@ const AllMyCourses = () => {
           {
             key: "action",
             label: "Action",
-            render: (_: unknown, row: CourseRecord) => (
-              <AppButton asChild>
-                <Link href={`/course-details/${row._id}?role=instructor`}>
-                  View Details
-                </Link>
+            render: (_: unknown, row: CourseListItem) => (
+              <AppButton href={`/course-details/${row._id}?role=instructor`}>
+                View Details
               </AppButton>
             ),
           },
         ]}
         pagination={true}
+        paginationMeta={pagination}
+        onPageChange={(page) => updateQuery({ page })}
       />
     </PageFlexCol>
   );
 };
 
 export default AllMyCourses;
-

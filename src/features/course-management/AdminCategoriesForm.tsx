@@ -229,16 +229,14 @@ const AdminCategoriesForm = ({
                         it.
                       </p>
                       <div className="flex flex-wrap gap-2">
-                        <label htmlFor="category-image-upload">
-                          <AppButton
-                            type="button"
-                            variant="outline"
-                            iconLeft={ImagePlus}
-                          asChild
-                          >
-                            <span>Choose Another Image</span>
-                          </AppButton>
-                        </label>
+                        <AppButton
+                          type="button"
+                          variant="outline"
+                          iconLeft={ImagePlus}
+                          onClick={() => fileInputRef.current?.click()}
+                        >
+                          Choose Another Image
+                        </AppButton>
                       </div>
                     </div>
                   ) : null}

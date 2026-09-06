@@ -38,6 +38,38 @@ import { coursesData as courseMockData } from "@/dummy-data/coursesData";
 import { type CourseRecord } from "@/types/courseTypes";
 import { formatCourseLevel, getCourseVerificationState } from "./courseHelpers";
 
+const CATEGORY_PAGE_SIZE = 10;
+
+// This screen is still driven by dummy data end-to-end (see courseMockData
+// above), so category search/pagination is faked client-side here instead of
+// going through the real categories API — see CreateNewCourses.tsx for the
+// real, server-backed implementation of the same PagedSearchSelect pattern.
+const paginateCategories = (search: string, page: number) => {
+  const normalizedSearch = search.trim().toLowerCase();
+  const filtered = normalizedSearch
+    ? courseCategoryOptions.filter((category) =>
+        category.name.toLowerCase().includes(normalizedSearch),
+      )
+    : courseCategoryOptions;
+
+  const totalDocuments = filtered.length;
+  const totalPages = Math.max(1, Math.ceil(totalDocuments / CATEGORY_PAGE_SIZE));
+  const currentPage = Math.min(Math.max(page, 1), totalPages);
+  const start = (currentPage - 1) * CATEGORY_PAGE_SIZE;
+
+  return {
+    items: filtered.slice(start, start + CATEGORY_PAGE_SIZE),
+    pagination: {
+      page: currentPage,
+      limit: CATEGORY_PAGE_SIZE,
+      totalDocuments,
+      totalPages,
+      hasNextPage: currentPage < totalPages,
+      hasPrevPage: currentPage > 1,
+    },
+  };
+};
+
 type CourseViewerRole = "student" | "instructor" | "admin";
 
 interface CourseDetailsProps {
@@ -71,6 +103,10 @@ const CourseDetails = ({ viewerRole }: CourseDetailsProps) => {
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
   const [reviewRating, setReviewRating] = useState(0);
   const [reviewFeedback, setReviewFeedback] = useState("");
+  const [categorySearch, setCategorySearch] = useState("");
+  const [categoryPage, setCategoryPage] = useState(1);
+  const { items: categoryItems, pagination: categoryPagination } =
+    paginateCategories(categorySearch, categoryPage);
 
   const course =
     (routeCourseId ? coursesById[routeCourseId] : null) ?? courseMockData[0];
@@ -370,7 +406,17 @@ const CourseDetails = ({ viewerRole }: CourseDetailsProps) => {
                 key={`${course._id}-${viewerRole}-${formMode}-${course.updatedAt}`}
                 mode={isInstructorViewer ? formMode : "view"}
                 initialData={course}
-                categoryOptions={courseCategoryOptions}
+                categoryItems={categoryItems.map((category) => ({
+                  id: category._id,
+                  label: category.name,
+                }))}
+                categoryPagination={categoryPagination}
+                categorySearch={categorySearch}
+                onCategorySearchChange={(value) => {
+                  setCategorySearch(value);
+                  setCategoryPage(1);
+                }}
+                onCategoryPageChange={setCategoryPage}
                 onSubmit={handleUpdateCourse}
                 onClose={() => router.back()}
                 onModeChange={isInstructorViewer ? setFormMode : undefined}

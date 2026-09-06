@@ -1,8 +1,8 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ImagePlus, Upload, Video } from "lucide-react";
-import { useEffect, useState } from "react";
+import { CirclePlus, ImagePlus, Upload, Video } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 
@@ -27,10 +27,14 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { CourseLevel, type CourseRecord } from "@/types/courseTypes";
-import { type Category } from "@/types/categoryTypes";
+import PagedSearchSelect, {
+  type PagedSearchSelectItem,
+} from "@/components/PagedSearchSelect";
+import type { Pagination } from "@/response-types/userResponseTypes";
 
-const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png"];
-const ACCEPTED_VIDEO_TYPES = ["video/mp4", "video/webm", "video/quicktime"];
+const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png"];
+const ACCEPTED_VIDEO_TYPES = ["video/mp4", "video/webm"];
+const MAX_THUMBNAIL_SIZE_IN_BYTES = 5 * 1024 * 1024;
 const MAX_VIDEO_SIZE_IN_BYTES = 20 * 1024 * 1024;
 
 const isFileInstance = (value: unknown): value is File =>
@@ -66,6 +70,13 @@ const courseSchema = z.object({
         !isFileInstance(file) ||
         ACCEPTED_IMAGE_TYPES.includes(file.type),
       "Only .jpg, .jpeg, and .png image formats are supported.",
+    )
+    .refine(
+      (file) =>
+        !file ||
+        !isFileInstance(file) ||
+        file.size <= MAX_THUMBNAIL_SIZE_IN_BYTES,
+      "Course thumbnail must be 5MB or smaller.",
     ),
   videoFile: z
     .custom<File | null | undefined>(
@@ -77,7 +88,7 @@ const courseSchema = z.object({
         !file ||
         !isFileInstance(file) ||
         ACCEPTED_VIDEO_TYPES.includes(file.type),
-      "Only .mp4, .webm, and .mov video formats are supported.",
+      "Only .mp4 and .webm video formats are supported.",
     )
     .refine(
       (file) =>
@@ -103,15 +114,24 @@ interface CourseSubmitValues {
 
 interface CourseFormProps {
   mode: CourseFormMode;
-  categoryOptions: Category[];
+  categoryItems: PagedSearchSelectItem[];
+  categoryPagination: Pagination;
+  categorySearch: string;
+  onCategorySearchChange: (value: string) => void;
+  onCategoryPageChange: (page: number) => void;
   initialData?: CourseRecord | null;
-  onSubmit: (values: CourseSubmitValues) => void;
+  // Return `false` (or resolve to it) to signal failure — the form then
+  // keeps the entered values instead of resetting, so the caller can retry.
+  onSubmit: (
+    values: CourseSubmitValues,
+  ) => void | boolean | Promise<void | boolean>;
   onClose: () => void;
   onModeChange?: (mode: Exclude<CourseFormMode, "create">) => void;
   allowEdit?: boolean;
   hideVideo?: boolean;
   showEnrollButton?: boolean;
   onEnroll?: () => void;
+  isLoading?: boolean;
 }
 
 const emptyValues: CourseFormValues = {
@@ -152,7 +172,11 @@ const revokeObjectUrl = (url: string | null) => {
 
 const CourseForm = ({
   mode,
-  categoryOptions,
+  categoryItems,
+  categoryPagination,
+  categorySearch,
+  onCategorySearchChange,
+  onCategoryPageChange,
   initialData,
   onSubmit,
   onClose,
@@ -161,6 +185,7 @@ const CourseForm = ({
   hideVideo = false,
   showEnrollButton = false,
   onEnroll,
+  isLoading = false,
 }: CourseFormProps) => {
   const [thumbnailPreviewUrl, setThumbnailPreviewUrl] = useState<string | null>(
     initialData?.thumbnail ?? null,
@@ -170,6 +195,8 @@ const CourseForm = ({
   );
   const [thumbnailInputKey, setThumbnailInputKey] = useState(0);
   const [videoInputKey, setVideoInputKey] = useState(0);
+  const thumbnailFileInputRef = useRef<HTMLInputElement | null>(null);
+  const videoFileInputRef = useRef<HTMLInputElement | null>(null);
 
   const form = useForm<CourseFormValues>({
     resolver: zodResolver(courseSchema),
@@ -244,7 +271,7 @@ const CourseForm = ({
     });
   };
 
-  const handleSubmit = (values: CourseFormValues) => {
+  const handleSubmit = async (values: CourseFormValues) => {
     const thumbnailUrl = thumbnailPreviewUrl ?? initialData?.thumbnail ?? null;
     const videoUrl = videoPreviewUrl ?? initialData?.videoUrl ?? null;
 
@@ -264,7 +291,7 @@ const CourseForm = ({
       return;
     }
 
-    onSubmit({
+    const result = await onSubmit({
       title: values.title,
       description: values.description,
       price: values.price,
@@ -277,6 +304,13 @@ const CourseForm = ({
     });
 
     if (mode === "create") {
+      // Only clear the form once the caller confirms the submit succeeded —
+      // on failure (e.g. a failed S3 upload or a rejected create call), keep
+      // the entered values so the admin/instructor can retry.
+      if (result === false) {
+        return;
+      }
+
       form.reset(emptyValues);
       revokeObjectUrl(thumbnailPreviewUrl);
       revokeObjectUrl(videoPreviewUrl);
@@ -414,26 +448,19 @@ const CourseForm = ({
                   <FormItem>
                     <FormLabel>Category</FormLabel>
                     <FormControl>
-                      <Select
-                        name={field.name}
+                      <PagedSearchSelect
+                        items={categoryItems}
+                        pagination={categoryPagination}
+                        search={categorySearch}
                         value={field.value}
                         onValueChange={field.onChange}
+                        onSearchChange={onCategorySearchChange}
+                        onPageChange={onCategoryPageChange}
+                        selectedLabel={initialData?.categoryName}
+                        placeholder="Select category"
+                        searchPlaceholder="Search categories..."
                         disabled={isReadOnly}
-                      >
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select category" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {categoryOptions.map((categoryOption) => (
-                            <SelectItem
-                              key={categoryOption._id}
-                              value={categoryOption._id}
-                            >
-                              {categoryOption.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -451,7 +478,7 @@ const CourseForm = ({
                   <FormLabel>Course Thumbnail</FormLabel>
                   {!isReadOnly && (
                     <FormDescription>
-                      Supported formats (.jpg, .jpeg, or .png).
+                      A sharp 16:9 image works best. Accepts .jpg, .jpeg, or .png, up to 5MB.
                     </FormDescription>
                   )}
 
@@ -476,16 +503,16 @@ const CourseForm = ({
                             preview.
                           </p>
                           <div className="flex flex-wrap gap-2">
-                            <label htmlFor="course-thumbnail-upload">
-                              <AppButton
-                                type="button"
-                                variant="outline"
-                                iconLeft={ImagePlus}
-                                asChild
-                              >
-                                <span>Choose Another Thumbnail</span>
-                              </AppButton>
-                            </label>
+                            <AppButton
+                              type="button"
+                              variant="outline"
+                              iconLeft={ImagePlus}
+                              onClick={() =>
+                                thumbnailFileInputRef.current?.click()
+                              }
+                            >
+                              Choose Another Thumbnail
+                            </AppButton>
                           </div>
                         </div>
                       ) : null}
@@ -522,6 +549,7 @@ const CourseForm = ({
                     <FormControl>
                       <Input
                         key={thumbnailInputKey}
+                        ref={thumbnailFileInputRef}
                         id="course-thumbnail-upload"
                         type="file"
                         accept=".jpg,.jpeg,.png,image/jpeg,image/png"
@@ -544,9 +572,7 @@ const CourseForm = ({
                     <FormLabel>Course Video</FormLabel>
                     {!isReadOnly && (
                       <FormDescription>
-                        Upload a `.mp4`, `.webm`, or `.mov` file up to 20MB. For
-                        now we collect the raw `File` object and log it on
-                        submit.
+                        Clear audio and video help it pass review faster. Accepts .mp4 or .webm, up to 20MB.
                       </FormDescription>
                     )}
 
@@ -573,16 +599,14 @@ const CourseForm = ({
 
                         {!isReadOnly ? (
                           <div className="flex flex-wrap gap-2">
-                            <label htmlFor="course-video-upload">
-                              <AppButton
-                                type="button"
-                                variant="outline"
-                                iconLeft={Video}
-                                asChild
-                              >
-                                <span>Choose Another Video</span>
-                              </AppButton>
-                            </label>
+                            <AppButton
+                              type="button"
+                              variant="outline"
+                              iconLeft={Video}
+                              onClick={() => videoFileInputRef.current?.click()}
+                            >
+                              Choose Another Video
+                            </AppButton>
                           </div>
                         ) : null}
                       </div>
@@ -613,9 +637,10 @@ const CourseForm = ({
                       <FormControl>
                         <Input
                           key={videoInputKey}
+                          ref={videoFileInputRef}
                           id="course-video-upload"
                           type="file"
-                          accept=".mp4,.webm,.mov,video/mp4,video/webm,video/quicktime"
+                          accept=".mp4,.webm,video/mp4,video/webm"
                           className="hidden"
                           onChange={handleVideoChange}
                         />
@@ -648,14 +673,22 @@ const CourseForm = ({
             </>
           ) : (
             <>
+              {mode === "edit" ? (
+                <AppButton
+                  type="button"
+                  variant="outline"
+                  disabled={isLoading}
+                  onClick={handleViewMode}
+                >
+                  Back to View
+                </AppButton>
+              ) : null}
               <AppButton
-                type="button"
-                variant="outline"
-                onClick={mode === "edit" ? handleViewMode : handleClose}
+                type="submit"
+                iconLeft={mode === "create" ? CirclePlus : undefined}
+                loading={isLoading || form.formState.isSubmitting}
+                disabled={isLoading}
               >
-                {mode === "edit" ? "Back to View" : "Cancel"}
-              </AppButton>
-              <AppButton type="submit" loading={form.formState.isSubmitting}>
                 {mode === "edit" ? "Save Changes" : "Create Course"}
               </AppButton>
             </>
