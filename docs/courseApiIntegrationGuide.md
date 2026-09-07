@@ -16,19 +16,19 @@ Base path: `/api/v1/courses`
 
 ## Roles and access
 
-| Route                        | Allowed caller                                                                                                           |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `POST /upload-thumbnail`     | Instructor only                                                                                                          |
-| `POST /upload-video`         | Instructor only                                                                                                          |
-| `POST /`                     | Instructor only (must have completed Stripe onboarding)                                                                  |
-| `PATCH /:id`                 | Instructor only (must own the course)                                                                                    |
-| `DELETE /:id`                | Instructor only (must own the course)                                                                                    |
-| `PATCH /:id/verification`    | Admin only                                                                                                               |
-| `POST /:id/payment-intent`   | Student only                                                                                                             |
-| `POST /:id/refund`           | Student only                                                                                                             |
-| `GET /:id/completion-status` | Student only                                                                                                             |
-| `GET /`                      | Any authenticated user (role changes visibility, see below)                                                              |
-| `GET /:id`                   | Admin, Instructor, or Student (must be logged in; role changes what's returned, see [API 8](#api-8--get-course-details)) |
+| Route | Allowed caller |
+| --- | --- |
+| `POST /upload-thumbnail` | Instructor only |
+| `POST /upload-video` | Instructor only |
+| `POST /` | Instructor only (must have completed Stripe onboarding) |
+| `PATCH /:id` | Instructor only (must own the course) |
+| `DELETE /:id` | Instructor only (must own the course) |
+| `PATCH /:id/verification` | Admin only |
+| `POST /:id/payment-intent` | Student only |
+| `POST /:id/refund` | Student only |
+| `GET /:id/completion-status` | Student only |
+| `GET /` | Any authenticated user (role changes visibility, see below) |
+| `GET /:id` | Admin, Instructor, or Student (must be logged in; role changes what's returned, see [API 8](#api-8--get-course-details)) |
 
 A caller with the wrong role receives `403 You do not have permission to perform this action`. A missing/invalid/expired `accessToken` cookie receives the same `401` errors documented for `/auth/me`.
 
@@ -81,9 +81,9 @@ Instructor only. Generates a presigned S3 POST policy for uploading a course thu
 }
 ```
 
-| Field      | Rules                                             |
-| ---------- | ------------------------------------------------- |
-| `fileName` | Required, non-empty string.                       |
+| Field | Rules |
+| --- | --- |
+| `fileName` | Required, non-empty string. |
 | `fileType` | Required, one of `"image/jpeg"` or `"image/png"`. |
 
 ### Success response
@@ -115,11 +115,11 @@ HTTP `200`
 
 ### Possible errors
 
-| HTTP status | Message                                             | When                                                               |
-| ----------- | --------------------------------------------------- | ------------------------------------------------------------------ |
-| 400         | `Validation failed`                                 | `fileName` missing, or `fileType` is not `image/jpeg`/`image/png`. |
-| 401         | _(see auth guide `/me` 401 rows)_                   | Access-token cookie missing/invalid/expired.                       |
-| 403         | `You do not have permission to perform this action` | Caller is not an instructor.                                       |
+| HTTP status | Message | When |
+| --- | --- | --- |
+| 400 | `Validation failed` | `fileName` missing, or `fileType` is not `image/jpeg`/`image/png`. |
+| 401 | *(see auth guide `/me` 401 rows)* | Access-token cookie missing/invalid/expired. |
+| 403 | `You do not have permission to perform this action` | Caller is not an instructor. |
 
 ## API 2 — Get course video upload URL
 
@@ -136,9 +136,9 @@ Instructor only. Generates a presigned S3 POST policy for uploading a course vid
 }
 ```
 
-| Field      | Rules                                             |
-| ---------- | ------------------------------------------------- |
-| `fileName` | Required, non-empty string.                       |
+| Field | Rules |
+| --- | --- |
+| `fileName` | Required, non-empty string. |
 | `fileType` | Required, one of `"video/mp4"` or `"video/webm"`. |
 
 ### Success response
@@ -168,11 +168,11 @@ Same flow as API 1: upload the file to `data.uploadUrl` using `data.fields`, the
 
 ### Possible errors
 
-| HTTP status | Message                                             | When                                                               |
-| ----------- | --------------------------------------------------- | ------------------------------------------------------------------ |
-| 400         | `Validation failed`                                 | `fileName` missing, or `fileType` is not `video/mp4`/`video/webm`. |
-| 401         | _(see auth guide `/me` 401 rows)_                   | Access-token cookie missing/invalid/expired.                       |
-| 403         | `You do not have permission to perform this action` | Caller is not an instructor.                                       |
+| HTTP status | Message | When |
+| --- | --- | --- |
+| 400 | `Validation failed` | `fileName` missing, or `fileType` is not `video/mp4`/`video/webm`. |
+| 401 | *(see auth guide `/me` 401 rows)* | Access-token cookie missing/invalid/expired. |
+| 403 | `You do not have permission to perform this action` | Caller is not an instructor. |
 
 ## API 3 — Create course
 
@@ -194,15 +194,15 @@ Instructor only. Requires the instructor to have completed Stripe Connect onboar
 }
 ```
 
-| Field          | Rules                                                               |
-| -------------- | ------------------------------------------------------------------- |
-| `title`        | Required, trimmed, 5–120 characters. Must be unique per instructor. |
-| `description`  | Required, trimmed, 20–5000 characters.                              |
-| `price`        | Required, number, ≥ 0.                                              |
-| `level`        | Required, one of `"beginner"`, `"intermediate"`, `"advanced"`.      |
-| `category`     | Required, non-empty string (Category `_id`).                        |
-| `thumbnailKey` | Required, non-empty string (S3 object key from API 1).              |
-| `videoKey`     | Required, non-empty string (S3 object key from API 2).              |
+| Field | Rules |
+| --- | --- |
+| `title` | Required, trimmed, 5–120 characters. Must be unique per instructor. |
+| `description` | Required, trimmed, 20–5000 characters. |
+| `price` | Required, number, ≥ 0. |
+| `level` | Required, one of `"beginner"`, `"intermediate"`, `"advanced"`. |
+| `category` | Required, non-empty string (Category `_id`). |
+| `thumbnailKey` | Required, non-empty string (S3 object key from API 1). |
+| `videoKey` | Required, non-empty string (S3 object key from API 2). |
 
 `instructor` is taken from the logged-in user, not the request body — do not send it. `slug` and `isVerified` are also server-managed and must not be sent.
 
@@ -215,23 +215,21 @@ HTTP `201`
   "status": "success",
   "message": "Course created successfully, it will be reviewed by an Admin",
   "data": {
-    "course": {
-      /* Course shape, see above */
-    }
+    "course": { /* Course shape, see above */ }
   }
 }
 ```
 
 ### Possible errors
 
-| HTTP status | Message                                                           | When                                                                |
-| ----------- | ----------------------------------------------------------------- | ------------------------------------------------------------------- |
-| 400         | `Validation failed`                                               | A field is missing, out of range, or an undocumented field is sent. |
-| 400         | `"<value>" already exists. Please use a different title`          | Instructor already has a course with this exact title.              |
-| 401         | _(see auth guide `/me` 401 rows)_                                 | Access-token cookie missing/invalid/expired.                        |
-| 403         | `You do not have permission to perform this action`               | Caller is not an instructor.                                        |
-| 403         | `Please complete your Stripe onboarding before creating a course` | Instructor hasn't finished Stripe Connect onboarding.               |
-| 404         | `Instructor not found`                                            | The logged-in instructor's user record is missing.                  |
+| HTTP status | Message | When |
+| --- | --- | --- |
+| 400 | `Validation failed` | A field is missing, out of range, or an undocumented field is sent. |
+| 400 | `"<value>" already exists. Please use a different title` | Instructor already has a course with this exact title. |
+| 401 | *(see auth guide `/me` 401 rows)* | Access-token cookie missing/invalid/expired. |
+| 403 | `You do not have permission to perform this action` | Caller is not an instructor. |
+| 403 | `Please complete your Stripe onboarding before creating a course` | Instructor hasn't finished Stripe Connect onboarding. |
+| 404 | `Instructor not found` | The logged-in instructor's user record is missing. |
 
 ## API 4 — Update course
 
@@ -241,9 +239,9 @@ Instructor only, and only the course's own instructor. All fields are optional, 
 
 ### URL params
 
-| Param | Rules                                     |
-| ----- | ----------------------------------------- |
-| `id`  | Required, non-empty string (Mongo `_id`). |
+| Param | Rules |
+| --- | --- |
+| `id` | Required, non-empty string (Mongo `_id`). |
 
 ### Request body
 
@@ -254,15 +252,15 @@ Instructor only, and only the course's own instructor. All fields are optional, 
 }
 ```
 
-| Field          | Rules                                                          |
-| -------------- | -------------------------------------------------------------- |
-| `title`        | Optional, trimmed, 5–120 characters.                           |
-| `description`  | Optional, trimmed, 20–5000 characters.                         |
-| `thumbnailKey` | Optional, non-empty string (S3 object key from API 1).         |
-| `videoKey`     | Optional, non-empty string (S3 object key from API 2).         |
-| `price`        | Optional, number, ≥ 0.                                         |
-| `level`        | Optional, one of `"beginner"`, `"intermediate"`, `"advanced"`. |
-| `category`     | Optional, non-empty string (Category `_id`).                   |
+| Field | Rules |
+| --- | --- |
+| `title` | Optional, trimmed, 5–120 characters. |
+| `description` | Optional, trimmed, 20–5000 characters. |
+| `thumbnailKey` | Optional, non-empty string (S3 object key from API 1). |
+| `videoKey` | Optional, non-empty string (S3 object key from API 2). |
+| `price` | Optional, number, ≥ 0. |
+| `level` | Optional, one of `"beginner"`, `"intermediate"`, `"advanced"`. |
+| `category` | Optional, non-empty string (Category `_id`). |
 
 ### Success response
 
@@ -273,21 +271,19 @@ HTTP `200`
   "status": "success",
   "message": "Course updated successfully",
   "data": {
-    "course": {
-      /* Course shape, see above */
-    }
+    "course": { /* Course shape, see above */ }
   }
 }
 ```
 
 ### Possible errors
 
-| HTTP status | Message                                            | When                                                                            |
-| ----------- | -------------------------------------------------- | ------------------------------------------------------------------------------- |
-| 400         | `Validation failed`                                | Body is empty, a field fails its shape rules, or an undocumented field is sent. |
-| 401         | _(see auth guide `/me` 401 rows)_                  | Access-token cookie missing/invalid/expired.                                    |
-| 403         | `You do not have permission to access this course` | Caller is not the course's owning instructor.                                   |
-| 404         | `Course not found`                                 | No course exists with that `id`.                                                |
+| HTTP status | Message | When |
+| --- | --- | --- |
+| 400 | `Validation failed` | Body is empty, a field fails its shape rules, or an undocumented field is sent. |
+| 401 | *(see auth guide `/me` 401 rows)* | Access-token cookie missing/invalid/expired. |
+| 403 | `You do not have permission to access this course` | Caller is not the course's owning instructor. |
+| 404 | `Course not found` | No course exists with that `id`. |
 
 ## API 5 — Delete course
 
@@ -297,9 +293,9 @@ Instructor only, and only the course's own instructor. Deletes the course docume
 
 ### URL params
 
-| Param | Rules                       |
-| ----- | --------------------------- |
-| `id`  | Required, non-empty string. |
+| Param | Rules |
+| --- | --- |
+| `id` | Required, non-empty string. |
 
 ### Success response
 
@@ -315,24 +311,27 @@ HTTP `200`
 
 ### Possible errors
 
-| HTTP status | Message                                            | When                                          |
-| ----------- | -------------------------------------------------- | --------------------------------------------- |
-| 400         | `Invalid value "<value>" for field "_id"`          | `id` is not a valid Mongo ObjectId.           |
-| 401         | _(see auth guide `/me` 401 rows)_                  | Access-token cookie missing/invalid/expired.  |
-| 403         | `You do not have permission to access this course` | Caller is not the course's owning instructor. |
-| 404         | `Course not found`                                 | No course exists with that `id`.              |
+| HTTP status | Message | When |
+| --- | --- | --- |
+| 400 | `Invalid value "<value>" for field "_id"` | `id` is not a valid Mongo ObjectId. |
+| 401 | *(see auth guide `/me` 401 rows)* | Access-token cookie missing/invalid/expired. |
+| 403 | `You do not have permission to access this course` | Caller is not the course's owning instructor. |
+| 404 | `Course not found` | No course exists with that `id`. |
 
 ## API 6 — Approve or reject course (Admin)
 
 `PATCH /api/v1/courses/:id/verification`
 
-Admin only. `verificationRejectionReason` is required when `isVerified: false`. Rejecting redundantly (course is already in the target state) is rejected with an error.
+Admin only. `verificationRejectionReason` is required when `isVerified: false`.
+
+- Approving (`isVerified: true`) is blocked only if the course is already verified. A previously-rejected course can always be approved — its `verificationRejectionReason` is cleared to `null` in the process.
+- Rejecting (`isVerified: false`) is blocked only if the course is already sitting in a rejected state (`isVerified: false` with a `verificationRejectionReason` already recorded). A currently-verified course can always be rejected — a fresh, never-reviewed course (`isVerified: false`, `verificationRejectionReason: null`) can also always be rejected for the first time.
 
 ### URL params
 
-| Param | Rules                       |
-| ----- | --------------------------- |
-| `id`  | Required, non-empty string. |
+| Param | Rules |
+| --- | --- |
+| `id` | Required, non-empty string. |
 
 ### Request body
 
@@ -343,9 +342,9 @@ Admin only. `verificationRejectionReason` is required when `isVerified: false`. 
 }
 ```
 
-| Field                         | Rules                                                                                              |
-| ----------------------------- | -------------------------------------------------------------------------------------------------- |
-| `isVerified`                  | Required, boolean.                                                                                 |
+| Field | Rules |
+| --- | --- |
+| `isVerified` | Required, boolean. |
 | `verificationRejectionReason` | Required when `isVerified: false` (1–500 characters); omit or send `null` when `isVerified: true`. |
 
 ### Success response
@@ -357,9 +356,7 @@ HTTP `200`
   "status": "success",
   "message": "Course approved successfully",
   "data": {
-    "course": {
-      /* Course shape, see above */
-    }
+    "course": { /* Course shape, see above */ }
   }
 }
 ```
@@ -368,14 +365,14 @@ HTTP `200`
 
 ### Possible errors
 
-| HTTP status | Message                                             | When                                                                      |
-| ----------- | --------------------------------------------------- | ------------------------------------------------------------------------- |
-| 400         | `Validation failed`                                 | `isVerified` missing, or rejecting without `verificationRejectionReason`. |
-| 400         | `Course is already verified`                        | `isVerified: true` sent but the course is already verified.               |
-| 400         | `Course is already unverified`                      | `isVerified: false` sent but the course is already unverified.            |
-| 401         | _(see auth guide `/me` 401 rows)_                   | Access-token cookie missing/invalid/expired.                              |
-| 403         | `You do not have permission to perform this action` | Caller is not an admin.                                                   |
-| 404         | `Course not found`                                  | No course exists with that `id`.                                          |
+| HTTP status | Message | When |
+| --- | --- | --- |
+| 400 | `Validation failed` | `isVerified` missing, or rejecting without `verificationRejectionReason`. |
+| 400 | `Course is already verified` | `isVerified: true` sent but the course is already verified. |
+| 400 | `Course is already unverified` | `isVerified: false` sent but the course is already unverified with a rejection reason already on record (i.e. it was already rejected, not just pending its first review). |
+| 401 | *(see auth guide `/me` 401 rows)* | Access-token cookie missing/invalid/expired. |
+| 403 | `You do not have permission to perform this action` | Caller is not an admin. |
+| 404 | `Course not found` | No course exists with that `id`. |
 
 ## API 7 — List courses
 
@@ -385,25 +382,25 @@ Requires an authenticated session — anonymous callers are rejected with `401`.
 
 ### Role-based visibility (list endpoint)
 
-| Caller     | Sees                                                                   |
-| ---------- | ---------------------------------------------------------------------- |
-| Student    | Only courses they are enrolled in.                                     |
+| Caller | Sees |
+| --- | --- |
+| Student | Only courses they are enrolled in. |
 | Instructor | Only their own courses (including their own unverified/rejected ones). |
-| Admin      | All courses, no restriction.                                           |
+| Admin | All courses, no restriction. |
 
 ### Query parameters
 
-| Param                         | Type                | Default     | Notes                                                                  |
-| ----------------------------- | ------------------- | ----------- | ---------------------------------------------------------------------- |
-| `search`                      | string              | —           | Case-insensitive search against `title`.                               |
-| `projection`                  | string              | —           | Comma-separated Mongo field projection.                                |
-| `instructor`                  | string              | —           | Filter by instructor `_id`.                                            |
-| `isVerified`                  | `"true" \| "false"` | —           | Filter by verification state.                                          |
-| `verificationRejectionReason` | `"null"`            | —           | Literal string `"null"` — filters to courses where this field IS null. |
-| `page`                        | number (≥1)         | `1`         |                                                                        |
-| `limit`                       | number (≥1)         | `10`        |                                                                        |
-| `sortBy`                      | string              | `createdAt` |                                                                        |
-| `sortOrder`                   | `"asc" \| "desc"`   | `desc`      |                                                                        |
+| Param | Type | Default | Notes |
+| --- | --- | --- | --- |
+| `search` | string | — | Case-insensitive search against `title`. |
+| `projection` | string | — | Comma-separated Mongo field projection. |
+| `instructor` | string | — | Filter by instructor `_id`. |
+| `isVerified` | `"true" \| "false"` | — | Filter by verification state. |
+| `verificationRejectionReason` | `"null"` | — | Literal string `"null"` — filters to courses where this field IS null. |
+| `page` | number (≥1) | `1` | |
+| `limit` | number (≥1) | `10` | |
+| `sortBy` | string | `createdAt` | |
+| `sortOrder` | `"asc" \| "desc"` | `desc` | |
 
 All params are optional and sent as query-string values (strings); `page`/`limit` are coerced to numbers server-side.
 
@@ -425,14 +422,8 @@ HTTP `200`
         "videoUrl": "https://s3.<region>.amazonaws.com/<bucket>/...?X-Amz-Signature=...",
         "price": 49.99,
         "level": "beginner",
-        "instructorDetails": {
-          "_id": "66c0a1b2c3d4e5f678901111",
-          "fullName": "Jane Doe"
-        },
-        "categoryDetails": {
-          "_id": "66c0a1b2c3d4e5f678901222",
-          "name": "Web Development"
-        },
+        "instructorDetails": { "_id": "66c0a1b2c3d4e5f678901111", "fullName": "Jane Doe" },
+        "categoryDetails": { "_id": "66c0a1b2c3d4e5f678901222", "name": "Web Development" },
         "isVerified": true,
         "verificationRejectionReason": null,
         "lastVerificationRejectedAt": null,
@@ -461,10 +452,10 @@ Note: `instructor` and `category` raw ids are replaced by joined `instructorDeta
 
 ### Possible errors
 
-| HTTP status | Message                           | When                                            |
-| ----------- | --------------------------------- | ----------------------------------------------- |
-| 400         | `Validation failed`               | An invalid or undocumented query param is sent. |
-| 401         | _(see auth guide `/me` 401 rows)_ | Access-token cookie missing/invalid/expired.    |
+| HTTP status | Message | When |
+| --- | --- | --- |
+| 400 | `Validation failed` | An invalid or undocumented query param is sent. |
+| 401 | *(see auth guide `/me` 401 rows)* | Access-token cookie missing/invalid/expired. |
 
 ## API 8 — Get course details
 
@@ -476,17 +467,17 @@ Requires an authenticated session (unlike `GET /`, anonymous callers are rejecte
 
 Every role gets the same joined shape back — `instructorDetails`/`categoryDetails` instead of raw `instructor`/`category` (same as an [API 7](#api-7--list-courses) list item) — but who can reach it differs:
 
-| Caller     | Sees                                                     | On a course that isn't theirs / isn't accessible                                                                                                         |
-| ---------- | -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Admin      | Any course, full details.                                | `404 Course not found` if the `id` doesn't exist.                                                                                                        |
-| Instructor | Full details, but only for a course they own.            | `404 Course not found` if the `id` doesn't exist; `403 You do not have permission to access this course` if it exists but belongs to another instructor. |
-| Student    | Full details, but only for a course they're enrolled in. | `404 You are not enrolled in this course` if there's no enrollment for this student+course (including when the course itself doesn't exist).             |
+| Caller | Sees | On a course that isn't theirs / isn't accessible |
+| --- | --- | --- |
+| Admin | Any course, full details. | `404 Course not found` if the `id` doesn't exist. |
+| Instructor | Full details, but only for a course they own. | `404 Course not found` if the `id` doesn't exist; `403 You do not have permission to access this course` if it exists but belongs to another instructor. |
+| Student | Full details, but only for a course they're enrolled in. | `404 You are not enrolled in this course` if there's no enrollment for this student+course (including when the course itself doesn't exist). |
 
 ### URL params
 
-| Param | Rules                                     |
-| ----- | ----------------------------------------- |
-| `id`  | Required, non-empty string (Mongo `_id`). |
+| Param | Rules |
+| --- | --- |
+| `id` | Required, non-empty string (Mongo `_id`). |
 
 ### Success response
 
@@ -504,14 +495,8 @@ HTTP `200`
       "title": "Complete Web Development Bootcamp",
       "thumbnailUrl": "https://s3.<region>.amazonaws.com/<bucket>/5.0/courses/thumbnails/....jpg",
       "videoUrl": "https://s3.<region>.amazonaws.com/<bucket>/...?X-Amz-Signature=...",
-      "instructorDetails": {
-        "_id": "66c0a1b2c3d4e5f678901111",
-        "fullName": "Jane Doe"
-      },
-      "categoryDetails": {
-        "_id": "66c0a1b2c3d4e5f678901222",
-        "name": "Web Development"
-      }
+      "instructorDetails": { "_id": "66c0a1b2c3d4e5f678901111", "fullName": "Jane Doe" },
+      "categoryDetails": { "_id": "66c0a1b2c3d4e5f678901222", "name": "Web Development" }
       /* ...remaining Course fields, see above */
     }
   }
@@ -520,13 +505,13 @@ HTTP `200`
 
 ### Possible errors
 
-| HTTP status | Message                                            | When                                                                                                       |
-| ----------- | -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| 400         | `Invalid value "<value>" for field "_id"`          | `id` is not a valid Mongo ObjectId.                                                                        |
-| 401         | _(see auth guide `/me` 401 rows)_                  | Access-token cookie missing/invalid/expired.                                                               |
-| 403         | `You do not have permission to access this course` | Caller is an instructor and the course belongs to someone else.                                            |
-| 404         | `Course not found`                                 | Caller is an admin/instructor and no course exists with that `id`.                                         |
-| 404         | `You are not enrolled in this course`              | Caller is a student with no enrollment for this course (also returned when the `id` doesn't exist at all). |
+| HTTP status | Message | When |
+| --- | --- | --- |
+| 400 | `Invalid value "<value>" for field "_id"` | `id` is not a valid Mongo ObjectId. |
+| 401 | *(see auth guide `/me` 401 rows)* | Access-token cookie missing/invalid/expired. |
+| 403 | `You do not have permission to access this course` | Caller is an instructor and the course belongs to someone else. |
+| 404 | `Course not found` | Caller is an admin/instructor and no course exists with that `id`. |
+| 404 | `You are not enrolled in this course` | Caller is a student with no enrollment for this course (also returned when the `id` doesn't exist at all). |
 
 ## API 9 — Create payment intent (Student)
 
@@ -536,9 +521,9 @@ Student only. Course must be verified, the student must not already be enrolled,
 
 ### URL params
 
-| Param | Rules                                      |
-| ----- | ------------------------------------------ |
-| `id`  | Required, non-empty string (course `_id`). |
+| Param | Rules |
+| --- | --- |
+| `id` | Required, non-empty string (course `_id`). |
 
 No request body.
 
@@ -560,13 +545,13 @@ Pass `data.clientSecret` to Stripe.js/Elements on the frontend to confirm the pa
 
 ### Possible errors
 
-| HTTP status | Message                                                             | When                                                  |
-| ----------- | ------------------------------------------------------------------- | ----------------------------------------------------- |
-| 401         | _(see auth guide `/me` 401 rows)_                                   | Access-token cookie missing/invalid/expired.          |
-| 403         | `You do not have permission to perform this action`                 | Caller is not a student.                              |
-| 404         | `Course not found`                                                  | Course doesn't exist, or exists but is not verified.  |
-| 400         | `You are already enrolled in this course`                           | Student already has an enrollment for this course.    |
-| 400         | `This course's instructor has not completed payment onboarding yet` | Instructor hasn't finished Stripe Connect onboarding. |
+| HTTP status | Message | When |
+| --- | --- | --- |
+| 401 | *(see auth guide `/me` 401 rows)* | Access-token cookie missing/invalid/expired. |
+| 403 | `You do not have permission to perform this action` | Caller is not a student. |
+| 404 | `Course not found` | Course doesn't exist, or exists but is not verified. |
+| 400 | `You are already enrolled in this course` | Student already has an enrollment for this course. |
+| 400 | `This course's instructor has not completed payment onboarding yet` | Instructor hasn't finished Stripe Connect onboarding. |
 
 ## API 10 — Refund course (Student)
 
@@ -576,9 +561,9 @@ Student only. All conditions below must hold; checked in order.
 
 ### URL params
 
-| Param | Rules                                      |
-| ----- | ------------------------------------------ |
-| `id`  | Required, non-empty string (course `_id`). |
+| Param | Rules |
+| --- | --- |
+| `id` | Required, non-empty string (course `_id`). |
 
 No request body.
 
@@ -603,17 +588,17 @@ HTTP `200`
 
 ### Possible errors
 
-| HTTP status | Message                                                                                | When                                                    |
-| ----------- | -------------------------------------------------------------------------------------- | ------------------------------------------------------- |
-| 401         | _(see auth guide `/me` 401 rows)_                                                      | Access-token cookie missing/invalid/expired.            |
-| 403         | `You do not have permission to perform this action`                                    | Caller is not a student.                                |
-| 404         | `You are not enrolled in this course`                                                  | No enrollment record for this student+course.           |
-| 404         | `No payment record found for this enrollment`                                          | No transaction linked to the enrollment.                |
-| 400         | `This course has already been refunded`                                                | Transaction is not in a `paid` state.                   |
-| 400         | `This payment is not eligible for a refund`                                            | `stripeChargeId` is missing on the transaction.         |
-| 400         | `Refund window has expired. Refunds are only allowed within 7 days of purchase`        | More than 7 days since `amountPaidAt`.                  |
-| 400         | `You have watched more than 30% of the course and are no longer eligible for a refund` | `enrollment.watchPercentage` exceeds 30%.               |
-| 500         | `Unable to process refund: no charge reference found`                                  | Unexpected missing charge reference on the Stripe side. |
+| HTTP status | Message | When |
+| --- | --- | --- |
+| 401 | *(see auth guide `/me` 401 rows)* | Access-token cookie missing/invalid/expired. |
+| 403 | `You do not have permission to perform this action` | Caller is not a student. |
+| 404 | `You are not enrolled in this course` | No enrollment record for this student+course. |
+| 404 | `No payment record found for this enrollment` | No transaction linked to the enrollment. |
+| 400 | `This course has already been refunded` | Transaction is not in a `paid` state. |
+| 400 | `This payment is not eligible for a refund` | `stripeChargeId` is missing on the transaction. |
+| 400 | `Refund window has expired. Refunds are only allowed within 7 days of purchase` | More than 7 days since `amountPaidAt`. |
+| 400 | `You have watched more than 30% of the course and are no longer eligible for a refund` | `enrollment.watchPercentage` exceeds 30%. |
+| 500 | `Unable to process refund: no charge reference found` | Unexpected missing charge reference on the Stripe side. |
 
 ## API 11 — Get course completion status (Student)
 
@@ -623,9 +608,9 @@ Student only. Requires an existing enrollment.
 
 ### URL params
 
-| Param | Rules                                      |
-| ----- | ------------------------------------------ |
-| `id`  | Required, non-empty string (course `_id`). |
+| Param | Rules |
+| --- | --- |
+| `id` | Required, non-empty string (course `_id`). |
 
 ### Success response
 
@@ -644,11 +629,11 @@ HTTP `200`
 
 ### Possible errors
 
-| HTTP status | Message                                             | When                                          |
-| ----------- | --------------------------------------------------- | --------------------------------------------- |
-| 401         | _(see auth guide `/me` 401 rows)_                   | Access-token cookie missing/invalid/expired.  |
-| 403         | `You do not have permission to perform this action` | Caller is not a student.                      |
-| 404         | `You are not enrolled in this course`               | No enrollment record for this student+course. |
+| HTTP status | Message | When |
+| --- | --- | --- |
+| 401 | *(see auth guide `/me` 401 rows)* | Access-token cookie missing/invalid/expired. |
+| 403 | `You do not have permission to perform this action` | Caller is not a student. |
+| 404 | `You are not enrolled in this course` | No enrollment record for this student+course. |
 
 ## Frontend types
 

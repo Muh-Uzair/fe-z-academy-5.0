@@ -23,14 +23,23 @@ const AppButton = React.forwardRef<HTMLButtonElement, AppButtonProps>(
       disabled,
       href,
       linkProps,
+      loading,
       ...props
     },
     ref,
   ) => {
+    // `isLoading` and the underlying Button's own `loading` prop both mean
+    // "this button is busy" — accept either so the left icon (`leftIcon` or
+    // the primitive `iconLeft`) is hidden in favor of the spinner no matter
+    // which one the caller passed.
+    const busy = isLoading ?? loading ?? false;
+
+    // The underlying Button already renders its own spinner in place of
+    // `iconLeft` when `loading` is true (forwarded below), so this only
+    // needs to hide `leftIcon` while busy — not render a second spinner.
     const content = (
       <>
-        {isLoading && <AppIcon icon={Loader2} className="mr-1 animate-spin" />}
-        {!isLoading && LeftIcon && <AppIcon icon={LeftIcon} className="mr-1" />}
+        {!busy && LeftIcon && <AppIcon icon={LeftIcon} className="mr-1" />}
         {children}
         {RightIcon && <AppIcon icon={RightIcon} className="ml-1" />}
       </>
@@ -40,7 +49,8 @@ const AppButton = React.forwardRef<HTMLButtonElement, AppButtonProps>(
       return (
         <Button
           asChild
-          disabled={isLoading || disabled}
+          loading={busy}
+          disabled={busy || disabled}
           className={className}
           {...props}
         >
@@ -54,7 +64,8 @@ const AppButton = React.forwardRef<HTMLButtonElement, AppButtonProps>(
     return (
       <Button
         ref={ref}
-        disabled={isLoading || disabled}
+        loading={busy}
+        disabled={busy || disabled}
         className={className}
         {...props}
       >

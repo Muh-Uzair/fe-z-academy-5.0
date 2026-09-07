@@ -133,6 +133,7 @@ interface CourseFormProps {
   showEnrollButton?: boolean;
   onEnroll?: () => void;
   isLoading?: boolean;
+  hideCloseButton?: boolean;
 }
 
 const emptyValues: CourseFormValues = {
@@ -187,6 +188,7 @@ const CourseForm = ({
   showEnrollButton = false,
   onEnroll,
   isLoading = false,
+  hideCloseButton = false,
 }: CourseFormProps) => {
   const [thumbnailPreviewUrl, setThumbnailPreviewUrl] = useState<string | null>(
     initialData?.thumbnailUrl ?? null,
@@ -206,6 +208,11 @@ const CourseForm = ({
   });
 
   const isReadOnly = mode === "view";
+  // In view mode the footer only has content when at least one of these
+  // actions applies — skip rendering it (and its divider) when it'd be empty.
+  const hasViewModeActions =
+    (!allowEdit && !hideCloseButton) || allowEdit || (showEnrollButton && !!onEnroll);
+  const showFormFooter = mode !== "view" || hasViewModeActions;
   const selectedVideoFile = useWatch({
     control: form.control,
     name: "videoFile",
@@ -665,52 +672,57 @@ const CourseForm = ({
           </div>
         </div>
 
-        <div className="flex flex-col-reverse gap-2 border-t pt-4 sm:flex-row sm:justify-end">
-          {mode === "view" ? (
-            <>
-              {!allowEdit ? (
+        {showFormFooter ? (
+          <div className="flex flex-col-reverse gap-2 border-t pt-4 sm:flex-row sm:justify-end">
+            {mode === "view" ? (
+              <>
+                {!allowEdit && !hideCloseButton ? (
+                  <AppButton
+                    type="button"
+                    variant="outline"
+                    onClick={handleClose}
+                  >
+                    Close
+                  </AppButton>
+                ) : null}
+                {allowEdit ? (
+                  <AppButton
+                    type="button"
+                    onClick={() => onModeChange?.("edit")}
+                  >
+                    Edit Course
+                  </AppButton>
+                ) : null}
+                {showEnrollButton && onEnroll ? (
+                  <AppButton type="button" onClick={onEnroll}>
+                    Enroll Now
+                  </AppButton>
+                ) : null}
+              </>
+            ) : (
+              <>
+                {mode === "edit" ? (
+                  <AppButton
+                    type="button"
+                    variant="outline"
+                    disabled={isLoading}
+                    onClick={handleViewMode}
+                  >
+                    Back to View
+                  </AppButton>
+                ) : null}
                 <AppButton
-                  type="button"
-                  variant="outline"
-                  onClick={handleClose}
-                >
-                  Close
-                </AppButton>
-              ) : null}
-              {allowEdit ? (
-                <AppButton type="button" onClick={() => onModeChange?.("edit")}>
-                  Edit Course
-                </AppButton>
-              ) : null}
-              {showEnrollButton && onEnroll ? (
-                <AppButton type="button" onClick={onEnroll}>
-                  Enroll Now
-                </AppButton>
-              ) : null}
-            </>
-          ) : (
-            <>
-              {mode === "edit" ? (
-                <AppButton
-                  type="button"
-                  variant="outline"
+                  type="submit"
+                  iconLeft={mode === "create" ? CirclePlus : undefined}
+                  loading={isLoading || form.formState.isSubmitting}
                   disabled={isLoading}
-                  onClick={handleViewMode}
                 >
-                  Back to View
+                  {mode === "edit" ? "Save Changes" : "Create Course"}
                 </AppButton>
-              ) : null}
-              <AppButton
-                type="submit"
-                iconLeft={mode === "create" ? CirclePlus : undefined}
-                loading={isLoading || form.formState.isSubmitting}
-                disabled={isLoading}
-              >
-                {mode === "edit" ? "Save Changes" : "Create Course"}
-              </AppButton>
-            </>
-          )}
-        </div>
+              </>
+            )}
+          </div>
+        ) : null}
       </form>
     </Form>
   );

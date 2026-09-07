@@ -14,7 +14,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ArrowLeft, Star } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Star, XCircle } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -47,7 +47,12 @@ import type {
 } from "@/response-types/courseResponseTypes";
 import type { Category } from "@/response-types/categoryResponseTypes";
 import type { Pagination } from "@/response-types/userResponseTypes";
-import { formatCourseLevel, getCourseVerificationState } from "./courseHelpers";
+import {
+  formatCourseLevel,
+  getCourseVerificationBadgeVariant,
+  getCourseVerificationLabel,
+  getCourseVerificationState,
+} from "./courseHelpers";
 
 type CourseViewerRole = "student" | "instructor" | "admin";
 
@@ -109,20 +114,18 @@ const CourseDetails = ({
   const { run: runRejectAction, isLoading: isRejecting } = useClientAction();
 
   const isInstructorViewer = viewerRole === "instructor";
+  // Admin always reaches this page from an admin course list, which always
+  // links here with review=true — there's no other admin entry point.
   const isAdminViewer = viewerRole === "admin";
-  const showAdminReviewPanel =
-    isAdminViewer && searchParams.get("review") === "true";
   const source = searchParams.get("source");
   const isFromBrowse = source === "browse";
   const courseVerificationState = getCourseVerificationState(course);
 
   const pageDescription = isInstructorViewer
     ? "Review your course submission, then switch to edit mode when you need to update the content or replace media files."
-    : isAdminViewer && showAdminReviewPanel
+    : isAdminViewer
       ? "Review the submitted course and either verify it or return feedback to the instructor."
-      : isAdminViewer
-        ? "View the submitted course details exactly as the instructor sees them."
-        : "Review the course details.";
+      : "Review the course details.";
 
   const updateCategoryQuery = (next: { search?: string; page?: number }) => {
     const nextSearch = next.search ?? categorySearch;
@@ -239,7 +242,7 @@ const CourseDetails = ({
 
     if (response?.status === "success") {
       setAdminReviewReason("");
-      router.refresh();
+      router.push("/admin/courses/verified-courses");
     }
   };
 
@@ -258,7 +261,7 @@ const CourseDetails = ({
     );
 
     if (response?.status === "success") {
-      router.refresh();
+      router.push("/admin/courses/all-courses");
     }
   };
 
@@ -355,10 +358,9 @@ const CourseDetails = ({
               </CardHeader>
               <CardContent className="space-y-3 text-sm">
                 <div className="flex flex-wrap items-center gap-2">
-                  {course.isVerified === false && (
-                    <Badge variant="destructive">Not verified</Badge>
-                  )}
-                  {course.isVerified && <Badge>Verified</Badge>}
+                  <Badge variant={getCourseVerificationBadgeVariant(course)}>
+                    {getCourseVerificationLabel(course)}
+                  </Badge>
 
                   <Badge variant="outline">
                     {formatCourseLevel(course.level)}
@@ -463,11 +465,12 @@ const CourseDetails = ({
                 showEnrollButton={isFromBrowse}
                 onEnroll={() => router.push(`/course-checkout/${course._id}`)}
                 isLoading={isUpdating}
+                hideCloseButton={isAdminViewer}
               />
             </CardContent>
           </Card>
 
-          {showAdminReviewPanel ? (
+          {isAdminViewer ? (
             <Card>
               <CardHeader>
                 <CardTitle>Admin Review</CardTitle>
@@ -477,45 +480,68 @@ const CourseDetails = ({
                     : "Update the review result if the course still needs changes or is ready to be approved."}
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <p className="text-sm font-medium">
-                    Verification Rejection Reason
-                  </p>
-                  <Textarea
-                    value={adminReviewReason}
-                    onChange={(event) =>
-                      setAdminReviewReason(event.target.value)
-                    }
-                    placeholder="Explain what the instructor needs to fix before this course can be approved."
-                    className="min-h-32"
-                  />
-                  <p className="text-sm text-muted-foreground">
-                    Leave this blank if you are going to verify the course.
-                  </p>
-                </div>
+              <CardContent className="space-y-6">
+                {courseVerificationState !== "verified" ? (
+                  <div
+                    className={cn(
+                      "flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between",
+                      courseVerificationState !== "rejected" &&
+                        "border-b pb-6",
+                    )}
+                  >
+                    <div>
+                      <p className="text-sm font-medium">Verify this course</p>
+                      <p className="text-sm text-muted-foreground">
+                        Approve the course as-is — it becomes visible to
+                        students once verified.
+                      </p>
+                    </div>
+                    <AppButton
+                      type="button"
+                      iconLeft={CheckCircle2}
+                      disabled={isVerifying || isRejecting}
+                      isLoading={isVerifying}
+                      onClick={handleVerifyCourse}
+                    >
+                      Verify Course
+                    </AppButton>
+                  </div>
+                ) : null}
 
-                <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-                  <AppButton
-                    type="button"
-                    variant="outline"
-                    disabled={isVerifying || isRejecting}
-                    isLoading={isVerifying}
-                    onClick={handleVerifyCourse}
-                  >
-                    Verify Course
-                  </AppButton>
-                  <AppButton
-                    type="button"
-                    disabled={
-                      !adminReviewReason.trim() || isVerifying || isRejecting
-                    }
-                    isLoading={isRejecting}
-                    onClick={handleRejectCourse}
-                  >
-                    Save Rejection Reason
-                  </AppButton>
-                </div>
+                {courseVerificationState !== "rejected" ? (
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium">Reject with feedback</p>
+                    <Textarea
+                      value={adminReviewReason}
+                      onChange={(event) =>
+                        setAdminReviewReason(event.target.value)
+                      }
+                      placeholder="Explain what the instructor needs to fix before this course can be approved."
+                      className="min-h-32"
+                    />
+                    <p className="text-sm text-muted-foreground">
+                      A rejection reason is required so the instructor knows
+                      what to fix.
+                    </p>
+
+                    <div className="flex justify-end">
+                      <AppButton
+                        type="button"
+                        variant="destructive"
+                        iconLeft={XCircle}
+                        disabled={
+                          !adminReviewReason.trim() ||
+                          isVerifying ||
+                          isRejecting
+                        }
+                        isLoading={isRejecting}
+                        onClick={handleRejectCourse}
+                      >
+                        Save Rejection Reason
+                      </AppButton>
+                    </div>
+                  </div>
+                ) : null}
               </CardContent>
             </Card>
           ) : null}

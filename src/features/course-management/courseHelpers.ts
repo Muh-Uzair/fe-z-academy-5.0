@@ -2,14 +2,17 @@ import type { CourseLevel, CourseRecord } from "@/types/courseTypes";
 
 export type CourseVerificationState = "verified" | "pending" | "rejected";
 
+// isVerified: true                                        -> verified
+// isVerified: false && verificationRejectionReason == null -> pending
+// isVerified: false && verificationRejectionReason != null -> rejected
 export const getCourseVerificationState = (
   course: Pick<CourseRecord, "isVerified" | "verificationRejectionReason">,
 ): CourseVerificationState => {
-  if (course.isVerified && !course.verificationRejectionReason) {
+  if (course.isVerified) {
     return "verified";
   }
 
-  if (!course.isVerified && course.verificationRejectionReason) {
+  if (course.verificationRejectionReason) {
     return "rejected";
   }
 
