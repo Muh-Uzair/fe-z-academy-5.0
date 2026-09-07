@@ -7,6 +7,7 @@ import type {
   GetCoursesResponse,
   GetCourseDetailsResponse,
   GetCourseCompletionStatusResponse,
+  CourseStatus,
 } from "@/response-types/courseResponseTypes";
 
 // Each query below throws on a non-success response instead of returning it,
@@ -30,6 +31,7 @@ type GetCoursesParams = {
   instructor?: string;
   isVerified?: "true" | "false";
   verificationRejectionReason?: "null";
+  status?: CourseStatus;
   page?: number;
   limit?: number;
   sortBy?: string;

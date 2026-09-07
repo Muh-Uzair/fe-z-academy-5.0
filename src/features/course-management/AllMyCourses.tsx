@@ -19,6 +19,7 @@ import {
 import type {
   CourseListItem,
   CourseCategorySummary,
+  CourseStatus,
 } from "@/response-types/courseResponseTypes";
 import type { Pagination } from "@/response-types/userResponseTypes";
 import {
@@ -27,35 +28,35 @@ import {
   getCourseVerificationLabel,
 } from "@/features/course-management/courseHelpers";
 
-type IsVerifiedFilter = "all" | "true" | "false";
+type StatusFilter = "all" | CourseStatus;
 
 type AllMyCoursesProps = {
   courses: CourseListItem[];
   pagination: Pagination;
   search: string;
-  isVerified: IsVerifiedFilter;
+  status: StatusFilter;
 };
 
 const AllMyCourses = ({
   courses,
   pagination,
   search,
-  isVerified,
+  status,
 }: AllMyCoursesProps) => {
   const router = useRouter();
 
   const updateQuery = (next: {
     search?: string;
     page?: number;
-    isVerified?: IsVerifiedFilter;
+    status?: StatusFilter;
   }) => {
     const nextSearch = next.search ?? search;
     const nextPage = next.page ?? pagination.page ?? 1;
-    const nextIsVerified = next.isVerified ?? isVerified;
+    const nextStatus = next.status ?? status;
 
     const searchParams = new URLSearchParams();
     if (nextSearch) searchParams.set("search", nextSearch);
-    if (nextIsVerified !== "all") searchParams.set("isVerified", nextIsVerified);
+    if (nextStatus !== "all") searchParams.set("status", nextStatus);
     if (nextPage > 1) searchParams.set("page", String(nextPage));
 
     const query = searchParams.toString();
@@ -85,18 +86,19 @@ const AllMyCourses = ({
             </div>
 
             <Select
-              value={isVerified}
-              onValueChange={(value: IsVerifiedFilter) =>
-                updateQuery({ isVerified: value, page: 1 })
+              value={status}
+              onValueChange={(value: StatusFilter) =>
+                updateQuery({ status: value, page: 1 })
               }
             >
               <SelectTrigger className="w-[160px]">
-                <SelectValue placeholder="Verification status" />
+                <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All statuses</SelectItem>
-                <SelectItem value="true">Verified</SelectItem>
-                <SelectItem value="false">Not verified</SelectItem>
+                <SelectItem value="verified">Verified</SelectItem>
+                <SelectItem value="rejected">Rejected</SelectItem>
+                <SelectItem value="pendingReview">Pending Review</SelectItem>
               </SelectContent>
             </Select>
           </div>

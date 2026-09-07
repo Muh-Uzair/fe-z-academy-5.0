@@ -19,7 +19,7 @@ const InstructorPendingVerificationsPage = async ({
   const response = await getCoursesQuery({
     search,
     page: page ? Number(page) : 1,
-    isVerified: "false",
+    status: "pendingReview",
   });
 
   return (

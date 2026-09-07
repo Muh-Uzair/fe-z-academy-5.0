@@ -83,7 +83,7 @@ const PendingVerificationCourses = ({
     <PageFlexCol>
       <PageHeader
         pageHeading="Pending Verification Courses"
-        pageDescription="Review courses that are still awaiting admin approval or already have rejection feedback saved."
+        pageDescription="Review courses that are still awaiting their first admin approval."
       />
 
       <AppTable

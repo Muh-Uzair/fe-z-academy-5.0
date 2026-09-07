@@ -23,7 +23,7 @@ const AdminVerifiedCoursesPage = async ({
       getCoursesQuery({
         search,
         page: page ? Number(page) : 1,
-        isVerified: "true",
+        status: "verified",
         instructor,
       }),
       getInstructorsQuery({

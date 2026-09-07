@@ -21,6 +21,7 @@ import type {
   CourseListItem,
   CourseCategorySummary,
   CourseInstructorSummary,
+  CourseStatus,
 } from "@/response-types/courseResponseTypes";
 import type {
   Pagination,
@@ -32,7 +33,7 @@ import {
   getCourseVerificationLabel,
 } from "@/features/course-management/courseHelpers";
 
-type IsVerifiedFilter = "all" | "true" | "false";
+type StatusFilter = "all" | CourseStatus;
 
 const ALL_INSTRUCTORS_ITEM = { id: "", label: "All instructors" };
 
@@ -40,7 +41,7 @@ type AllCoursesProps = {
   courses: CourseListItem[];
   pagination: Pagination;
   search: string;
-  isVerified: IsVerifiedFilter;
+  status: StatusFilter;
   instructors: UserDetails[];
   instructorsPagination: Pagination;
   instructorSearch: string;
@@ -52,7 +53,7 @@ const AllCourses = ({
   courses,
   pagination,
   search,
-  isVerified,
+  status,
   instructors,
   instructorsPagination,
   instructorSearch,
@@ -64,14 +65,14 @@ const AllCourses = ({
   const updateQuery = (next: {
     search?: string;
     page?: number;
-    isVerified?: IsVerifiedFilter;
+    status?: StatusFilter;
     instructor?: string;
     instructorSearch?: string;
     instructorPage?: number;
   }) => {
     const nextSearch = next.search ?? search;
     const nextPage = next.page ?? pagination.page ?? 1;
-    const nextIsVerified = next.isVerified ?? isVerified;
+    const nextStatus = next.status ?? status;
     const nextInstructor = next.instructor ?? instructor;
     const nextInstructorSearch = next.instructorSearch ?? instructorSearch;
     const nextInstructorPage =
@@ -79,8 +80,7 @@ const AllCourses = ({
 
     const searchParams = new URLSearchParams();
     if (nextSearch) searchParams.set("search", nextSearch);
-    if (nextIsVerified !== "all")
-      searchParams.set("isVerified", nextIsVerified);
+    if (nextStatus !== "all") searchParams.set("status", nextStatus);
     if (nextInstructor) searchParams.set("instructor", nextInstructor);
     if (nextInstructorSearch)
       searchParams.set("instructorSearch", nextInstructorSearch);
@@ -113,18 +113,19 @@ const AllCourses = ({
             </div>
 
             <Select
-              value={isVerified}
-              onValueChange={(value: IsVerifiedFilter) =>
-                updateQuery({ isVerified: value, page: 1 })
+              value={status}
+              onValueChange={(value: StatusFilter) =>
+                updateQuery({ status: value, page: 1 })
               }
             >
               <SelectTrigger className="w-[160px]">
-                <SelectValue placeholder="Verification status" />
+                <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All statuses</SelectItem>
-                <SelectItem value="true">Verified</SelectItem>
-                <SelectItem value="false">Not verified</SelectItem>
+                <SelectItem value="verified">Verified</SelectItem>
+                <SelectItem value="rejected">Rejected</SelectItem>
+                <SelectItem value="pendingReview">Pending Review</SelectItem>
               </SelectContent>
             </Select>
 

@@ -5,17 +5,19 @@ type InstructorAllMyCoursesPageProps = {
   searchParams: Promise<{
     search?: string;
     page?: string;
-    isVerified?: string;
+    status?: string;
   }>;
 };
 
 const InstructorAllMyCoursesPage = async ({
   searchParams,
 }: InstructorAllMyCoursesPageProps) => {
-  const { search, page, isVerified } = await searchParams;
+  const { search, page, status } = await searchParams;
 
-  const normalizedIsVerified =
-    isVerified === "true" || isVerified === "false" ? isVerified : undefined;
+  const normalizedStatus =
+    status === "verified" || status === "rejected" || status === "pendingReview"
+      ? status
+      : undefined;
 
   // No `instructor` filter is sent — the backend already scopes this
   // endpoint to the logged-in instructor's own courses based on their
@@ -23,7 +25,7 @@ const InstructorAllMyCoursesPage = async ({
   const response = await getCoursesQuery({
     search,
     page: page ? Number(page) : 1,
-    isVerified: normalizedIsVerified,
+    status: normalizedStatus,
   });
 
   return (
@@ -31,7 +33,7 @@ const InstructorAllMyCoursesPage = async ({
       courses={response.data.courses}
       pagination={response.data.pagination}
       search={search ?? ""}
-      isVerified={normalizedIsVerified ?? "all"}
+      status={normalizedStatus ?? "all"}
     />
   );
 };

@@ -6,7 +6,7 @@ type AdminAllCoursesPageProps = {
   searchParams: Promise<{
     search?: string;
     page?: string;
-    isVerified?: string;
+    status?: string;
     instructor?: string;
     instructorSearch?: string;
     instructorPage?: string;
@@ -19,21 +19,23 @@ const AdminAllCoursesPage = async ({
   const {
     search,
     page,
-    isVerified,
+    status,
     instructor,
     instructorSearch,
     instructorPage,
   } = await searchParams;
 
-  const normalizedIsVerified =
-    isVerified === "true" || isVerified === "false" ? isVerified : undefined;
+  const normalizedStatus =
+    status === "verified" || status === "rejected" || status === "pendingReview"
+      ? status
+      : undefined;
 
   const [response, instructorsResponse, selectedInstructorResponse] =
     await Promise.all([
       getCoursesQuery({
         search,
         page: page ? Number(page) : 1,
-        isVerified: normalizedIsVerified,
+        status: normalizedStatus,
         instructor,
       }),
       getInstructorsQuery({
@@ -50,7 +52,7 @@ const AdminAllCoursesPage = async ({
       courses={response.data.courses}
       pagination={response.data.pagination}
       search={search ?? ""}
-      isVerified={normalizedIsVerified ?? "all"}
+      status={normalizedStatus ?? "all"}
       instructors={instructorsResponse.data.instructors}
       instructorsPagination={instructorsResponse.data.pagination}
       instructorSearch={instructorSearch ?? ""}
