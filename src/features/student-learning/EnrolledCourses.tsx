@@ -1,7 +1,6 @@
 "use client";
 
-
-import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 import AppSearchBar from "@/components/AppSearchBar";
 import AppTable from "@/components/AppTable";
@@ -9,25 +8,40 @@ import PageFlexCol from "@/components/PageFlexCol";
 import PageHeader from "@/components/PageHeader";
 import TableImage from "@/components/TableImage";
 import AppButton from "@/components/AppButton";
-import { coursesData as enrolledCoursesMockData } from "@/dummy-data/coursesData";
-import { type CourseRecord } from "@/types/courseTypes";
+import type {
+  CourseListItem,
+  CourseCategorySummary,
+  CourseInstructorSummary,
+} from "@/response-types/courseResponseTypes";
+import type { Pagination } from "@/response-types/userResponseTypes";
+import { formatCourseLevel } from "@/features/course-management/courseHelpers";
 
-const EnrolledCourses = () => {
-  const [search, setSearch] = useState("");
+type EnrolledCoursesProps = {
+  courses: CourseListItem[];
+  pagination: Pagination;
+  search: string;
+};
 
-  const filteredCourses = enrolledCoursesMockData.filter((course) => {
-    const normalizedSearch = search.trim().toLowerCase();
+const EnrolledCourses = ({
+  courses,
+  pagination,
+  search,
+}: EnrolledCoursesProps) => {
+  const router = useRouter();
 
-    if (!normalizedSearch) {
-      return true;
-    }
+  const updateQuery = (next: { search?: string; page?: number }) => {
+    const nextSearch = next.search ?? search;
+    const nextPage = next.page ?? pagination.page ?? 1;
 
-    return (
-      course.title.toLowerCase().includes(normalizedSearch) ||
-      course.instructorName.toLowerCase().includes(normalizedSearch) ||
-      course.categoryName.toLowerCase().includes(normalizedSearch)
+    const searchParams = new URLSearchParams();
+    if (nextSearch) searchParams.set("search", nextSearch);
+    if (nextPage > 1) searchParams.set("page", String(nextPage));
+
+    const query = searchParams.toString();
+    router.push(
+      `/student/my-learning/enrolled-courses${query ? `?${query}` : ""}`,
     );
-  });
+  };
 
   return (
     <PageFlexCol>
@@ -41,16 +55,19 @@ const EnrolledCourses = () => {
           <div className="max-w-sm">
             <AppSearchBar
               placeholder="Search enrolled courses..."
-              onChange={(value: string) => setSearch(value)}
+              defaultValue={search}
+              onChange={(value: string) =>
+                updateQuery({ search: value, page: 1 })
+              }
             />
           </div>
         }
-        data={filteredCourses}
+        data={courses}
         columns={[
           {
-            key: "thumbnail",
+            key: "thumbnailUrl",
             label: "Thumbnail",
-            render: (value: string, row: CourseRecord) => (
+            render: (value: string, row: CourseListItem) => (
               <TableImage src={value} alt={row.title} shape="rectangle" />
             ),
           },
@@ -62,24 +79,35 @@ const EnrolledCourses = () => {
             ),
           },
           {
-            key: "instructorName",
+            key: "instructorDetails",
             label: "Instructor",
+            render: (value: CourseInstructorSummary) => value.fullName,
           },
           {
-            key: "categoryName",
+            key: "level",
+            label: "Level",
+            render: (value: string) => formatCourseLevel(value),
+          },
+          {
+            key: "categoryDetails",
             label: "Category",
+            render: (value: CourseCategorySummary) => value.name,
           },
           {
             key: "action",
             label: "Action",
-            render: (_: unknown, row: CourseRecord) => (
-              <AppButton href={`/course-details/${row._id}?role=student&source=enrolled`}>
+            render: (_: unknown, row: CourseListItem) => (
+              <AppButton
+                href={`/course-details/${row._id}?role=student&source=enrolled`}
+              >
                 View Details
               </AppButton>
             ),
           },
         ]}
         pagination={true}
+        paginationMeta={pagination}
+        onPageChange={(page) => updateQuery({ page })}
       />
     </PageFlexCol>
   );

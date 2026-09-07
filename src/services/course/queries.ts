@@ -7,6 +7,8 @@ import type {
   GetCoursesResponse,
   GetCourseDetailsResponse,
   GetCourseCompletionStatusResponse,
+  GetPublicCoursesResponse,
+  GetPublicCourseDetailsResponse,
   CourseStatus,
 } from "@/response-types/courseResponseTypes";
 
@@ -24,6 +26,14 @@ type GetCourseCompletionStatusSuccessResponse = Extract<
   GetCourseCompletionStatusResponse,
   { status: "success" }
 >;
+type GetPublicCoursesSuccessResponse = Extract<
+  GetPublicCoursesResponse,
+  { status: "success" }
+>;
+type GetPublicCourseDetailsSuccessResponse = Extract<
+  GetPublicCourseDetailsResponse,
+  { status: "success" }
+>;
 
 type GetCoursesParams = {
   search?: string;
@@ -36,6 +46,12 @@ type GetCoursesParams = {
   limit?: number;
   sortBy?: string;
   sortOrder?: "asc" | "desc";
+};
+
+type GetPublicCoursesParams = {
+  search?: string;
+  page?: number;
+  limit?: number;
 };
 
 /**
@@ -134,6 +150,73 @@ export async function getCourseCompletionStatusQuery(
     return json;
   } catch (err) {
     console.error("getCourseCompletionStatusQuery failed:", err);
+    throw err;
+  }
+}
+
+/**
+ * No authentication required — cookies are not sent. Always scoped to
+ * verified courses only. Does not return videoUrl.
+ * Uses a shared (non-private) 'use cache' since the response doesn't depend
+ * on the caller's identity.
+ */
+export async function getPublicCoursesQuery(
+  params: GetPublicCoursesParams = {},
+): Promise<GetPublicCoursesSuccessResponse> {
+  "use cache";
+  cacheTag(COURSE_TAGS.publicCourses);
+  cacheLife("minutes");
+
+  const query = buildQueryString(params);
+
+  try {
+    const res = await apiClient(
+      `/courses/public${query}`,
+      { method: "GET" },
+      { includeCookies: false },
+    );
+    const json: GetPublicCoursesResponse = await res.json();
+
+    if (json.status !== "success") {
+      throw new Error(json.message);
+    }
+
+    return json;
+  } catch (err) {
+    console.error("getPublicCoursesQuery failed:", err);
+    throw err;
+  }
+}
+
+/**
+ * No authentication required — cookies are not sent. Always scoped to
+ * verified courses only; a rejected/pending/nonexistent course returns 404.
+ * Does not return videoUrl.
+ * Uses a shared (non-private) 'use cache' since the response doesn't depend
+ * on the caller's identity.
+ */
+export async function getPublicCourseDetailsQuery(
+  id: string,
+): Promise<GetPublicCourseDetailsSuccessResponse> {
+  "use cache";
+  cacheTag(COURSE_TAGS.publicCourseDetails(id));
+  cacheLife("minutes");
+
+  try {
+    const res = await apiClient(
+      `/courses/${id}/public`,
+      { method: "GET" },
+      { includeCookies: false },
+    );
+    const json: GetPublicCourseDetailsResponse = await res.json();
+
+    if (json.status !== "success") {
+      throw new Error(json.message);
+    }
+
+    return json;
+  } catch (err) {
+    console.error("getPublicCourseDetailsQuery failed:", err);
     throw err;
   }
 }

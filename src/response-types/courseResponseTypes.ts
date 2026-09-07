@@ -59,6 +59,10 @@ export interface CourseListItem extends Omit<
   categoryDetails: CourseCategorySummary;
 }
 
+// Course shape returned by the public list endpoint (API 12) — same as
+// CourseListItem but without videoUrl, since that route never signs one.
+export type PublicCourseListItem = Omit<CourseListItem, "videoUrl">;
+
 // API 1: POST /api/v1/courses/upload-thumbnail
 // Response: { status, message, data: { uploadUrl, fields, key } }
 export interface UploadCourseThumbnailResponseData {
@@ -178,6 +182,20 @@ export type GetCoursesResponse =
   | SuccessApiResponse<GetCoursesResponseData, "Courses fetched successfully">
   | ApiErrorResponse;
 
+// API 12: GET /api/v1/courses/public
+// Response: { status, message, data: { courses, pagination } }
+export interface GetPublicCoursesResponseData {
+  courses: PublicCourseListItem[];
+  pagination: Pagination;
+}
+
+export type GetPublicCoursesResponse =
+  | SuccessApiResponse<
+      GetPublicCoursesResponseData,
+      "Courses fetched successfully"
+    >
+  | ApiErrorResponse;
+
 // API 8: GET /api/v1/courses/:id
 // Response: { status, message, data: { course } }
 // Always the joined shape (instructorDetails/categoryDetails, same as
@@ -189,6 +207,19 @@ export interface GetCourseDetailsResponseData {
 export type GetCourseDetailsResponse =
   | SuccessApiResponse<
       GetCourseDetailsResponseData,
+      "Course details fetched successfully"
+    >
+  | ApiErrorResponse;
+
+// API 13: GET /api/v1/courses/:id/public
+// Response: { status, message, data: { course } }
+export interface GetPublicCourseDetailsResponseData {
+  course: PublicCourseListItem;
+}
+
+export type GetPublicCourseDetailsResponse =
+  | SuccessApiResponse<
+      GetPublicCourseDetailsResponseData,
       "Course details fetched successfully"
     >
   | ApiErrorResponse;
