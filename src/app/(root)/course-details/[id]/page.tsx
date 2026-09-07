@@ -1,13 +1,17 @@
 import CourseDetails, {
   type CourseViewerRole,
 } from "@/features/course-management/CourseDetails";
-import { getCourseDetailsQuery } from "@/services/course/queries";
+import {
+  getCourseDetailsQuery,
+  getPublicCourseDetailsQuery,
+} from "@/services/course/queries";
 import { getCategoriesQuery } from "@/services/category/queries";
 
 type CourseDetailsPageProps = {
   params: Promise<{ id: string }>;
   searchParams: Promise<{
     role?: string;
+    source?: string;
     categorySearch?: string;
     categoryPage?: string;
   }>;
@@ -18,10 +22,18 @@ const UnifiedCourseDetailsPage = async ({
   searchParams,
 }: CourseDetailsPageProps) => {
   const { id } = await params;
-  const { role, categorySearch, categoryPage } = await searchParams;
+  const { role, source, categorySearch, categoryPage } = await searchParams;
   const viewerRole = (role as CourseViewerRole) || "student";
 
-  const courseResponse = await getCourseDetailsQuery(id);
+  // A student reaching this page from the public browse-courses listing
+  // hasn't enrolled yet, so the authenticated details endpoint (which
+  // requires an enrollment for students) would 404 — use the public
+  // endpoint instead, which only needs the course to be verified.
+  const isFromBrowse = source === "browse";
+
+  const course = isFromBrowse
+    ? { ...(await getPublicCourseDetailsQuery(id)).data.course, videoUrl: "" }
+    : (await getCourseDetailsQuery(id)).data.course;
 
   // Categories are only needed for the instructor's edit-mode category
   // picker — skip the extra request for every other viewer.
@@ -36,7 +48,7 @@ const UnifiedCourseDetailsPage = async ({
   return (
     <CourseDetails
       viewerRole={viewerRole}
-      course={courseResponse.data.course}
+      course={course}
       categories={categoriesResponse?.data.categories ?? []}
       categoriesPagination={
         categoriesResponse?.data.pagination ?? {

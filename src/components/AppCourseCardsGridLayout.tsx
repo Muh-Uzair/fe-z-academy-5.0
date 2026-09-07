@@ -3,6 +3,7 @@
 import React, { ReactNode } from "react";
 import CourseCard from "@/components/CourseCard";
 import { Button } from "@/components/ui/button";
+import type { Pagination as PaginationMeta } from "@/response-types/userResponseTypes";
 
 interface Course {
   _id: string;
@@ -23,6 +24,8 @@ interface AppCourseCardsGridLayoutProps {
   courses: Course[];
   upperHeader?: ReactNode;
   pagination?: boolean;
+  paginationMeta?: PaginationMeta;
+  onPageChange?: (page: number) => void;
   renderFooter?: (course: Course) => ReactNode;
   mode?: "default" | "in-progress";
 }
@@ -31,6 +34,8 @@ const AppCourseCardsGridLayout = ({
   courses = [],
   upperHeader = null,
   pagination = false,
+  paginationMeta,
+  onPageChange,
   renderFooter,
   mode = "default",
 }: AppCourseCardsGridLayoutProps) => {
@@ -55,12 +60,30 @@ const AppCourseCardsGridLayout = ({
       {pagination && (
         <div className="flex justify-between items-center">
           <span className="text-sm text-muted-foreground">
-            Showing {courses.length} courses
+            {paginationMeta
+              ? `Showing ${courses.length} of ${paginationMeta.totalDocuments} courses`
+              : `Showing ${courses.length} courses`}
           </span>
 
           <div className="flex gap-2">
-            <Button variant="outline">Previous</Button>
-            <Button variant="outline">Next</Button>
+            <Button
+              variant="outline"
+              disabled={!paginationMeta?.hasPrevPage}
+              onClick={() =>
+                onPageChange?.((paginationMeta?.page ?? 1) - 1)
+              }
+            >
+              Previous
+            </Button>
+            <Button
+              variant="outline"
+              disabled={!paginationMeta?.hasNextPage}
+              onClick={() =>
+                onPageChange?.((paginationMeta?.page ?? 1) + 1)
+              }
+            >
+              Next
+            </Button>
           </div>
         </div>
       )}

@@ -465,7 +465,7 @@ const CourseDetails = ({
                 showEnrollButton={isFromBrowse}
                 onEnroll={() => router.push(`/course-checkout/${course._id}`)}
                 isLoading={isUpdating}
-                hideCloseButton={isAdminViewer}
+                hideCloseButton={isAdminViewer || isFromBrowse}
               />
             </CardContent>
           </Card>
