@@ -37,9 +37,11 @@ type GetCoursesParams = {
 };
 
 /**
- * Uses optionalAuth. Fetches a paginated, sortable, searchable list of
- * courses. Visibility depends on the caller's role (anonymous/student see
- * only verified courses, instructors see only their own, admins see all).
+ * Requires an authenticated session — anonymous callers are rejected with
+ * 401. Fetches a paginated, sortable, searchable list of courses. Visibility
+ * depends on the caller's role: students see only courses they're enrolled
+ * in, instructors see only their own (including unverified/rejected ones),
+ * admins see all.
  * Uses 'use cache: private' so the cache entry is scoped to the requesting
  * caller, based on the cookies read inside apiClient.
  * Use updateTag(COURSE_TAGS.courses) to invalidate this after a
