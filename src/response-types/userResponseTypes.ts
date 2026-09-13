@@ -1,9 +1,13 @@
 // This file is intentionally framework-independent. Copy it directly into a
 // frontend project; it has no backend imports and represents JSON values only.
 
-import { AuthUser, SuccessApiResponse, ApiErrorResponse } from "./authResponseTypes";
+import {
+  AuthUser,
+  SuccessApiResponse,
+  ApiErrorResponse,
+} from "./authResponseTypes";
 
-// Full user document shape as returned by the admin-only user endpoints.
+// Full user document shape as returned by the user-management endpoints.
 // Same public projection as AuthUser (see authResponseTypes.ts).
 export type UserDetails = AuthUser;
 
@@ -91,5 +95,8 @@ export interface UpdateProfileResponseData {
 }
 
 export type UpdateProfileResponse =
-  | SuccessApiResponse<UpdateProfileResponseData, "Profile updated successfully">
+  | SuccessApiResponse<
+      UpdateProfileResponseData,
+      "Profile updated successfully"
+    >
   | ApiErrorResponse;

@@ -65,13 +65,13 @@ const PagedSearchSelect = ({
           disabled={disabled}
           aria-expanded={open}
           className={cn(
-            "w-full justify-between font-normal",
+            "w-full min-w-0 justify-between font-normal",
             !triggerLabel && "text-muted-foreground",
             className,
           )}
         >
-          {triggerLabel ?? placeholder}
-          <ChevronsUpDown className="opacity-50" />
+          <span className="truncate">{triggerLabel ?? placeholder}</span>
+          <ChevronsUpDown className="shrink-0 opacity-50" />
         </Button>
       </PopoverPrimitive.Trigger>
 
@@ -102,11 +102,11 @@ const PagedSearchSelect = ({
                     onValueChange(item.id);
                     setOpen(false);
                   }}
-                  className="flex w-full items-center justify-between rounded-md px-2 py-1.5 text-left text-sm hover:bg-muted"
+                  className="flex w-full items-center justify-between gap-2 rounded-md px-2 py-1.5 text-left text-sm hover:bg-muted"
                 >
-                  {item.label}
+                  <span className="truncate">{item.label}</span>
                   {item.id === value ? (
-                    <Check className="size-4" />
+                    <Check className="size-4 shrink-0" />
                   ) : null}
                 </button>
               ))

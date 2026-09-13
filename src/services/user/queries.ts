@@ -5,6 +5,7 @@ import { buildQueryString } from "@/lib/buildQueryString";
 import { USER_TAGS } from "./tags";
 import type {
   GetInstructorsResponse,
+  GetStudentsResponse,
   GetUserDetailsResponse,
   GetInstructorOnboardingLinkResponse,
 } from "@/response-types/userResponseTypes";
@@ -13,6 +14,10 @@ import type {
 // so the resolved type only ever needs to describe the success shape.
 type GetInstructorsSuccessResponse = Extract<
   GetInstructorsResponse,
+  { status: "success" }
+>;
+type GetStudentsSuccessResponse = Extract<
+  GetStudentsResponse,
   { status: "success" }
 >;
 type GetUserDetailsSuccessResponse = Extract<
@@ -35,8 +40,9 @@ type GetInstructorsParams = {
 };
 
 /**
- * Admin only. Fetches a paginated, filterable, searchable list of
- * instructor accounts.
+ * Admin or Student. Fetches a paginated, filterable, searchable list of
+ * instructor accounts, scoped by the caller's role: an admin sees every
+ * instructor, a student sees only instructors whose course they've bought.
  * Use updateTag(USER_TAGS.instructors) to invalidate this after a
  * verification update.
  */
@@ -61,6 +67,47 @@ export async function getInstructorsQuery(
 
     return json;
   } catch (err) {
+    throw err;
+  }
+}
+
+type GetStudentsParams = {
+  search?: string;
+  projection?: string;
+  page?: number;
+  limit?: number;
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
+};
+
+/**
+ * Admin or Instructor. Fetches a paginated, searchable list of student
+ * accounts, scoped by the caller's role: an admin sees every student, an
+ * instructor sees only students enrolled in at least one of their own
+ * courses.
+ */
+export async function getStudentsQuery(
+  params: GetStudentsParams = {},
+): Promise<GetStudentsSuccessResponse> {
+  "use cache: private";
+  cacheTag(USER_TAGS.students);
+  cacheLife("minutes");
+
+  const query = buildQueryString(params);
+
+  try {
+    const res = await apiClient(`/users/students${query}`, {
+      method: "GET",
+    });
+    const json: GetStudentsResponse = await res.json();
+
+    if (json.status !== "success") {
+      throw new Error(json.message);
+    }
+
+    return json;
+  } catch (err) {
+    console.error("getStudentsQuery failed:", err);
     throw err;
   }
 }

@@ -29,7 +29,7 @@ A caller with the wrong role receives `403 You do not have permission to perform
 
 `GET /api/v1/users/instructors`
 
-Admin or Student. Returns a paginated, filterable, searchable list of instructor accounts.
+Admin or Student. Returns a paginated, filterable, searchable list of instructor accounts, scoped by the caller's role: an admin sees every instructor; a student sees only instructors whose course they have bought (distinct — an instructor whose several courses the student bought appears once).
 
 ### Query parameters
 

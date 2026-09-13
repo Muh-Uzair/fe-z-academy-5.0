@@ -1,6 +1,10 @@
 import TransactionsTable from "@/features/transaction-management/TransactionsTable";
 import { getTransactionsQuery } from "@/services/transaction/queries";
-import { getInstructorsQuery, getUserDetailsQuery } from "@/services/user/queries";
+import {
+  getInstructorsQuery,
+  getStudentsQuery,
+  getUserDetailsQuery,
+} from "@/services/user/queries";
 import { getCoursesQuery, getCourseDetailsQuery } from "@/services/course/queries";
 import type { Transaction } from "@/response-types/transactionResponseTypes";
 
@@ -15,6 +19,9 @@ type AdminTransactionsPageProps = {
     course?: string;
     courseSearch?: string;
     coursePage?: string;
+    student?: string;
+    studentSearch?: string;
+    studentPage?: string;
   }>;
 };
 
@@ -39,6 +46,9 @@ const AdminTransactionsPage = async ({
     course,
     courseSearch,
     coursePage,
+    student,
+    studentSearch,
+    studentPage,
   } = await searchParams;
 
   const normalizedPaymentStatus = PAYMENT_STATUSES.includes(
@@ -53,6 +63,8 @@ const AdminTransactionsPage = async ({
     selectedInstructorResponse,
     coursesResponse,
     selectedCourseResponse,
+    studentsResponse,
+    selectedStudentResponse,
   ] = await Promise.all([
     getTransactionsQuery({
       search,
@@ -60,6 +72,7 @@ const AdminTransactionsPage = async ({
       paymentStatus: normalizedPaymentStatus,
       instructor,
       course,
+      student,
     }),
     getInstructorsQuery({
       search: instructorSearch,
@@ -77,6 +90,13 @@ const AdminTransactionsPage = async ({
     // Resolve the selected course's title so the picker can show it as the
     // trigger label even when it isn't on the current results page.
     course ? getCourseDetailsQuery(course) : null,
+    getStudentsQuery({
+      search: studentSearch,
+      page: studentPage ? Number(studentPage) : 1,
+    }),
+    // Resolve the selected student's name so the picker can show it as the
+    // trigger label even when it isn't on the current results page.
+    student ? getUserDetailsQuery(student, "student") : null,
   ]);
 
   return (
@@ -100,6 +120,14 @@ const AdminTransactionsPage = async ({
         courseSearch: courseSearch ?? "",
         course: course ?? "",
         selectedCourseLabel: selectedCourseResponse?.data.course.title ?? null,
+      }}
+      studentFilter={{
+        students: studentsResponse.data.students,
+        studentsPagination: studentsResponse.data.pagination,
+        studentSearch: studentSearch ?? "",
+        student: student ?? "",
+        selectedStudentLabel:
+          selectedStudentResponse?.data.user.fullName ?? null,
       }}
     />
   );

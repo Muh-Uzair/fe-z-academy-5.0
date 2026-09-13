@@ -27,6 +27,7 @@ type PaymentStatusFilter = "all" | Transaction["paymentStatus"];
 
 const ALL_INSTRUCTORS_ITEM = { id: "", label: "All instructors" };
 const ALL_COURSES_ITEM = { id: "", label: "All courses" };
+const ALL_STUDENTS_ITEM = { id: "", label: "All students" };
 
 type InstructorFilterProps = {
   instructors: UserDetails[];
@@ -44,6 +45,14 @@ type CourseFilterProps = {
   selectedCourseLabel: string | null;
 };
 
+type StudentFilterProps = {
+  students: UserDetails[];
+  studentsPagination: Pagination;
+  studentSearch: string;
+  student: string;
+  selectedStudentLabel: string | null;
+};
+
 type TransactionsTableProps = {
   basePath: string;
   transactions: Transaction[];
@@ -54,6 +63,7 @@ type TransactionsTableProps = {
   showInstructorColumn?: boolean;
   instructorFilter?: InstructorFilterProps;
   courseFilter?: CourseFilterProps;
+  studentFilter?: StudentFilterProps;
 };
 
 const TransactionsTable = ({
@@ -66,6 +76,7 @@ const TransactionsTable = ({
   showInstructorColumn = true,
   instructorFilter,
   courseFilter,
+  studentFilter,
 }: TransactionsTableProps) => {
   const router = useRouter();
 
@@ -79,6 +90,9 @@ const TransactionsTable = ({
     course?: string;
     courseSearch?: string;
     coursePage?: number;
+    student?: string;
+    studentSearch?: string;
+    studentPage?: number;
   }) => {
     const nextSearch = next.search ?? search;
     const nextPage = next.page ?? pagination.page ?? 1;
@@ -92,6 +106,10 @@ const TransactionsTable = ({
     const nextCourseSearch = next.courseSearch ?? courseFilter?.courseSearch;
     const nextCoursePage =
       next.coursePage ?? courseFilter?.coursesPagination.page ?? 1;
+    const nextStudent = next.student ?? studentFilter?.student;
+    const nextStudentSearch = next.studentSearch ?? studentFilter?.studentSearch;
+    const nextStudentPage =
+      next.studentPage ?? studentFilter?.studentsPagination.page ?? 1;
 
     const searchParams = new URLSearchParams();
     if (nextSearch) searchParams.set("search", nextSearch);
@@ -109,6 +127,13 @@ const TransactionsTable = ({
       if (nextCourseSearch) searchParams.set("courseSearch", nextCourseSearch);
       if (nextCoursePage > 1)
         searchParams.set("coursePage", String(nextCoursePage));
+    }
+    if (studentFilter) {
+      if (nextStudent) searchParams.set("student", nextStudent);
+      if (nextStudentSearch)
+        searchParams.set("studentSearch", nextStudentSearch);
+      if (nextStudentPage > 1)
+        searchParams.set("studentPage", String(nextStudentPage));
     }
     if (nextPage > 1) searchParams.set("page", String(nextPage));
 
@@ -281,6 +306,37 @@ const TransactionsTable = ({
                   }
                   placeholder="Filter by course"
                   searchPlaceholder="Search courses..."
+                />
+              </div>
+            ) : null}
+
+            {studentFilter ? (
+              <div className="w-[220px]">
+                <PagedSearchSelect
+                  items={[
+                    ALL_STUDENTS_ITEM,
+                    ...studentFilter.students.map((studentOption) => ({
+                      id: studentOption._id,
+                      label: studentOption.fullName,
+                    })),
+                  ]}
+                  pagination={studentFilter.studentsPagination}
+                  search={studentFilter.studentSearch}
+                  value={studentFilter.student}
+                  onValueChange={(value) =>
+                    updateQuery({ student: value, page: 1 })
+                  }
+                  onSearchChange={(value) =>
+                    updateQuery({ studentSearch: value, studentPage: 1 })
+                  }
+                  onPageChange={(value) => updateQuery({ studentPage: value })}
+                  selectedLabel={
+                    studentFilter.student
+                      ? studentFilter.selectedStudentLabel
+                      : "All students"
+                  }
+                  placeholder="Filter by student"
+                  searchPlaceholder="Search students..."
                 />
               </div>
             ) : null}
