@@ -6,6 +6,7 @@ import {
   getPublicCourseDetailsQuery,
 } from "@/services/course/queries";
 import { getCategoriesQuery } from "@/services/category/queries";
+import { getReviewByCourseAndStudentQuery } from "@/services/review/queries";
 
 type CourseDetailsPageProps = {
   params: Promise<{ id: string }>;
@@ -45,6 +46,21 @@ const UnifiedCourseDetailsPage = async ({
         })
       : null;
 
+  // Only an enrolled student can leave a review — check whether they already
+  // have one so the "Add review" action can be swapped for "Already Reviewed".
+  // getReviewByCourseAndStudentQuery throws on its 404 ("no review yet"), so
+  // that's the "not reviewed" case rather than an unexpected failure.
+  const isEnrolledStudent = viewerRole === "student" && source === "enrolled";
+  let hasReviewed = false;
+  if (isEnrolledStudent) {
+    try {
+      await getReviewByCourseAndStudentQuery(id);
+      hasReviewed = true;
+    } catch {
+      hasReviewed = false;
+    }
+  }
+
   return (
     <CourseDetails
       viewerRole={viewerRole}
@@ -61,6 +77,7 @@ const UnifiedCourseDetailsPage = async ({
         }
       }
       categorySearch={categorySearch ?? ""}
+      hasReviewed={hasReviewed}
     />
   );
 };

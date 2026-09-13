@@ -28,6 +28,8 @@ export async function createReviewAction(data: {
 
   if (json.status === "success") {
     updateTag(REVIEW_TAGS.reviews);
+    updateTag(REVIEW_TAGS.myReviews);
+    updateTag(REVIEW_TAGS.reviewByCourse(data.course));
   }
 
   return json;
@@ -54,6 +56,7 @@ export async function updateReviewAction(
   if (json.status === "success") {
     updateTag(REVIEW_TAGS.reviews);
     updateTag(REVIEW_TAGS.reviewDetails(id));
+    updateTag(REVIEW_TAGS.myReviews);
   }
 
   return json;
@@ -74,6 +77,7 @@ export async function deleteReviewAction(
   if (json.status === "success") {
     updateTag(REVIEW_TAGS.reviews);
     updateTag(REVIEW_TAGS.reviewDetails(id));
+    updateTag(REVIEW_TAGS.myReviews);
   }
 
   return json;

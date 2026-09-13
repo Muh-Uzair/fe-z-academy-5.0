@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/utils/cn";
 
@@ -48,8 +49,11 @@ const TableImage = ({
     return <div aria-hidden="true" className={imageClasses} />;
   }
 
-  // eslint-disable-next-line @next/next/no-img-element
-  return <img src={src} alt={alt} className={imageClasses} />;
+  return (
+    <div className={cn("relative shrink-0 overflow-hidden", imageClasses)}>
+      <Image src={src} alt={alt} fill className="object-cover" sizes="64px" />
+    </div>
+  );
 };
 
 export default TableImage;

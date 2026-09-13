@@ -14,7 +14,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ArrowLeft, CheckCircle2, XCircle } from "lucide-react";
+import { ArrowLeft, CheckCircle2, CheckCircle, XCircle } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/utils/cn";
 import { formatDate } from "@/utils/time";
@@ -52,6 +52,7 @@ interface CourseDetailsProps {
   categories: Category[];
   categoriesPagination: Pagination;
   categorySearch: string;
+  hasReviewed?: boolean;
 }
 
 // Both upload-URL responses share this shape: an S3 POST policy plus the
@@ -84,6 +85,7 @@ const CourseDetails = ({
   categories,
   categoriesPagination,
   categorySearch,
+  hasReviewed = false,
 }: CourseDetailsProps) => {
   console.log("Course Details:==========================", course);
 
@@ -257,7 +259,19 @@ const CourseDetails = ({
                   Back
                 </AppButton>
                 {viewerRole === "student" && source === "enrolled" && (
-                  <AddReviewDialog courseId={course._id} />
+                  <>
+                    {hasReviewed ? (
+                      <AppButton
+                        variant="outline"
+                        iconLeft={CheckCircle}
+                        disabled
+                      >
+                        Already Reviewed
+                      </AppButton>
+                    ) : (
+                      <AddReviewDialog courseId={course._id} />
+                    )}
+                  </>
                 )}
               </div>
             }

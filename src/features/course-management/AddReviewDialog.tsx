@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Star } from "lucide-react";
 
 import AppButton from "@/components/AppButton";
@@ -25,6 +26,7 @@ type AddReviewDialogProps = {
 };
 
 const AddReviewDialog = ({ courseId }: AddReviewDialogProps) => {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [rating, setRating] = useState(0);
   const [feedback, setFeedback] = useState("");
@@ -54,6 +56,7 @@ const AddReviewDialog = ({ courseId }: AddReviewDialogProps) => {
 
     if (response?.status === "success") {
       handleOpenChange(false);
+      router.refresh();
     }
   };
 
