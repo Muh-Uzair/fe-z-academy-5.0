@@ -139,6 +139,9 @@ interface CourseFormProps {
   isRefunding?: boolean;
   isLoading?: boolean;
   hideCloseButton?: boolean;
+  // Called every time the course video is paused, with its current playback
+  // position in seconds — lets the caller track how much a student watched.
+  onVideoPause?: (currentTime: number) => void;
 }
 
 const emptyValues: CourseFormValues = {
@@ -199,6 +202,7 @@ const CourseForm = ({
   isRefunding = false,
   isLoading = false,
   hideCloseButton = false,
+  onVideoPause,
 }: CourseFormProps) => {
   const [thumbnailPreviewUrl, setThumbnailPreviewUrl] = useState<string | null>(
     initialData?.thumbnailUrl ?? null,
@@ -210,6 +214,7 @@ const CourseForm = ({
   const [videoInputKey, setVideoInputKey] = useState(0);
   const thumbnailFileInputRef = useRef<HTMLInputElement | null>(null);
   const videoFileInputRef = useRef<HTMLInputElement | null>(null);
+  const videoElementRef = useRef<HTMLVideoElement | null>(null);
 
   const form = useForm<CourseFormValues>({
     resolver: zodResolver(courseSchema),
@@ -237,6 +242,38 @@ const CourseForm = ({
       revokeObjectUrl(videoPreviewUrl);
     };
   }, [thumbnailPreviewUrl, videoPreviewUrl]);
+
+  // Captures the video's last playback position whenever the viewer could
+  // stop watching without a clean "pause" — closing the tab, navigating
+  // away, the OS shutting the browser down, or this component unmounting.
+  useEffect(() => {
+    if (!onVideoPause) {
+      return;
+    }
+
+    const reportPosition = () => {
+      if (videoElementRef.current) {
+        onVideoPause(videoElementRef.current.currentTime);
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "hidden") {
+        reportPosition();
+      }
+    };
+
+    window.addEventListener("beforeunload", reportPosition);
+    window.addEventListener("pagehide", reportPosition);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener("beforeunload", reportPosition);
+      window.removeEventListener("pagehide", reportPosition);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      reportPosition();
+    };
+  }, [onVideoPause]);
 
   // With mode: "onChange", react-hook-form only computes `isValid` once a
   // field has been validated — trigger it on entering create/edit mode so
@@ -618,6 +655,7 @@ const CourseForm = ({
                     {videoPreviewUrl ? (
                       <div className="space-y-3 rounded-xl border bg-muted/20 p-3">
                         <video
+                          ref={videoElementRef}
                           src={videoPreviewUrl}
                           controls
                           controlsList="nodownload"
@@ -625,6 +663,9 @@ const CourseForm = ({
                           onContextMenu={(event) => event.preventDefault()}
                           preload="metadata"
                           className="aspect-video w-full rounded-lg border bg-black"
+                          onPause={(event) =>
+                            onVideoPause?.(event.currentTarget.currentTime)
+                          }
                         />
                         <div className="space-y-1 text-xs text-muted-foreground">
                           {selectedVideoFile ? (

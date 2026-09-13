@@ -8,6 +8,7 @@ import {
 } from "@/services/course/queries";
 import { getCategoriesQuery } from "@/services/category/queries";
 import { getReviewByCourseAndStudentQuery } from "@/services/review/queries";
+import { getEnrollmentsQuery } from "@/services/enrollment/queries";
 import type { CourseRefundEligibility } from "@/response-types/courseResponseTypes";
 
 type CourseDetailsPageProps = {
@@ -76,6 +77,21 @@ const UnifiedCourseDetailsPage = async ({
     }
   }
 
+  // Needed to report watch progress (see API 3 in the enrollment guide) —
+  // that endpoint is addressed by enrollment id, not course id.
+  let enrollmentId: string | null = null;
+  if (isEnrolledStudent) {
+    try {
+      const enrollmentsResponse = await getEnrollmentsQuery({
+        course: id,
+        limit: 1,
+      });
+      enrollmentId = enrollmentsResponse.data.enrollments[0]?._id ?? null;
+    } catch {
+      enrollmentId = null;
+    }
+  }
+
   return (
     <CourseDetails
       viewerRole={viewerRole}
@@ -94,6 +110,7 @@ const UnifiedCourseDetailsPage = async ({
       categorySearch={categorySearch ?? ""}
       hasReviewed={hasReviewed}
       refundEligibility={refundEligibility}
+      enrollmentId={enrollmentId}
     />
   );
 };

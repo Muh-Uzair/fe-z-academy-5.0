@@ -41,6 +41,7 @@ import {
   updateCourseVerificationAction,
   requestCourseRefundAction,
 } from "@/services/course/actions";
+import { updateEnrollmentProgressAction } from "@/services/enrollment/actions";
 import type {
   CourseListItem,
   CourseRefundEligibility,
@@ -67,6 +68,7 @@ interface CourseDetailsProps {
   categorySearch: string;
   hasReviewed?: boolean;
   refundEligibility?: CourseRefundEligibility | null;
+  enrollmentId?: string | null;
 }
 
 // Both upload-URL responses share this shape: an S3 POST policy plus the
@@ -101,6 +103,7 @@ const CourseDetails = ({
   categorySearch,
   hasReviewed = false,
   refundEligibility = null,
+  enrollmentId = null,
 }: CourseDetailsProps) => {
   console.log("Course Details:==========================", course);
 
@@ -435,6 +438,16 @@ const CourseDetails = ({
                 isLoading={isUpdating}
                 hideCloseButton={
                   isAdminViewer || isFromBrowse || source === "enrolled"
+                }
+                onVideoPause={
+                  viewerRole === "student" &&
+                  source === "enrolled" &&
+                  enrollmentId
+                    ? (currentTime) =>
+                        updateEnrollmentProgressAction(enrollmentId, {
+                          lastPositionInSeconds: Math.floor(currentTime),
+                        })
+                    : undefined
                 }
               />
             </CardContent>
