@@ -14,6 +14,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { ArrowLeft, CheckCircle2, CheckCircle, XCircle } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/utils/cn";
@@ -101,6 +111,7 @@ const CourseDetails = ({
   const [adminReviewReason, setAdminReviewReason] = useState(
     course.verificationRejectionReason ?? "",
   );
+  const [isRefundConfirmOpen, setIsRefundConfirmOpen] = useState(false);
 
   const { run: runUpdateAction, isLoading: isUpdating } = useClientAction();
   const { run: runVerifyAction, isLoading: isVerifying } = useClientAction();
@@ -222,12 +233,13 @@ const CourseDetails = ({
     return false;
   };
 
-  const handleRequestRefund = async () => {
+  const handleConfirmRequestRefund = async () => {
     const response = await runRefundAction(() =>
       requestCourseRefundAction(course._id),
     );
 
     if (response?.status === "success") {
+      setIsRefundConfirmOpen(false);
       router.push("/student/my-learning/enrolled-courses");
     }
   };
@@ -418,7 +430,7 @@ const CourseDetails = ({
                 }
                 refundEligible={refundEligibility?.eligible ?? false}
                 refundDisabledReason={refundEligibility?.reason ?? null}
-                onRequestRefund={handleRequestRefund}
+                onRequestRefund={() => setIsRefundConfirmOpen(true)}
                 isRefunding={isRefunding}
                 isLoading={isUpdating}
                 hideCloseButton={
@@ -505,6 +517,37 @@ const CourseDetails = ({
           ) : null}
         </PageFlexCol>
       </div>
+
+      <AlertDialog
+        open={isRefundConfirmOpen}
+        onOpenChange={setIsRefundConfirmOpen}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Request Refund</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to request a refund for &quot;
+              {course.title}&quot;? This will cancel your enrollment and
+              cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isRefunding}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              disabled={isRefunding}
+              onClick={(event) => {
+                event.preventDefault();
+                handleConfirmRequestRefund();
+              }}
+            >
+              {isRefunding ? "Requesting..." : "Request Refund"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
