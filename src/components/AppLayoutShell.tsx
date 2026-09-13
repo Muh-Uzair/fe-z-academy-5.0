@@ -13,6 +13,7 @@ import {
   Grid2X2,
   LayoutDashboard,
   MessageSquare,
+  Wallet,
   Search,
   Settings,
   Star,
@@ -116,6 +117,11 @@ const navigationByRole: Record<AppRole, NavigationItem[]> = {
       icon: Tags,
     },
     {
+      title: "Transactions",
+      href: "/admin/transactions",
+      icon: Wallet,
+    },
+    {
       title: "Chat",
       href: "/admin/chat",
       icon: MessageSquare,
@@ -167,6 +173,11 @@ const navigationByRole: Record<AppRole, NavigationItem[]> = {
       icon: Grid2X2,
     },
     {
+      title: "Transactions",
+      href: "/instructor/transactions",
+      icon: Wallet,
+    },
+    {
       title: "Chat",
       href: "/instructor/chat",
       icon: MessageSquare,
@@ -207,6 +218,11 @@ const navigationByRole: Record<AppRole, NavigationItem[]> = {
           href: "/student/my-learning/continue-watching",
         },
       ],
+    },
+    {
+      title: "Transactions",
+      href: "/student/transactions",
+      icon: Wallet,
     },
     {
       title: "Chat",
