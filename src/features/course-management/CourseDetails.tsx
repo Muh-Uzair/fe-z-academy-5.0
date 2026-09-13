@@ -14,18 +14,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ArrowLeft, CheckCircle2, Star, XCircle } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogBody,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
+import { ArrowLeft, CheckCircle2, XCircle } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/utils/cn";
 import { formatDate } from "@/utils/time";
@@ -34,6 +23,7 @@ import CourseForm, {
   type CourseFormMode,
   type CourseSubmitValues,
 } from "./CourseForm";
+import AddReviewDialog from "./AddReviewDialog";
 import {
   uploadCourseThumbnailAction,
   uploadCourseVideoAction,
@@ -104,10 +94,6 @@ const CourseDetails = ({
   const [adminReviewReason, setAdminReviewReason] = useState(
     course.verificationRejectionReason ?? "",
   );
-
-  const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
-  const [reviewRating, setReviewRating] = useState(0);
-  const [reviewFeedback, setReviewFeedback] = useState("");
 
   const { run: runUpdateAction, isLoading: isUpdating } = useClientAction();
   const { run: runVerifyAction, isLoading: isVerifying } = useClientAction();
@@ -218,21 +204,10 @@ const CourseDetails = ({
     });
 
     if (response?.status === "success") {
-      router.refresh();
       return true;
     }
 
     return false;
-  };
-
-  const handleSubmitReview = () => {
-    console.log("Submit review", {
-      rating: reviewRating,
-      feedback: reviewFeedback,
-    });
-    setReviewDialogOpen(false);
-    setReviewRating(0);
-    setReviewFeedback("");
   };
 
   const handleVerifyCourse = async () => {
@@ -282,69 +257,7 @@ const CourseDetails = ({
                   Back
                 </AppButton>
                 {viewerRole === "student" && source === "enrolled" && (
-                  <Dialog
-                    open={reviewDialogOpen}
-                    onOpenChange={setReviewDialogOpen}
-                  >
-                    <DialogTrigger asChild>
-                      <AppButton>Add review</AppButton>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-[425px]">
-                      <DialogHeader variant="create">
-                        <DialogTitle>Write a Review</DialogTitle>
-                        <DialogDescription>
-                          Share your thoughts about this course to help others.
-                        </DialogDescription>
-                      </DialogHeader>
-                      <DialogBody>
-                        <div className="grid gap-4 py-0">
-                          <div className="flex flex-col gap-2">
-                            <Label>Rating</Label>
-                            <div className="flex items-center gap-1">
-                              {[1, 2, 3, 4, 5].map((star) => (
-                                <button
-                                  key={star}
-                                  type="button"
-                                  className="focus:outline-none"
-                                  onClick={() => setReviewRating(star)}
-                                >
-                                  <Star
-                                    className={cn(
-                                      "h-6 w-6 cursor-pointer transition-colors",
-                                      reviewRating >= star
-                                        ? "fill-yellow-400 text-yellow-400"
-                                        : "text-muted-foreground hover:text-yellow-400",
-                                    )}
-                                  />
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-                          <div className="flex flex-col gap-2">
-                            <Label htmlFor="feedback">Feedback</Label>
-                            <Textarea
-                              id="feedback"
-                              placeholder="Tell us what you liked or what could be improved..."
-                              value={reviewFeedback}
-                              onChange={(e) =>
-                                setReviewFeedback(e.target.value)
-                              }
-                              className="min-h-[100px]"
-                            />
-                          </div>
-                        </div>
-                      </DialogBody>
-                      <DialogFooter>
-                        <AppButton
-                          type="button"
-                          onClick={handleSubmitReview}
-                          disabled={!reviewRating || !reviewFeedback.trim()}
-                        >
-                          Submit review
-                        </AppButton>
-                      </DialogFooter>
-                    </DialogContent>
-                  </Dialog>
+                  <AddReviewDialog courseId={course._id} />
                 )}
               </div>
             }
@@ -465,7 +378,9 @@ const CourseDetails = ({
                 showEnrollButton={isFromBrowse}
                 onEnroll={() => router.push(`/course-checkout/${course._id}`)}
                 isLoading={isUpdating}
-                hideCloseButton={isAdminViewer || isFromBrowse}
+                hideCloseButton={
+                  isAdminViewer || isFromBrowse || source === "enrolled"
+                }
               />
             </CardContent>
           </Card>

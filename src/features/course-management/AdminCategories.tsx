@@ -148,7 +148,6 @@ const AdminCategories = ({
 
     if (response?.status === "success") {
       setIsCreateDialogOpen(false);
-      router.refresh();
     }
   };
 
@@ -207,7 +206,6 @@ const AdminCategories = ({
 
     if (response?.status === "success") {
       handleCloseCategoryDetails();
-      router.refresh();
     }
   };
 
@@ -222,7 +220,6 @@ const AdminCategories = ({
 
     if (response?.status === "success") {
       setCategoryToDelete(null);
-      router.refresh();
     }
   };
 

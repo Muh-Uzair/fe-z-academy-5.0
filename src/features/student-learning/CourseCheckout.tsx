@@ -3,7 +3,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Star, Clock, Users, Loader2 } from "lucide-react";
+import { Star, Clock, Users, Loader2, Check } from "lucide-react";
 import {
   Elements,
   CardNumberElement,
@@ -26,15 +26,6 @@ import AppButton from "@/components/AppButton";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
-import {
-  Dialog,
-  DialogContent,
-  DialogBody,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
 import AppCourseCardsGridLayout from "@/components/AppCourseCardsGridLayout";
 
 import { getStripe } from "@/lib/stripeClient";
@@ -79,24 +70,29 @@ const PaymentForm = ({ course }: { course: PublicCourseListItem }) => {
       setIsFetchingIntent(true);
       setIntentError(null);
 
-      const response = await createCoursePaymentIntentAction(course._id);
+      try {
+        const response = await createCoursePaymentIntentAction(course._id);
 
-      if (cancelled) return;
+        if (cancelled) return;
 
-      if (response.status !== "success") {
-        setIntentError(response.message);
-        setIsFetchingIntent(false);
-        return;
-      }
+        if (response.status !== "success") {
+          setIntentError(response.message);
+          return;
+        }
 
-      if (!response.data.clientSecret) {
+        if (!response.data.clientSecret) {
+          setIntentError("Unable to start checkout for this course.");
+          return;
+        }
+
+        setClientSecret(response.data.clientSecret);
+      } catch (err) {
+        if (cancelled) return;
+        console.error("createCoursePaymentIntentAction failed:", err);
         setIntentError("Unable to start checkout for this course.");
-        setIsFetchingIntent(false);
-        return;
+      } finally {
+        if (!cancelled) setIsFetchingIntent(false);
       }
-
-      setClientSecret(response.data.clientSecret);
-      setIsFetchingIntent(false);
     };
 
     fetchPaymentIntent();
@@ -127,14 +123,15 @@ const PaymentForm = ({ course }: { course: PublicCourseListItem }) => {
     setIsConfirming(false);
 
     if (result.error) {
-      setCardError(
-        result.error.message ?? "Payment failed. Please try again.",
-      );
+      setCardError(result.error.message ?? "Payment failed. Please try again.");
       return;
     }
 
     if (result.paymentIntent?.status === "succeeded") {
       setIsSuccessOpen(true);
+      setTimeout(() => {
+        router.push("/student/my-learning/enrolled-courses");
+      }, 5000);
     }
   };
 
@@ -151,110 +148,113 @@ const PaymentForm = ({ course }: { course: PublicCourseListItem }) => {
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-6">
-          <div className="mb-6 flex justify-between items-center text-xl font-bold bg-primary/10 p-4 rounded-lg">
-            <span className="text-primary">Total Amount</span>
-            <span>${course.price}</span>
-          </div>
-
-          {intentError ? (
-            <p className="mb-4 rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
-              {intentError}
-            </p>
-          ) : null}
-
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div className="space-y-2">
-              <Label htmlFor="nameOnCard">Name on Card</Label>
-              <Input
-                id="nameOnCard"
-                placeholder="John Doe"
-                value={nameOnCard}
-                onChange={(event) => setNameOnCard(event.target.value)}
-                className="h-11"
-                required
-                disabled={isFormDisabled}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Card Number</Label>
-              <div className="rounded-md border px-3 py-3">
-                <CardNumberElement
-                  options={{ ...CARD_ELEMENT_OPTIONS, disabled: isFormDisabled }}
-                />
+          {isSuccessOpen ? (
+            <div className="flex flex-col items-center justify-center gap-3 py-10 text-center">
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-green-100 text-green-600">
+                <Check className="h-7 w-7" />
               </div>
+              <h3 className="text-lg font-semibold">Payment Successful</h3>
+              <p className="text-muted-foreground text-sm">
+                You are now enrolled in &quot;{course.title}&quot;. Redirecting
+                to your courses...
+              </p>
             </div>
+          ) : (
+            <>
+              <div className="mb-6 flex justify-between items-center text-xl font-bold bg-primary/10 p-4 rounded-lg">
+                <span className="text-primary">Total Amount</span>
+                <span>${course.price}</span>
+              </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Expiry Date</Label>
-                <div className="rounded-md border px-3 py-3">
-                  <CardExpiryElement
-                    options={{ ...CARD_ELEMENT_OPTIONS, disabled: isFormDisabled }}
+              {intentError ? (
+                <p className="mb-4 rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
+                  {intentError}
+                </p>
+              ) : null}
+
+              <form onSubmit={handleSubmit} className="space-y-5">
+                <div className="space-y-2">
+                  <Label htmlFor="nameOnCard">Name on Card</Label>
+                  <Input
+                    id="nameOnCard"
+                    placeholder="John Doe"
+                    value={nameOnCard}
+                    onChange={(event) => setNameOnCard(event.target.value)}
+                    className="h-11"
+                    required
+                    disabled={isFormDisabled}
                   />
                 </div>
-              </div>
-              <div className="space-y-2">
-                <Label>CVC</Label>
-                <div className="rounded-md border px-3 py-3">
-                  <CardCvcElement
-                    options={{ ...CARD_ELEMENT_OPTIONS, disabled: isFormDisabled }}
-                  />
+
+                <div className="space-y-2">
+                  <Label>Card Number</Label>
+                  <div className="rounded-md border px-3 py-3">
+                    <CardNumberElement
+                      options={{
+                        ...CARD_ELEMENT_OPTIONS,
+                        disabled: isFormDisabled,
+                      }}
+                    />
+                  </div>
                 </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Expiry Date</Label>
+                    <div className="rounded-md border px-3 py-3">
+                      <CardExpiryElement
+                        options={{
+                          ...CARD_ELEMENT_OPTIONS,
+                          disabled: isFormDisabled,
+                        }}
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>CVC</Label>
+                    <div className="rounded-md border px-3 py-3">
+                      <CardCvcElement
+                        options={{
+                          ...CARD_ELEMENT_OPTIONS,
+                          disabled: isFormDisabled,
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {isFetchingIntent ? (
+                  <div className="flex items-center justify-center gap-2 rounded-md bg-muted/50 py-3 text-sm text-muted-foreground">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Preparing secure payment...
+                  </div>
+                ) : null}
+
+                {cardError ? (
+                  <p className="text-sm text-destructive">{cardError}</p>
+                ) : null}
+
+                <AppButton
+                  type="submit"
+                  className="w-full h-12 text-md mt-6"
+                  size="lg"
+                  disabled={isFormDisabled || !nameOnCard.trim()}
+                  isLoading={isConfirming}
+                >
+                  Buy Now &bull; ${course.price}
+                </AppButton>
+              </form>
+
+              <div className="mt-6 text-center">
+                <p className="text-xs text-muted-foreground bg-muted/50 p-3 rounded-lg border border-dashed">
+                  Payments are processed securely by Stripe. Your card details
+                  never touch our servers.
+                </p>
               </div>
-            </div>
-
-            {isFetchingIntent ? (
-              <div className="flex items-center justify-center gap-2 rounded-md bg-muted/50 py-3 text-sm text-muted-foreground">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Preparing secure payment...
-              </div>
-            ) : null}
-
-            {cardError ? (
-              <p className="text-sm text-destructive">{cardError}</p>
-            ) : null}
-
-            <AppButton
-              type="submit"
-              className="w-full h-12 text-md mt-6"
-              size="lg"
-              disabled={isFormDisabled || !nameOnCard.trim()}
-              isLoading={isConfirming}
-            >
-              Buy Now &bull; ${course.price}
-            </AppButton>
-          </form>
-
-          <div className="mt-6 text-center">
-            <p className="text-xs text-muted-foreground bg-muted/50 p-3 rounded-lg border border-dashed">
-              Payments are processed securely by Stripe. Your card details
-              never touch our servers.
-            </p>
-          </div>
+            </>
+          )}
         </CardContent>
       </Card>
-
-      <Dialog open={isSuccessOpen} onOpenChange={setIsSuccessOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader variant="success">
-            <DialogTitle className="text-xl">Payment Successful</DialogTitle>
-            <DialogDescription>
-              You are now enrolled in &quot;{course.title}&quot;. Happy
-              learning!
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <AppButton
-              onClick={() =>
-                router.push("/student/my-learning/enrolled-courses")
-              }
-            >
-              Go to My Courses
-            </AppButton>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </>
   );
 };
@@ -356,38 +356,40 @@ const CourseCheckout = ({ course, similarCourses }: CourseCheckoutProps) => {
         </div>
       </div>
 
-      {similarCoursesGrid.length > 0 ? (
-        <>
-          <Separator />
+      <Separator />
 
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-2xl font-bold tracking-tight">
-                Similar Courses You Might Like
-              </h2>
-              <p className="text-muted-foreground mt-1">
-                Explore other courses in the same category.
-              </p>
-            </div>
+      <div className="space-y-6">
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight">
+            Similar Courses You Might Like
+          </h2>
+          <p className="text-muted-foreground mt-1">
+            Explore other courses in the same category.
+          </p>
+        </div>
 
-            <AppCourseCardsGridLayout
-              courses={similarCoursesGrid}
-              renderFooter={(similarCourse) => (
-                <AppButton
-                  className="w-full"
-                  onClick={() =>
-                    router.push(
-                      `/course-details/${similarCourse._id}?role=student&source=browse`,
-                    )
-                  }
-                >
-                  View Details
-                </AppButton>
-              )}
-            />
-          </div>
-        </>
-      ) : null}
+        {similarCoursesGrid.length > 0 ? (
+          <AppCourseCardsGridLayout
+            courses={similarCoursesGrid}
+            renderFooter={(similarCourse) => (
+              <AppButton
+                className="w-full"
+                onClick={() =>
+                  router.push(
+                    `/course-details/${similarCourse._id}?role=student&source=browse`,
+                  )
+                }
+              >
+                View Details
+              </AppButton>
+            )}
+          />
+        ) : (
+          <p className="text-muted-foreground text-center py-10 border rounded-xl border-dashed">
+            No similar courses found.
+          </p>
+        )}
+      </div>
     </div>
   );
 };
