@@ -7,6 +7,7 @@ import type {
   GetCoursesResponse,
   GetCourseDetailsResponse,
   GetCourseCompletionStatusResponse,
+  GetCourseRefundEligibilityResponse,
   GetPublicCoursesResponse,
   GetPublicCourseDetailsResponse,
   CourseStatus,
@@ -24,6 +25,10 @@ type GetCourseDetailsSuccessResponse = Extract<
 >;
 type GetCourseCompletionStatusSuccessResponse = Extract<
   GetCourseCompletionStatusResponse,
+  { status: "success" }
+>;
+type GetCourseRefundEligibilitySuccessResponse = Extract<
+  GetCourseRefundEligibilityResponse,
   { status: "success" }
 >;
 type GetPublicCoursesSuccessResponse = Extract<
@@ -151,6 +156,38 @@ export async function getCourseCompletionStatusQuery(
     return json;
   } catch (err) {
     console.error("getCourseCompletionStatusQuery failed:", err);
+    throw err;
+  }
+}
+
+/**
+ * Student only. Read-only check that runs the same rules as
+ * requestCourseRefundAction (payment state, 7-day window, 30% watch limit)
+ * without claiming the transaction or calling Stripe. Use it to show/hide a
+ * "Request refund" button and explain why it's disabled.
+ * Uses 'use cache: private' so the cache entry is scoped to the requesting
+ * student, based on the cookies read inside apiClient.
+ */
+export async function getCourseRefundEligibilityQuery(
+  id: string,
+): Promise<GetCourseRefundEligibilitySuccessResponse> {
+  "use cache: private";
+  cacheTag(COURSE_TAGS.refundEligibility(id));
+  cacheLife("minutes");
+
+  try {
+    const res = await apiClient(`/courses/${id}/refund-eligibility`, {
+      method: "GET",
+    });
+    const json: GetCourseRefundEligibilityResponse = await res.json();
+
+    if (json.status !== "success") {
+      throw new Error(json.message);
+    }
+
+    return json;
+  } catch (err) {
+    console.error("getCourseRefundEligibilityQuery failed:", err);
     throw err;
   }
 }

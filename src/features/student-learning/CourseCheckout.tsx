@@ -3,7 +3,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Star, Clock, Users, Loader2, Check } from "lucide-react";
+import { Star, Clock, Users, Check } from "lucide-react";
 import {
   Elements,
   CardNumberElement,
@@ -25,6 +25,7 @@ import { Input } from "@/components/ui/input";
 import AppButton from "@/components/AppButton";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import AppCourseCardsGridLayout from "@/components/AppCourseCardsGridLayout";
 
@@ -148,7 +149,34 @@ const PaymentForm = ({ course }: { course: PublicCourseListItem }) => {
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-6">
-          {isSuccessOpen ? (
+          {isFetchingIntent ? (
+            <div className="space-y-5">
+              <Skeleton className="h-14 w-full rounded-lg" />
+
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-11 w-full" />
+              </div>
+
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-28" />
+                <Skeleton className="h-11 w-full rounded-md" />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-20" />
+                  <Skeleton className="h-11 w-full rounded-md" />
+                </div>
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-12" />
+                  <Skeleton className="h-11 w-full rounded-md" />
+                </div>
+              </div>
+
+              <Skeleton className="h-12 w-full rounded-md" />
+            </div>
+          ) : isSuccessOpen ? (
             <div className="flex flex-col items-center justify-center gap-3 py-10 text-center">
               <div className="flex h-14 w-14 items-center justify-center rounded-full bg-green-100 text-green-600">
                 <Check className="h-7 w-7" />
@@ -222,13 +250,6 @@ const PaymentForm = ({ course }: { course: PublicCourseListItem }) => {
                     </div>
                   </div>
                 </div>
-
-                {isFetchingIntent ? (
-                  <div className="flex items-center justify-center gap-2 rounded-md bg-muted/50 py-3 text-sm text-muted-foreground">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Preparing secure payment...
-                  </div>
-                ) : null}
 
                 {cardError ? (
                   <p className="text-sm text-destructive">{cardError}</p>

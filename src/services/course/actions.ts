@@ -56,6 +56,9 @@ export async function uploadCourseVideoAction(data: {
  * onboarding. `thumbnailKey`/`videoKey` must come from
  * uploadCourseThumbnailAction/uploadCourseVideoAction. New courses always
  * start with `isVerified: false`, pending admin review.
+ * `totalDurationInMinutes` must be read from the actual video file on the
+ * frontend (e.g. an `HTMLVideoElement`'s `.duration`, converted to minutes)
+ * before calling this — the backend never inspects the uploaded file itself.
  */
 export async function createCourseAction(data: {
   title: string;
@@ -65,6 +68,7 @@ export async function createCourseAction(data: {
   category: string;
   thumbnailKey: string;
   videoKey: string;
+  totalDurationInMinutes: number;
 }): Promise<CreateCourseResponse> {
   const res = await apiClient("/courses", {
     method: "POST",
@@ -84,6 +88,9 @@ export async function createCourseAction(data: {
  * Instructor only, and only the course's own instructor. All fields are
  * optional, but at least one must be sent. If `thumbnailKey`/`videoKey`
  * changes, the previous S3 object is deleted by the backend.
+ * `totalDurationInMinutes` is required whenever `videoKey` is sent (must be
+ * read from the actual video file on the frontend, same as
+ * createCourseAction) — omit it otherwise.
  */
 export async function updateCourseAction(
   id: string,
@@ -92,6 +99,7 @@ export async function updateCourseAction(
     description?: string;
     thumbnailKey?: string;
     videoKey?: string;
+    totalDurationInMinutes?: number;
     price?: number;
     level?: CourseLevel;
     category?: string;
@@ -173,14 +181,25 @@ export async function createCoursePaymentIntentAction(
     method: "POST",
   });
 
-  return res.json();
+  const json: CreateCoursePaymentIntentResponse = await res.json();
+
+  if (json.status === "success") {
+    updateTag(COURSE_TAGS.courses);
+    updateTag(COURSE_TAGS.courseDetails(id));
+  }
+
+  return json;
 }
 
 /**
  * Student only. Refund window is 7 days from the payment date, and is
- * blocked once the student has watched more than 30% of the course. The
- * database is not updated synchronously — enrollment removal happens
- * asynchronously via a Stripe webhook, so no cache tag is invalidated here.
+ * blocked once the student has watched more than 30% of the course. A
+ * duplicate/double-click request for the same course is rejected outright
+ * with "A refund for this course is already being processed". The
+ * transaction is claimed (paymentStatus -> "refund_processing") immediately
+ * on success, so the eligibility check is invalidated — but enrollment
+ * removal itself happens asynchronously via a Stripe webhook, so no
+ * course/enrollment tag is invalidated here.
  */
 export async function requestCourseRefundAction(
   id: string,
@@ -189,5 +208,11 @@ export async function requestCourseRefundAction(
     method: "POST",
   });
 
-  return res.json();
+  const json: RequestCourseRefundResponse = await res.json();
+
+  if (json.status === "success") {
+    updateTag(COURSE_TAGS.refundEligibility(id));
+  }
+
+  return json;
 }

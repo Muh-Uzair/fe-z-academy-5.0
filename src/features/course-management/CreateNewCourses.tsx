@@ -20,6 +20,7 @@ import type {
   UploadCourseThumbnailResponse,
   UploadCourseVideoResponse,
 } from "@/response-types/courseResponseTypes";
+import { getVideoDurationInMinutes } from "@/features/course-management/courseHelpers";
 
 // Both upload-URL responses share this shape: an S3 POST policy plus the
 // object key to send back when creating/updating the course.
@@ -130,6 +131,10 @@ const CreateNewCourses = ({
         };
       }
 
+      const totalDurationInMinutes = await getVideoDurationInMinutes(
+        videoFile,
+      );
+
       return createCourseAction({
         title: values.title,
         description: values.description,
@@ -138,6 +143,7 @@ const CreateNewCourses = ({
         category: values.category,
         thumbnailKey: thumbnailUploadResponse.data.key,
         videoKey: videoUploadResponse.data.key,
+        totalDurationInMinutes,
       });
     });
 

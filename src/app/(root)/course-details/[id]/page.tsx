@@ -4,9 +4,11 @@ import CourseDetails, {
 import {
   getCourseDetailsQuery,
   getPublicCourseDetailsQuery,
+  getCourseRefundEligibilityQuery,
 } from "@/services/course/queries";
 import { getCategoriesQuery } from "@/services/category/queries";
 import { getReviewByCourseAndStudentQuery } from "@/services/review/queries";
+import type { CourseRefundEligibility } from "@/response-types/courseResponseTypes";
 
 type CourseDetailsPageProps = {
   params: Promise<{ id: string }>;
@@ -61,6 +63,19 @@ const UnifiedCourseDetailsPage = async ({
     }
   }
 
+  // Fetch the refund eligibility server-side so the "Request Refund" action
+  // can be shown/hidden/disabled without a client round-trip. A failure here
+  // (e.g. no transaction record at all) just means no refund action applies.
+  let refundEligibility: CourseRefundEligibility | null = null;
+  if (isEnrolledStudent) {
+    try {
+      refundEligibility = (await getCourseRefundEligibilityQuery(id)).data
+        .eligibility;
+    } catch {
+      refundEligibility = null;
+    }
+  }
+
   return (
     <CourseDetails
       viewerRole={viewerRole}
@@ -78,6 +93,7 @@ const UnifiedCourseDetailsPage = async ({
       }
       categorySearch={categorySearch ?? ""}
       hasReviewed={hasReviewed}
+      refundEligibility={refundEligibility}
     />
   );
 };

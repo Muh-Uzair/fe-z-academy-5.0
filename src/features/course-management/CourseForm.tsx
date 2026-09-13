@@ -132,6 +132,11 @@ interface CourseFormProps {
   hideVideo?: boolean;
   showEnrollButton?: boolean;
   onEnroll?: () => void;
+  showRefundButton?: boolean;
+  refundEligible?: boolean;
+  refundDisabledReason?: string | null;
+  onRequestRefund?: () => void;
+  isRefunding?: boolean;
   isLoading?: boolean;
   hideCloseButton?: boolean;
 }
@@ -187,6 +192,11 @@ const CourseForm = ({
   hideVideo = false,
   showEnrollButton = false,
   onEnroll,
+  showRefundButton = false,
+  refundEligible = false,
+  refundDisabledReason = null,
+  onRequestRefund,
+  isRefunding = false,
   isLoading = false,
   hideCloseButton = false,
 }: CourseFormProps) => {
@@ -211,7 +221,10 @@ const CourseForm = ({
   // In view mode the footer only has content when at least one of these
   // actions applies — skip rendering it (and its divider) when it'd be empty.
   const hasViewModeActions =
-    (!allowEdit && !hideCloseButton) || allowEdit || (showEnrollButton && !!onEnroll);
+    (!allowEdit && !hideCloseButton) ||
+    allowEdit ||
+    (showEnrollButton && !!onEnroll) ||
+    showRefundButton;
   const showFormFooter = mode !== "view" || hasViewModeActions;
   const selectedVideoFile = useWatch({
     control: form.control,
@@ -224,6 +237,17 @@ const CourseForm = ({
       revokeObjectUrl(videoPreviewUrl);
     };
   }, [thumbnailPreviewUrl, videoPreviewUrl]);
+
+  // With mode: "onChange", react-hook-form only computes `isValid` once a
+  // field has been validated — trigger it on entering create/edit mode so
+  // the submit button's disabled state is accurate from the first render
+  // (e.g. immediately reflecting the thumbnail/video size limits below).
+  useEffect(() => {
+    if (mode !== "view") {
+      form.trigger();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode]);
 
   const clearFileInputs = () => {
     setThumbnailInputKey((currentValue) => currentValue + 1);
@@ -673,7 +697,13 @@ const CourseForm = ({
         </div>
 
         {showFormFooter ? (
-          <div className="flex flex-col-reverse gap-2 border-t pt-4 sm:flex-row sm:justify-end">
+          <div className="flex flex-col gap-2 border-t pt-4">
+            {showRefundButton && !refundEligible && refundDisabledReason ? (
+              <p className="text-sm text-muted-foreground sm:text-right">
+                {refundDisabledReason}
+              </p>
+            ) : null}
+            <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
             {mode === "view" ? (
               <>
                 {!allowEdit && !hideCloseButton ? (
@@ -698,6 +728,22 @@ const CourseForm = ({
                     Enroll Now
                   </AppButton>
                 ) : null}
+                {showRefundButton ? (
+                  <AppButton
+                    type="button"
+                    variant="destructive"
+                    disabled={!refundEligible || isRefunding}
+                    isLoading={isRefunding}
+                    title={
+                      !refundEligible && refundDisabledReason
+                        ? refundDisabledReason
+                        : undefined
+                    }
+                    onClick={onRequestRefund}
+                  >
+                    Request Refund
+                  </AppButton>
+                ) : null}
               </>
             ) : (
               <>
@@ -715,12 +761,13 @@ const CourseForm = ({
                   type="submit"
                   iconLeft={mode === "create" ? CirclePlus : undefined}
                   loading={isLoading || form.formState.isSubmitting}
-                  disabled={isLoading}
+                  disabled={isLoading || !form.formState.isValid}
                 >
                   {mode === "edit" ? "Save Changes" : "Create Course"}
                 </AppButton>
               </>
             )}
+            </div>
           </div>
         ) : null}
       </form>

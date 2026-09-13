@@ -29,9 +29,11 @@ import {
   uploadCourseVideoAction,
   updateCourseAction,
   updateCourseVerificationAction,
+  requestCourseRefundAction,
 } from "@/services/course/actions";
 import type {
   CourseListItem,
+  CourseRefundEligibility,
   UploadCourseThumbnailResponse,
   UploadCourseVideoResponse,
 } from "@/response-types/courseResponseTypes";
@@ -42,6 +44,7 @@ import {
   getCourseVerificationBadgeVariant,
   getCourseVerificationLabel,
   getCourseVerificationState,
+  getVideoDurationInMinutes,
 } from "./courseHelpers";
 
 type CourseViewerRole = "student" | "instructor" | "admin";
@@ -53,6 +56,7 @@ interface CourseDetailsProps {
   categoriesPagination: Pagination;
   categorySearch: string;
   hasReviewed?: boolean;
+  refundEligibility?: CourseRefundEligibility | null;
 }
 
 // Both upload-URL responses share this shape: an S3 POST policy plus the
@@ -86,6 +90,7 @@ const CourseDetails = ({
   categoriesPagination,
   categorySearch,
   hasReviewed = false,
+  refundEligibility = null,
 }: CourseDetailsProps) => {
   console.log("Course Details:==========================", course);
 
@@ -100,6 +105,7 @@ const CourseDetails = ({
   const { run: runUpdateAction, isLoading: isUpdating } = useClientAction();
   const { run: runVerifyAction, isLoading: isVerifying } = useClientAction();
   const { run: runRejectAction, isLoading: isRejecting } = useClientAction();
+  const { run: runRefundAction, isLoading: isRefunding } = useClientAction();
 
   const isInstructorViewer = viewerRole === "instructor";
   // Admin always reaches this page from an admin course list, which always
@@ -141,6 +147,7 @@ const CourseDetails = ({
     const response = await runUpdateAction(async () => {
       let thumbnailKey: string | undefined;
       let videoKey: string | undefined;
+      let totalDurationInMinutes: number | undefined;
 
       if (values.thumbnailFile) {
         const thumbnailUploadResponse = await uploadCourseThumbnailAction({
@@ -192,6 +199,9 @@ const CourseDetails = ({
         }
 
         videoKey = videoUploadResponse.data.key;
+        totalDurationInMinutes = await getVideoDurationInMinutes(
+          values.videoFile,
+        );
       }
 
       return updateCourseAction(course._id, {
@@ -201,7 +211,7 @@ const CourseDetails = ({
         level: values.level,
         category: values.category,
         ...(thumbnailKey ? { thumbnailKey } : {}),
-        ...(videoKey ? { videoKey } : {}),
+        ...(videoKey ? { videoKey, totalDurationInMinutes } : {}),
       });
     });
 
@@ -210,6 +220,16 @@ const CourseDetails = ({
     }
 
     return false;
+  };
+
+  const handleRequestRefund = async () => {
+    const response = await runRefundAction(() =>
+      requestCourseRefundAction(course._id),
+    );
+
+    if (response?.status === "success") {
+      router.push("/student/my-learning/enrolled-courses");
+    }
   };
 
   const handleVerifyCourse = async () => {
@@ -391,6 +411,15 @@ const CourseDetails = ({
                 hideVideo={isFromBrowse}
                 showEnrollButton={isFromBrowse}
                 onEnroll={() => router.push(`/course-checkout/${course._id}`)}
+                showRefundButton={
+                  viewerRole === "student" &&
+                  source === "enrolled" &&
+                  !!refundEligibility
+                }
+                refundEligible={refundEligibility?.eligible ?? false}
+                refundDisabledReason={refundEligibility?.reason ?? null}
+                onRequestRefund={handleRequestRefund}
+                isRefunding={isRefunding}
                 isLoading={isUpdating}
                 hideCloseButton={
                   isAdminViewer || isFromBrowse || source === "enrolled"

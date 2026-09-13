@@ -59,6 +59,28 @@ export const getCourseVerificationBadgeVariant = (
 export const formatCourseLevel = (level: CourseLevel | string) =>
   level.charAt(0).toUpperCase() + level.slice(1);
 
+// The backend never inspects the uploaded video file itself, so
+// totalDurationInMinutes (required on create, and on update whenever a new
+// videoKey is sent) must be read from the file client-side before calling
+// createCourseAction/updateCourseAction.
+export const getVideoDurationInMinutes = (file: File): Promise<number> =>
+  new Promise((resolve, reject) => {
+    const video = document.createElement("video");
+    video.preload = "metadata";
+    const objectUrl = URL.createObjectURL(file);
+
+    video.onloadedmetadata = () => {
+      URL.revokeObjectURL(objectUrl);
+      resolve(Number((video.duration / 60).toFixed(2)));
+    };
+    video.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error("Could not read the video file's duration."));
+    };
+
+    video.src = objectUrl;
+  });
+
 export const truncateText = (value: string | null, maxLength: number) => {
   if (!value) {
     return "";
