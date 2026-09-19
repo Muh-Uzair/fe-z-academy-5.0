@@ -29,7 +29,7 @@ const CourseEnrollments = () => {
       />
 
       <AppUserCardsGridLayout
-        users={enrolledStudents}
+        users={enrolledStudents as any}
         pagination={true}
         upperHeader={
           <div className="w-full sm:w-96">

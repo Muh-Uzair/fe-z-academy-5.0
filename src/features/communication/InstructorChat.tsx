@@ -38,7 +38,7 @@ const InstructorChat = () => {
       />
 
       <AppCourseCardsGridLayout
-        courses={filteredCourses}
+        courses={filteredCourses as any}
         upperHeader={upperHeader}
         pagination={true}
         renderFooter={(course) => (

@@ -10,6 +10,8 @@ import type {
   GetCourseRefundEligibilityResponse,
   GetPublicCoursesResponse,
   GetPublicCourseDetailsResponse,
+  GetInstructorCoursesResponse,
+  GetStudentCoursesResponse,
   CourseStatus,
 } from "@/response-types/courseResponseTypes";
 
@@ -37,6 +39,14 @@ type GetPublicCoursesSuccessResponse = Extract<
 >;
 type GetPublicCourseDetailsSuccessResponse = Extract<
   GetPublicCourseDetailsResponse,
+  { status: "success" }
+>;
+type GetInstructorCoursesSuccessResponse = Extract<
+  GetInstructorCoursesResponse,
+  { status: "success" }
+>;
+type GetStudentCoursesSuccessResponse = Extract<
+  GetStudentCoursesResponse,
   { status: "success" }
 >;
 
@@ -255,6 +265,70 @@ export async function getPublicCourseDetailsQuery(
     return json;
   } catch (err) {
     console.error("getPublicCourseDetailsQuery failed:", err);
+    throw err;
+  }
+}
+
+/**
+ * Admin only. Fetches a paginated, sortable, searchable list of courses created by a specific instructor.
+ * Uses 'use cache: private' so the cache entry is scoped to the requesting Admin.
+ * Use updateTag(COURSE_TAGS.courses) to invalidate.
+ */
+export async function getInstructorCoursesQuery(
+  id: string,
+  params: GetCoursesParams = {},
+): Promise<GetInstructorCoursesSuccessResponse> {
+  "use cache: private";
+  cacheTag(COURSE_TAGS.courses);
+  cacheLife("minutes");
+
+  const query = buildQueryString(params);
+
+  try {
+    const res = await apiClient(`/courses/instructor/${id}${query}`, {
+      method: "GET",
+    });
+    const json: GetInstructorCoursesResponse = await res.json();
+
+    if (json.status !== "success") {
+      throw new Error(json.message);
+    }
+
+    return json;
+  } catch (err) {
+    console.error("getInstructorCoursesQuery failed:", err);
+    throw err;
+  }
+}
+
+/**
+ * Admin only. Fetches a paginated, sortable, searchable list of courses a specific student is enrolled in.
+ * Uses 'use cache: private' so the cache entry is scoped to the requesting Admin.
+ * Use updateTag(COURSE_TAGS.courses) to invalidate.
+ */
+export async function getStudentCoursesQuery(
+  id: string,
+  params: GetCoursesParams = {},
+): Promise<GetStudentCoursesSuccessResponse> {
+  "use cache: private";
+  cacheTag(COURSE_TAGS.courses);
+  cacheLife("minutes");
+
+  const query = buildQueryString(params);
+
+  try {
+    const res = await apiClient(`/courses/student/${id}${query}`, {
+      method: "GET",
+    });
+    const json: GetStudentCoursesResponse = await res.json();
+
+    if (json.status !== "success") {
+      throw new Error(json.message);
+    }
+
+    return json;
+  } catch (err) {
+    console.error("getStudentCoursesQuery failed:", err);
     throw err;
   }
 }

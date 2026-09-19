@@ -1,48 +1,54 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
-import { usersData } from "@/dummy-data/usersData";
-import { coursesData } from "@/dummy-data/coursesData";
+import React from "react";
+import { useRouter } from "next/navigation";
 import PageHeader from "@/components/PageHeader";
 import AppSearchBar from "@/components/AppSearchBar";
 import AppCourseCardsGridLayout from "@/components/AppCourseCardsGridLayout";
 import { Badge } from "@/components/ui/badge";
-import { GraduationCap, Briefcase, Mail } from "lucide-react";
+import { GraduationCap, Briefcase, Mail, User } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import AppButton from "@/components/AppButton";
+import type {
+  UserDetails,
+  Pagination as PaginationMeta,
+} from "@/response-types/userResponseTypes";
+import type { CourseListItem } from "@/response-types/courseResponseTypes";
 
 interface UserProfileProps {
-  userId: string;
+  user: UserDetails;
+  courses: CourseListItem[];
+  pagination: PaginationMeta | null;
+  search: string;
+  role: string;
 }
 
-const UserProfile = ({ userId }: UserProfileProps) => {
-  const [searchQuery, setSearchQuery] = useState("");
+const UserProfile = ({
+  user,
+  courses,
+  pagination,
+  search,
+  role,
+}: UserProfileProps) => {
+  const router = useRouter();
 
-  const user = useMemo(() => {
-    return usersData.find((u) => u._id === userId) || usersData[0]; // fallback if not found
-  }, [userId]);
+  const updateQuery = (next: { search?: string; page?: number }) => {
+    const nextSearch = next.search ?? search;
+    const nextPage = next.page ?? pagination?.page ?? 1;
 
-  const relatedCourses = useMemo(() => {
-    let courses = [];
-    if (user.role === "instructor") {
-      courses = coursesData.filter((c) => c.instructor === user._id);
-    } else {
-      // Dummy logic: mock student enrolled courses by picking the first few courses
-      courses = coursesData.slice(0, 4);
-    }
+    const searchParams = new URLSearchParams();
+    if (role) searchParams.set("role", role);
+    if (nextSearch) searchParams.set("search", nextSearch);
+    if (nextPage > 1) searchParams.set("page", String(nextPage));
 
-    if (!searchQuery) return courses;
-    return courses.filter((course) =>
-      course.title.toLowerCase().includes(searchQuery.toLowerCase()),
-    );
-  }, [user, searchQuery]);
-
-  if (!user) return <div>User not found</div>;
+    const query = searchParams.toString();
+    router.push(`/user-profile/${user._id}${query ? `?${query}` : ""}`);
+  };
 
   const coursesHeading =
-    user.role === "instructor" ? "Courses Taught" : "Enrolled Courses";
+    role === "instructor" ? "Courses Taught" : "Enrolled Courses";
   const coursesDescription =
-    user.role === "instructor"
+    role === "instructor"
       ? "Courses created and managed by this instructor."
       : "Courses this student is currently enrolled in.";
 
@@ -59,14 +65,17 @@ const UserProfile = ({ userId }: UserProfileProps) => {
           </Badge>
         </div>
 
-        <img
-          src={
-            user.avatar ||
-            `https://ui-avatars.com/api/?name=${encodeURIComponent(user.fullName)}&background=random`
-          }
-          alt={user.fullName}
-          className="w-32 h-32 rounded-full object-cover border-4 border-background shadow-md"
-        />
+        {user.avatar ? (
+          <img
+            src={user.avatar}
+            alt={user.fullName}
+            className="w-32 h-32 rounded-full object-cover border-4 border-background shadow-md flex-shrink-0"
+          />
+        ) : (
+          <div className="w-32 h-32 rounded-full border-4 border-background shadow-md bg-muted flex items-center justify-center flex-shrink-0">
+            <User className="w-16 h-16 text-muted-foreground opacity-50" />
+          </div>
+        )}
 
         <div className="flex flex-col space-y-3 flex-1">
           <div>
@@ -108,18 +117,24 @@ const UserProfile = ({ userId }: UserProfileProps) => {
         />
 
         <AppCourseCardsGridLayout
-          courses={relatedCourses}
+          courses={courses}
           pagination={true}
+          paginationMeta={pagination ?? undefined}
+          onPageChange={(page) => updateQuery({ page })}
           upperHeader={
             <div className="w-full sm:w-96">
               <AppSearchBar
                 placeholder="Search courses..."
-                onChange={(val) => setSearchQuery(val)}
+                defaultValue={search}
+                onChange={(val) => updateQuery({ search: val, page: 1 })}
               />
             </div>
           }
           renderFooter={(course) => (
-            <AppButton href={`/course-enrollments/${course._id}`} className="w-full">
+            <AppButton
+              href={`/course-details/${course._id}`}
+              className="w-full"
+            >
               View Course
             </AppButton>
           )}

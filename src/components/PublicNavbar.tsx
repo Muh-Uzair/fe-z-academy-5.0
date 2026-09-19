@@ -23,7 +23,7 @@ const DASHBOARD_PATH_BY_ROLE: Record<AuthUser["role"], string> = {
 };
 
 type PublicNavbarProps = {
-  user: AuthUser | null;
+  user?: AuthUser | null;
 };
 
 const PublicNavbar = ({ user }: PublicNavbarProps) => {

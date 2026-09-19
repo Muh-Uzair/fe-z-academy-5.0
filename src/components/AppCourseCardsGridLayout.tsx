@@ -4,21 +4,11 @@ import React, { ReactNode } from "react";
 import CourseCard from "@/components/CourseCard";
 import { Button } from "@/components/ui/button";
 import type { Pagination as PaginationMeta } from "@/response-types/userResponseTypes";
+import type { CourseListItem } from "@/response-types/courseResponseTypes";
 
-interface Course {
-  _id: string;
-  title: string;
-  thumbnail: string;
-  price: number;
-  level: string;
-  instructor: string;
-  category: string;
-  averageRating: number;
-  totalReviews: number;
-  totalStudentsEnrolled: number;
-  totalDurationInMinutes: number;
-  totalDurationWatchedInMinutes?: number;
-}
+// Extend CourseListItem to allow the optional totalDurationWatchedInMinutes
+// field used by the "in-progress" mode (student continue-watching).
+type Course = CourseListItem & { totalDurationWatchedInMinutes?: number };
 
 interface AppCourseCardsGridLayoutProps {
   courses: Course[];

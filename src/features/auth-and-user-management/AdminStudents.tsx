@@ -94,7 +94,7 @@ const AdminStudents = ({ students, pagination, search }: AdminStudentsProps) => 
             label: "Action",
             render: (_: unknown, row: { _id: string; role: string }) => (
               <div className="text-right">
-                <AppButton href={`/user-details/${row._id}?role=${row.role}`}>
+                <AppButton href={`/user-profile/${row._id}?role=${row.role}`}>
                   View Details
                 </AppButton>
               </div>
@@ -109,4 +109,4 @@ const AdminStudents = ({ students, pagination, search }: AdminStudentsProps) => 
   );
 };
 
-export default AdminStudents;
+export default AdminStudents;

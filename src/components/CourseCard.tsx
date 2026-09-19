@@ -11,11 +11,14 @@ interface CourseCardProps {
   course: {
     _id: string;
     title: string;
-    thumbnail: string;
+    thumbnailUrl?: string;
+    thumbnail?: string;
     price: number;
     level: string;
-    instructor: string;
-    category: string;
+    instructorDetails?: { fullName: string };
+    instructor?: string;
+    categoryDetails?: { name: string };
+    category?: string;
     averageRating: number;
     totalReviews: number;
     totalStudentsEnrolled: number;
@@ -34,7 +37,7 @@ const CourseCard = ({ course, footer = null, mode = "default" }: CourseCardProps
       <div className="relative w-full overflow-hidden">
         <AspectRatio ratio={16 / 9}>
           <img
-            src={course.thumbnail}
+            src={course.thumbnailUrl || course.thumbnail}
             alt={course.title}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
@@ -52,7 +55,7 @@ const CourseCard = ({ course, footer = null, mode = "default" }: CourseCardProps
         {/* Category Badge */}
         <div className="absolute top-3 left-3">
           <Badge variant="secondary" className="shadow-sm bg-background/95 backdrop-blur-sm hover:bg-background border border-border/50">
-            {course.category}
+            {course.categoryDetails?.name || course.category}
           </Badge>
         </div>
       </div>
@@ -77,7 +80,7 @@ const CourseCard = ({ course, footer = null, mode = "default" }: CourseCardProps
         </h2>
 
         <p className="text-sm text-muted-foreground mb-4">
-          By <span className="font-medium text-foreground">{course.instructor}</span>
+          By <span className="font-medium text-foreground">{course.instructorDetails?.fullName || course.instructor}</span>
         </p>
 
         <div className="mt-auto">

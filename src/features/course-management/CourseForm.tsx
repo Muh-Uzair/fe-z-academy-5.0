@@ -26,7 +26,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { CourseLevel } from "@/types/courseTypes";
+import { CourseLevel } from "@/response-types/courseResponseTypes";
 import PagedSearchSelect, {
   type PagedSearchSelectItem,
 } from "@/components/PagedSearchSelect";

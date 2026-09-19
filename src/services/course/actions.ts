@@ -12,8 +12,8 @@ import type {
   UpdateCourseVerificationResponse,
   CreateCoursePaymentIntentResponse,
   RequestCourseRefundResponse,
-  CourseLevel,
 } from "@/response-types/courseResponseTypes";
+import { CourseLevel } from "@/response-types/courseResponseTypes";
 
 /**
  * Instructor only. Generates a presigned S3 POST policy for uploading a

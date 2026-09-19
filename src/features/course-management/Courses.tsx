@@ -23,7 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import { CourseLevel } from "@/types/courseTypes";
+import { CourseLevel } from "@/response-types/courseResponseTypes";
 
 // -------------------- Constants --------------------
 
@@ -323,7 +323,7 @@ const Courses = () => {
 
             {/* Courses grid */}
             <AppCourseCardsGridLayout
-              courses={filteredCourses}
+              courses={filteredCourses as any}
               pagination={true}
               renderFooter={(course) => (
                 <AppButton

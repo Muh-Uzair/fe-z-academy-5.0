@@ -107,7 +107,7 @@ const ContinueWatching = () => {
         <section>
           <h2 className="text-xl font-bold tracking-tight mb-4 text-foreground">In Progress</h2>
           <AppCourseCardsGridLayout
-            courses={otherCourses}
+            courses={otherCourses as any}
             mode="in-progress"
             renderFooter={(course) => (
               <AppButton href={`/course-details/${course._id}?role=student`}>

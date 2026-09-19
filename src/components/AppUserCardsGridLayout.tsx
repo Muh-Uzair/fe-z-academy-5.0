@@ -3,17 +3,8 @@
 import React, { ReactNode } from "react";
 import UserCard from "@/components/UserCard";
 import { Button } from "@/components/ui/button";
+import type { UserDetails as User } from "@/response-types/userResponseTypes";
 
-interface User {
-  _id: string;
-  fullName: string;
-  email: string;
-  avatar: string | null;
-  role: string;
-  highestEducation?: string;
-  yearsOfExperience?: number;
-  bio?: string;
-}
 
 interface AppUserCardsGridLayoutProps {
   users: User[];

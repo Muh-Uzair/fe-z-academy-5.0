@@ -1,4 +1,5 @@
-import type { CourseLevel, CourseRecord } from "@/types/courseTypes";
+import { CourseLevel } from "@/response-types/courseResponseTypes";
+import type { CourseListItem as CourseRecord } from "@/response-types/courseResponseTypes";
 
 export type CourseVerificationState = "verified" | "pending" | "rejected";
 

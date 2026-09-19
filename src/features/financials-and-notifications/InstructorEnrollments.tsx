@@ -25,7 +25,7 @@ const InstructorEnrollments = () => {
       />
 
       <AppCourseCardsGridLayout
-        courses={filteredCourses}
+        courses={filteredCourses as any}
         pagination={true}
         upperHeader={
           <div className="w-full sm:w-96">

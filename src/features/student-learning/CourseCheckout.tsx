@@ -284,19 +284,7 @@ const CourseCheckout = ({ course, similarCourses }: CourseCheckoutProps) => {
   const stripePromise = useMemo(() => getStripe(), []);
   const router = useRouter();
 
-  const similarCoursesGrid = similarCourses.map((similarCourse) => ({
-    _id: similarCourse._id,
-    title: similarCourse.title,
-    thumbnail: similarCourse.thumbnailUrl,
-    price: similarCourse.price,
-    level: similarCourse.level,
-    instructor: similarCourse.instructorDetails.fullName,
-    category: similarCourse.categoryDetails.name,
-    averageRating: similarCourse.averageRating,
-    totalReviews: similarCourse.totalReviews,
-    totalStudentsEnrolled: similarCourse.totalStudentsEnrolled,
-    totalDurationInMinutes: similarCourse.totalDurationInMinutes,
-  }));
+  const similarCoursesGrid = similarCourses as any;
 
   return (
     <div className="container mx-auto py-10 px-4 space-y-12 max-w-6xl">

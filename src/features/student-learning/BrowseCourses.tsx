@@ -32,19 +32,7 @@ const BrowseCourses = ({ courses, pagination, search }: BrowseCoursesProps) => {
     router.push(`/student/browse-courses${query ? `?${query}` : ""}`);
   };
 
-  const gridCourses = courses.map((course) => ({
-    _id: course._id,
-    title: course.title,
-    thumbnail: course.thumbnailUrl,
-    price: course.price,
-    level: course.level,
-    instructor: course.instructorDetails.fullName,
-    category: course.categoryDetails.name,
-    averageRating: course.averageRating,
-    totalReviews: course.totalReviews,
-    totalStudentsEnrolled: course.totalStudentsEnrolled,
-    totalDurationInMinutes: course.totalDurationInMinutes,
-  }));
+  const gridCourses = courses as any;
 
   return (
     <PageFlexCol>

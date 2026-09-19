@@ -4,7 +4,11 @@
 import { SuccessApiResponse, ApiErrorResponse } from "./authResponseTypes";
 import { Pagination } from "./userResponseTypes";
 
-export type CourseLevel = "beginner" | "intermediate" | "advanced";
+export enum CourseLevel {
+  Beginner = "beginner",
+  Intermediate = "intermediate",
+  Advanced = "advanced",
+}
 
 // Derived review status accepted by the `status` query param on API 7
 // (GET /api/v1/courses) — see the integration guide for the mapping to
@@ -261,5 +265,18 @@ export type GetInstructorCoursesResponse =
   | SuccessApiResponse<
       GetInstructorCoursesResponseData,
       "Instructor's courses fetched successfully"
+    >
+  | ApiErrorResponse;
+
+// API 15: GET /api/v1/courses/student/:id
+// Admin only. Same response envelope as API 7 (GetCoursesResponse) — the
+// data shape is identical, only the success message differs.
+// Response: { status, message, data: { courses, pagination } }
+export type GetStudentCoursesResponseData = GetCoursesResponseData;
+
+export type GetStudentCoursesResponse =
+  | SuccessApiResponse<
+      GetStudentCoursesResponseData,
+      "Student's courses fetched successfully"
     >
   | ApiErrorResponse;
