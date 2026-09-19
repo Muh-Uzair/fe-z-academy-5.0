@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { User } from "lucide-react";
 
 import PageFlexCol from "@/components/PageFlexCol";
 import PageHeader from "@/components/PageHeader";
@@ -10,19 +11,28 @@ import AppSearchBar from "@/components/AppSearchBar";
 import TableImage from "@/components/TableImage";
 import { Badge } from "@/components/ui/badge";
 import AppButton from "@/components/AppButton";
-import { usersData } from "@/dummy-data/usersData";
+import type { Pagination, UserDetails } from "@/response-types/userResponseTypes";
 
-const students = usersData.filter((u) => u.role === "student");
+type AdminStudentsProps = {
+  students: UserDetails[];
+  pagination: Pagination | null;
+  search: string;
+};
 
-const AdminStudents = () => {
-  const [search, setSearch] = useState("");
+const AdminStudents = ({ students, pagination, search }: AdminStudentsProps) => {
   const router = useRouter();
 
-  const filteredStudents = students.filter(
-    (u) =>
-      u.fullName.toLowerCase().includes(search.toLowerCase()) ||
-      u.email.toLowerCase().includes(search.toLowerCase()),
-  );
+  const updateQuery = (next: { search?: string; page?: number }) => {
+    const nextSearch = next.search ?? search;
+    const nextPage = next.page ?? pagination?.page ?? 1;
+
+    const searchParams = new URLSearchParams();
+    if (nextSearch) searchParams.set("search", nextSearch);
+    if (nextPage > 1) searchParams.set("page", String(nextPage));
+
+    const query = searchParams.toString();
+    router.push(`/admin/students${query ? `?${query}` : ""}`);
+  };
 
   return (
     <PageFlexCol>
@@ -36,23 +46,22 @@ const AdminStudents = () => {
           <div className="max-w-sm">
             <AppSearchBar
               placeholder="Search students by name or email..."
-              onChange={(value: string) => setSearch(value)}
+              defaultValue={search}
+              onChange={(value: string) => updateQuery({ search: value, page: 1 })}
             />
           </div>
         }
-        data={filteredStudents}
+        data={students}
         columns={[
           {
             key: "avatar",
             label: "Avatar",
             render: (value: string | null, row: { fullName: string }) => (
               <TableImage
-                src={
-                  value ||
-                  `https://ui-avatars.com/api/?name=${encodeURIComponent(row.fullName)}&background=random`
-                }
+                src={value || ""}
                 alt={row.fullName}
                 shape="circle"
+                fallbackIcon={User}
               />
             ),
           },
@@ -83,16 +92,18 @@ const AdminStudents = () => {
           {
             key: "action",
             label: "Action",
-            render: (_: unknown, row: { _id: string }) => (
+            render: (_: unknown, row: { _id: string; role: string }) => (
               <div className="text-right">
-                <AppButton onClick={() => router.push(`/user-profile/${row._id}`)}>
-                  View Profile
+                <AppButton href={`/user-details/${row._id}?role=${row.role}`}>
+                  View Details
                 </AppButton>
               </div>
             ),
           },
         ]}
         pagination={true}
+        paginationMeta={pagination ?? undefined}
+        onPageChange={(page) => updateQuery({ page })}
       />
     </PageFlexCol>
   );
