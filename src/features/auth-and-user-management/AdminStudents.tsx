@@ -1,7 +1,6 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { User } from "lucide-react";
 
 import PageFlexCol from "@/components/PageFlexCol";

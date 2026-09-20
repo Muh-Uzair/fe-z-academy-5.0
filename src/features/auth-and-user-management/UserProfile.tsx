@@ -95,7 +95,7 @@ const UserProfile = ({
                 <span className="font-medium">{user.highestEducation}</span>
               </div>
             )}
-            {user.yearsOfExperience !== undefined && (
+            {user.yearsOfExperience !== undefined && user.role !== "student" && (
               <div className="flex items-center gap-2 text-sm">
                 <Briefcase className="h-4 w-4 text-primary" />
                 <span className="font-medium">

@@ -127,6 +127,7 @@ const CourseDetails = ({
   const isAdminViewer = viewerRole === "admin";
   const source = searchParams.get("source");
   const isFromBrowse = source === "browse";
+  const isDefaultStudentView = viewerRole === "student" && !source;
   const courseVerificationState = getCourseVerificationState(course);
 
   const pageDescription = isInstructorViewer
@@ -437,7 +438,10 @@ const CourseDetails = ({
                 isRefunding={isRefunding}
                 isLoading={isUpdating}
                 hideCloseButton={
-                  isAdminViewer || isFromBrowse || source === "enrolled"
+                  isAdminViewer ||
+                  isFromBrowse ||
+                  source === "enrolled" ||
+                  isDefaultStudentView
                 }
                 onVideoPause={
                   viewerRole === "student" &&

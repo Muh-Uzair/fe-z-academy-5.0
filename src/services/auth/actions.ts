@@ -3,6 +3,7 @@
 import { apiClient } from "@/lib/apiClient";
 import { updateTag } from "next/cache";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { parseSetCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { AUTH_TAGS } from "./tags";
 import type {
@@ -216,6 +217,7 @@ export async function signoutAction(): Promise<SignoutResponse> {
   if (json.status === "success") {
     await forwardAuthCookies(res);
     updateTag(AUTH_TAGS.currentUser);
+    redirect("/signin");
   }
 
   return json;
