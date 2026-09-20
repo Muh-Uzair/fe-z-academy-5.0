@@ -1,6 +1,7 @@
 "use client";
 
 import React, { ReactNode } from "react";
+import Image from "next/image";
 import { Star, Users, Clock } from "lucide-react";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Badge } from "@/components/ui/badge";
@@ -36,10 +37,12 @@ const CourseCard = ({ course, footer = null, mode = "default" }: CourseCardProps
       {/* Image Section */}
       <div className="relative w-full overflow-hidden">
         <AspectRatio ratio={16 / 9}>
-          <img
-            src={course.thumbnailUrl || course.thumbnail}
+          <Image
+            src={course.thumbnailUrl || course.thumbnail || ""}
             alt={course.title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            className="object-cover group-hover:scale-105 transition-transform duration-500"
           />
           {/* Overlay gradient for readability */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent pointer-events-none" />

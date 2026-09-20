@@ -4,6 +4,7 @@ import { apiClient } from "@/lib/apiClient";
 import { buildQueryString } from "@/lib/buildQueryString";
 import { ENROLLMENT_TAGS } from "./tags";
 import type {
+  GetEnrollmentsQueryParams,
   GetEnrollmentsResponse,
   GetEnrollmentDetailsResponse,
 } from "@/response-types/enrollmentResponseTypes";
@@ -17,20 +18,6 @@ type GetEnrollmentDetailsSuccessResponse = Extract<
   { status: "success" }
 >;
 
-type GetEnrollmentsParams = {
-  student?: string;
-  course?: string;
-  instructor?: string;
-  transaction?: string;
-  watchedCompletely?: "true" | "false";
-  certificateIssued?: "true" | "false";
-  projection?: string;
-  page?: number;
-  limit?: number;
-  sortBy?: string;
-  sortOrder?: "asc" | "desc";
-};
-
 /**
  * Requires an authenticated session. Visibility is scoped by the caller's
  * role on the backend (no restrictTo gate, no role query param needed):
@@ -40,7 +27,7 @@ type GetEnrollmentsParams = {
  * caller, based on the cookies read inside apiClient.
  */
 export async function getEnrollmentsQuery(
-  params: GetEnrollmentsParams = {},
+  params: GetEnrollmentsQueryParams = {},
 ): Promise<GetEnrollmentsSuccessResponse> {
   "use cache: private";
   cacheTag(ENROLLMENT_TAGS.enrollments);
