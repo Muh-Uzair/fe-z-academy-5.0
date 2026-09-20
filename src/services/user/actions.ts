@@ -5,6 +5,7 @@ import { updateTag } from "next/cache";
 import { USER_TAGS } from "./tags";
 import { AUTH_TAGS } from "../auth/tags";
 import type {
+  GetInstructorOnboardingLinkResponse,
   UpdateUserVerificationResponse,
   UpdateProfileResponse,
 } from "@/response-types/userResponseTypes";
@@ -64,4 +65,17 @@ export async function updateProfileAction(data: {
   }
 
   return json;
+}
+
+/**
+ * Instructor only. Generates a fresh Stripe Express onboarding URL.
+ * This is an action because the URL is requested from a client-side button
+ * and must never be cached or reused.
+ */
+export async function getInstructorOnboardingLinkAction(): Promise<GetInstructorOnboardingLinkResponse> {
+  const res = await apiClient("/users/get-instructor-onboarding-link", {
+    method: "GET",
+  });
+
+  return res.json() as Promise<GetInstructorOnboardingLinkResponse>;
 }

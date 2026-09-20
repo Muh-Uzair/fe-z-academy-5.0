@@ -31,7 +31,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Bell, Camera, Lock, ShieldCheck } from "lucide-react";
+import { Bell, Camera, Lock } from "lucide-react";
+import type { AuthUser } from "@/response-types/authResponseTypes";
+import { getInstructorOnboardingLinkAction } from "@/services/user/actions";
+import useClientAction from "@/hooks/useClientAction";
 
 // ─── SCHEMA (editable fields only) ───────────────────────────────────────────
 const instructorSettingsSchema = z.object({
@@ -48,26 +51,19 @@ const instructorSettingsSchema = z.object({
 
 type InstructorSettingsFormValues = z.infer<typeof instructorSettingsSchema>;
 
-// ─── MOCK DATA ────────────────────────────────────────────────────────────────
-const mockInstructor = {
-  fullName: "Sarah Mitchell",
-  email: "sarah.mitchell@example.com",
-  bio: "Senior software engineer and educator with 11 years of industry experience. Specialises in full-stack development, system design, and helping developers land their dream jobs.",
-  highestEducation: "Bachelor's",
-  yearsOfExperience: 11,
-  avatar: "https://i.pravatar.cc/150?u=user8",
-  isVerified: true,
-  role: "instructor",
+type InstructorSettingsProps = {
+  user: AuthUser;
 };
 
-// CMP CMP CMP
-const InstructorSettings = () => {
+const InstructorSettings = ({ user }: InstructorSettingsProps) => {
   // VARS
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-  const [avatarPreview, setAvatarPreview] = useState(mockInstructor.avatar);
+  const [avatarPreview, setAvatarPreview] = useState(user.avatar);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { run: runOnboardingAction, isLoading: isOnboardingLoading } =
+    useClientAction();
 
-  const initials = mockInstructor.fullName
+  const initials = user.fullName
     .split(" ")
     .map((n) => n[0])
     .join("");
@@ -76,10 +72,10 @@ const InstructorSettings = () => {
     resolver: zodResolver(instructorSettingsSchema),
     mode: "onChange",
     defaultValues: {
-      fullName: mockInstructor.fullName,
-      bio: mockInstructor.bio,
-      highestEducation: mockInstructor.highestEducation,
-      yearsOfExperience: mockInstructor.yearsOfExperience,
+      fullName: user.fullName,
+      bio: user.bio,
+      highestEducation: user.highestEducation,
+      yearsOfExperience: user.yearsOfExperience,
     },
   });
 
@@ -106,6 +102,16 @@ const InstructorSettings = () => {
     console.log(checked ? "Notification on" : "Notification off");
   };
 
+  const handleStripeOnboarding = async () => {
+    const response = await runOnboardingAction(() =>
+      getInstructorOnboardingLinkAction(),
+    );
+
+    if (response?.status === "success") {
+      window.location.assign(response.data.url);
+    }
+  };
+
   return (
     <PageFlexCol>
       {/* PAGE HEADER */}
@@ -127,13 +133,13 @@ const InstructorSettings = () => {
           {/* AVATAR SECTION */}
           <div className="flex items-center gap-5">
             <Avatar className="h-20 w-20">
-              <AvatarImage src={avatarPreview} alt={mockInstructor.fullName} />
+              <AvatarImage src={avatarPreview ?? undefined} alt={user.fullName} />
               <AvatarFallback className="text-xl font-bold">
                 {initials}
               </AvatarFallback>
             </Avatar>
             <div className="space-y-1">
-              <p className="text-sm font-medium">{mockInstructor.fullName}</p>
+              <p className="text-sm font-medium">{user.fullName}</p>
               <input
                 ref={fileInputRef}
                 type="file"
@@ -155,6 +161,38 @@ const InstructorSettings = () => {
 
           <Separator />
 
+          <div className="flex items-center justify-between rounded-lg border p-4">
+            <div className="space-y-1">
+              <p className="text-sm font-medium">Stripe onboarding</p>
+              <p className="text-sm text-muted-foreground">
+                {user.stripeOnboardingComplete
+                  ? "Your Stripe account is ready to receive course payouts."
+                  : "Complete Stripe onboarding to receive course payouts."}
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <Badge
+                variant={
+                  user.stripeOnboardingComplete ? "default" : "secondary"
+                }
+              >
+                {user.stripeOnboardingComplete ? "Complete" : "Incomplete"}
+              </Badge>
+              {!user.stripeOnboardingComplete && (
+                <AppButton
+                  type="button"
+                  size="sm"
+                  isLoading={isOnboardingLoading}
+                  onClick={handleStripeOnboarding}
+                >
+                  Complete onboarding
+                </AppButton>
+              )}
+            </div>
+          </div>
+
+          <Separator />
+
           {/* NON-EDITABLE DISPLAY FIELDS */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             {/* Email – read only */}
@@ -163,7 +201,7 @@ const InstructorSettings = () => {
                 <Lock className="h-3 w-3" /> Email
               </Label>
               <p className="text-sm font-medium text-muted-foreground">
-                {mockInstructor.email}
+                {user.email}
               </p>
             </div>
 
@@ -174,7 +212,7 @@ const InstructorSettings = () => {
               </Label>
               <div>
                 <Badge variant="secondary" className="capitalize">
-                  {mockInstructor.role}
+                  {user.role}
                 </Badge>
               </div>
             </div>
@@ -185,7 +223,7 @@ const InstructorSettings = () => {
                 Status
               </Label>
               <div>
-                {mockInstructor.isVerified ? (
+                {user.isVerified ? (
                   <Badge>Verified</Badge>
                 ) : (
                   <Badge variant="destructive">Unverified</Badge>

@@ -75,14 +75,14 @@ type ErrorResponse = {
 
 ### Status meanings and frontend action
 
-| HTTP status | `status`       | Meaning                                                                                                     | Recommended frontend handling                                                                                                                                                                                 |
-| ----------- | -------------- | ----------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 400         | `fail`         | Invalid request data, duplicate data, invalid/expired OTP, or another expected client error.                | Show `message`. If `data.errors` exists, map each item to its matching form field.                                                                                                                            |
-| 401         | `fail`         | Missing, invalid, expired, or deleted-user authentication token.                                            | Clear local authenticated UI state and redirect to sign-in. A token rotation attempt may be made first when appropriate.                                                                                      |
-| 403         | `fail`         | User is authenticated/identified but is not allowed to take this action, or has not completed verification. | Show `message`. Do not retry automatically. For pending instructors, show the approval-pending state.                                                                                                         |
-| 404         | `fail`         | User cannot be found, role cannot be determined, or the requested route does not exist.                     | Show `message`; for current-user requests, clear authenticated UI state.                                                                                                                                      |
-| 429         | Not guaranteed | More than 100 `/api` requests were made from the same IP in one hour.                                       | Read the response defensively as text or JSON, show `Too many requests from this IP, please try again in an hour!`, and stop automatic retries.                                                               |
-| 500         | `error`        | Unexpected backend error.                                                                                   | Show a generic retry message. The backend returns `Something went wrong. Please try again later.` and does not expose internal details. This can occur for database, cache, token, or email-service failures. |
+| HTTP status | `status` | Meaning | Recommended frontend handling |
+| --- | --- | --- | --- |
+| 400 | `fail` | Invalid request data, duplicate data, invalid/expired OTP, or another expected client error. | Show `message`. If `data.errors` exists, map each item to its matching form field. |
+| 401 | `fail` | Missing, invalid, expired, or deleted-user authentication token. | Clear local authenticated UI state and redirect to sign-in. A token rotation attempt may be made first when appropriate. |
+| 403 | `fail` | User is authenticated/identified but is not allowed to take this action, or has not completed verification. | Show `message`. Do not retry automatically. For pending instructors, show the approval-pending state. |
+| 404 | `fail` | User cannot be found, role cannot be determined, or the requested route does not exist. | Show `message`; for current-user requests, clear authenticated UI state. |
+| 429 | Not guaranteed | More than 100 `/api` requests were made from the same IP in one hour. | Read the response defensively as text or JSON, show `Too many requests from this IP, please try again in an hour!`, and stop automatic retries. |
+| 500 | `error` | Unexpected backend error. | Show a generic retry message. The backend returns `Something went wrong. Please try again later.` and does not expose internal details. This can occur for database, cache, token, or email-service failures. |
 
 ### Validation errors
 
@@ -94,10 +94,7 @@ Only validation failures include `data.errors`. Each error has a field path and 
   "message": "Validation failed",
   "data": {
     "errors": [
-      {
-        "field": "fullName",
-        "message": "Full name must be at least 2 characters"
-      },
+      { "field": "fullName", "message": "Full name must be at least 2 characters" },
       { "field": "email", "message": "Invalid email address" }
     ]
   }
@@ -161,15 +158,15 @@ Creates a student or instructor account. The `role` determines which request bod
 
 ### Field rules
 
-| Field               | Student     | Instructor | Rules                                              |
-| ------------------- | ----------- | ---------- | -------------------------------------------------- |
-| `fullName`          | required    | required   | String, trimmed, 2–100 characters.                 |
-| `email`             | required    | required   | Valid email address.                               |
-| `password`          | required    | required   | String with at least 8 characters.                 |
-| `bio`               | required    | required   | Trimmed, non-empty string, maximum 500 characters. |
-| `highestEducation`  | required    | required   | Trimmed, non-empty string, maximum 150 characters. |
-| `yearsOfExperience` | not allowed | required   | Number from 0 to 60.                               |
-| `role`              | required    | required   | Exactly `"student"` or `"instructor"`.             |
+| Field | Student | Instructor | Rules |
+| --- | --- | --- | --- |
+| `fullName` | required | required | String, trimmed, 2–100 characters. |
+| `email` | required | required | Valid email address. |
+| `password` | required | required | String with at least 8 characters. |
+| `bio` | required | required | Trimmed, non-empty string, maximum 500 characters. |
+| `highestEducation` | required | required | Trimmed, non-empty string, maximum 150 characters. |
+| `yearsOfExperience` | not allowed | required | Number from 0 to 60. |
+| `role` | required | required | Exactly `"student"` or `"instructor"`. |
 
 ### Processing
 
@@ -204,12 +201,12 @@ HTTP `201`
 
 ### Possible errors
 
-| HTTP status | Message                                                  | When                                                           |
-| ----------- | -------------------------------------------------------- | -------------------------------------------------------------- |
-| 400         | `Validation failed`                                      | Body is missing, invalid, or contains an extra field.          |
-| 400         | `Email already in use`                                   | Email already belongs to a user.                               |
-| 400         | `"<email>" already exists. Please use a different email` | A duplicate-email race reaches the database unique constraint. |
-| 500         | `Something went wrong. Please try again later.`          | Unexpected server, database, or email delivery error.          |
+| HTTP status | Message | When |
+| --- | --- | --- |
+| 400 | `Validation failed` | Body is missing, invalid, or contains an extra field. |
+| 400 | `Email already in use` | Email already belongs to a user. |
+| 400 | `"<email>" already exists. Please use a different email` | A duplicate-email race reaches the database unique constraint. |
+| 500 | `Something went wrong. Please try again later.` | Unexpected server, database, or email delivery error. |
 
 ## API 2 — Verify student OTP
 
@@ -249,15 +246,15 @@ HTTP `200`
 
 ### Possible errors
 
-| HTTP status | Message                                             | When                                                       |
-| ----------- | --------------------------------------------------- | ---------------------------------------------------------- |
-| 400         | `Validation failed`                                 | Email is invalid or OTP is not exactly six digits.         |
-| 400         | `Account is already verified`                       | The student is already verified.                           |
-| 400         | `Invalid OTP`                                       | OTP does not match.                                        |
-| 400         | `OTP has expired`                                   | OTP is older than 10 minutes.                              |
-| 403         | `You do not have permission to perform this action` | The email belongs to a non-student user.                   |
-| 404         | `Could not determine user role for authorization`   | No account exists for the email before authorization runs. |
-| 404         | `User not found`                                    | User cannot be found during OTP processing.                |
+| HTTP status | Message | When |
+| --- | --- | --- |
+| 400 | `Validation failed` | Email is invalid or OTP is not exactly six digits. |
+| 400 | `Account is already verified` | The student is already verified. |
+| 400 | `Invalid OTP` | OTP does not match. |
+| 400 | `OTP has expired` | OTP is older than 10 minutes. |
+| 403 | `You do not have permission to perform this action` | The email belongs to a non-student user. |
+| 404 | `Could not determine user role for authorization` | No account exists for the email before authorization runs. |
+| 404 | `User not found` | User cannot be found during OTP processing. |
 
 ## API 3 — Resend student OTP
 
@@ -294,13 +291,13 @@ HTTP `200`
 
 ### Possible errors
 
-| HTTP status | Message                                             | When                                                       |
-| ----------- | --------------------------------------------------- | ---------------------------------------------------------- |
-| 400         | `Validation failed`                                 | Email is invalid or an extra field is sent.                |
-| 400         | `Account is already verified`                       | The student is already verified.                           |
-| 403         | `You do not have permission to perform this action` | The email belongs to a non-student user.                   |
-| 404         | `Could not determine user role for authorization`   | No account exists for the email before authorization runs. |
-| 404         | `User not found`                                    | User cannot be found during OTP processing.                |
+| HTTP status | Message | When |
+| --- | --- | --- |
+| 400 | `Validation failed` | Email is invalid or an extra field is sent. |
+| 400 | `Account is already verified` | The student is already verified. |
+| 403 | `You do not have permission to perform this action` | The email belongs to a non-student user. |
+| 404 | `Could not determine user role for authorization` | No account exists for the email before authorization runs. |
+| 404 | `User not found` | User cannot be found during OTP processing. |
 
 ## API 4 — Sign in
 
@@ -315,10 +312,10 @@ HTTP `200`
 }
 ```
 
-| Field      | Rules                         |
-| ---------- | ----------------------------- |
-| `email`    | Required valid email address. |
-| `password` | Required non-empty string.    |
+| Field | Rules |
+| --- | --- |
+| `email` | Required valid email address. |
+| `password` | Required non-empty string. |
 
 ### Processing
 
@@ -355,12 +352,12 @@ HTTP `200`
 
 ### Possible errors
 
-| HTTP status | Message                                        | When                                                |
-| ----------- | ---------------------------------------------- | --------------------------------------------------- |
-| 400         | `Validation failed`                            | Email/password body is invalid or has extra fields. |
-| 401         | `Invalid email or password`                    | Email does not exist or password is incorrect.      |
-| 403         | `Your account is pending Admin approval`       | An unverified instructor attempts to sign in.       |
-| 403         | `Please verify your account before signing in` | An unverified student attempts to sign in.          |
+| HTTP status | Message | When |
+| --- | --- | --- |
+| 400 | `Validation failed` | Email/password body is invalid or has extra fields. |
+| 401 | `Invalid email or password` | Email does not exist or password is incorrect. |
+| 403 | `Your account is pending Admin approval` | An unverified instructor attempts to sign in. |
+| 403 | `Please verify your account before signing in` | An unverified student attempts to sign in. |
 
 ## API 5 — Rotate authentication tokens
 
@@ -388,11 +385,11 @@ HTTP `200`
 
 ### Possible errors
 
-| HTTP status | Message                            | When                                                |
-| ----------- | ---------------------------------- | --------------------------------------------------- |
-| 401         | `Refresh token is missing`         | The browser did not send a refresh-token cookie.    |
-| 401         | `Invalid or expired refresh token` | The refresh token is invalid or expired.            |
-| 401         | `User no longer exists`            | Token is valid but the associated user was deleted. |
+| HTTP status | Message | When |
+| --- | --- | --- |
+| 401 | `Refresh token is missing` | The browser did not send a refresh-token cookie. |
+| 401 | `Invalid or expired refresh token` | The refresh token is invalid or expired. |
+| 401 | `User no longer exists` | Token is valid but the associated user was deleted. |
 
 ## API 6 — Get current user
 
@@ -404,7 +401,7 @@ No request body is required; this endpoint ignores it. The request must include 
 
 1. Validates the `accessToken` cookie.
 2. Uses its user ID and role to load the matching user.
-3. Returns the same user shape as the sign-in response. Sensitive and internal fields (`password`, `otp`, `otpExpires`, `__v`, `stripeAccountId`, `stripeOnboardingComplete`, `verificationRejectionReason`, `lastVerificationRejectedAt`) are never included.
+3. Returns the same user shape as the sign-in response. For instructors, the response additionally includes `stripeOnboardingComplete`. Sensitive and internal fields (`password`, `otp`, `otpExpires`, `__v`, `stripeAccountId`, `verificationRejectionReason`, `lastVerificationRejectedAt`) are never included.
 
 ### Success response
 
@@ -432,13 +429,21 @@ HTTP `200`
 }
 ```
 
+For an instructor, `data.user` additionally includes:
+
+```json
+{
+  "stripeOnboardingComplete": true
+}
+```
+
 ### Possible errors
 
-| HTTP status | Message                                             | When                                                                          |
-| ----------- | --------------------------------------------------- | ----------------------------------------------------------------------------- |
-| 401         | `You are not logged in. Please sign in to continue` | Access-token cookie is missing.                                               |
-| 401         | `Invalid or expired access token`                   | Access-token cookie cannot be verified.                                       |
-| 404         | `<role> not found`                                  | The user referenced by the token no longer exists or no longer has that role. |
+| HTTP status | Message | When |
+| --- | --- | --- |
+| 401 | `You are not logged in. Please sign in to continue` | Access-token cookie is missing. |
+| 401 | `Invalid or expired access token` | Access-token cookie cannot be verified. |
+| 404 | `<role> not found` | The user referenced by the token no longer exists or no longer has that role. |
 
 ## API 7 — Forget password
 
@@ -474,10 +479,10 @@ HTTP `200`
 
 ### Possible errors
 
-| HTTP status | Message             | When                                        |
-| ----------- | ------------------- | ------------------------------------------- |
-| 400         | `Validation failed` | Email is invalid or an extra field is sent. |
-| 404         | `User not found`    | No account exists for the email.            |
+| HTTP status | Message | When |
+| --- | --- | --- |
+| 400 | `Validation failed` | Email is invalid or an extra field is sent. |
+| 404 | `User not found` | No account exists for the email. |
 
 ## API 8 — Reset password
 
@@ -516,11 +521,11 @@ HTTP `200`
 
 ### Possible errors
 
-| HTTP status | Message             | When                                                                                             |
-| ----------- | ------------------- | ------------------------------------------------------------------------------------------------ |
-| 400         | `Validation failed` | OTP is not exactly six digits, or `newPassword` is missing/too short, or an extra field is sent. |
-| 400         | `Invalid OTP`       | No user has this OTP set.                                                                        |
-| 400         | `OTP has expired`   | OTP is older than 10 minutes.                                                                    |
+| HTTP status | Message | When |
+| --- | --- | --- |
+| 400 | `Validation failed` | OTP is not exactly six digits, or `newPassword` is missing/too short, or an extra field is sent. |
+| 400 | `Invalid OTP` | No user has this OTP set. |
+| 400 | `OTP has expired` | OTP is older than 10 minutes. |
 
 ## API 9 — Sign out
 

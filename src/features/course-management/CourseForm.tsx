@@ -62,9 +62,10 @@ const courseSchema = z.object({
   }),
   categoryId: z.string().trim().min(1, "Course category is required."),
   thumbnailFile: z
-    .custom<
-      File | null | undefined
-    >((value) => value === undefined || value === null || isFileInstance(value), "Please select a valid image file.")
+    .custom<File | null | undefined>(
+      (value) => value === undefined || value === null || isFileInstance(value),
+      "Please select a valid image file.",
+    )
     .refine(
       (file) =>
         !file ||
@@ -275,17 +276,6 @@ const CourseForm = ({
     };
   }, [onVideoPause]);
 
-  // With mode: "onChange", react-hook-form only computes `isValid` once a
-  // field has been validated — trigger it on entering create/edit mode so
-  // the submit button's disabled state is accurate from the first render
-  // (e.g. immediately reflecting the thumbnail/video size limits below).
-  useEffect(() => {
-    if (mode !== "view") {
-      form.trigger();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mode]);
-
   const clearFileInputs = () => {
     setThumbnailInputKey((currentValue) => currentValue + 1);
     setVideoInputKey((currentValue) => currentValue + 1);
@@ -341,7 +331,8 @@ const CourseForm = ({
   };
 
   const handleSubmit = async (values: CourseFormValues) => {
-    const thumbnailUrl = thumbnailPreviewUrl ?? initialData?.thumbnailUrl ?? null;
+    const thumbnailUrl =
+      thumbnailPreviewUrl ?? initialData?.thumbnailUrl ?? null;
     const videoUrl = videoPreviewUrl ?? initialData?.videoUrl ?? null;
 
     if (!thumbnailUrl) {
@@ -554,7 +545,8 @@ const CourseForm = ({
                   <FormLabel>Course Thumbnail</FormLabel>
                   {!isReadOnly && (
                     <FormDescription>
-                      A sharp 16:9 image works best. Accepts .jpg, .jpeg, or .png, up to 5MB.
+                      A sharp 16:9 image works best. Accepts .jpg, .jpeg, or
+                      .png, up to 5MB.
                     </FormDescription>
                   )}
 
@@ -648,7 +640,8 @@ const CourseForm = ({
                     <FormLabel>Course Video</FormLabel>
                     {!isReadOnly && (
                       <FormDescription>
-                        Clear audio and video help it pass review faster. Accepts .mp4 or .webm, up to 20MB.
+                        Clear audio and video help it pass review faster.
+                        Accepts .mp4 or .webm, up to 20MB.
                       </FormDescription>
                     )}
 
@@ -745,69 +738,69 @@ const CourseForm = ({
               </p>
             ) : null}
             <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-            {mode === "view" ? (
-              <>
-                {!allowEdit && !hideCloseButton ? (
+              {mode === "view" ? (
+                <>
+                  {!allowEdit && !hideCloseButton ? (
+                    <AppButton
+                      type="button"
+                      variant="outline"
+                      onClick={handleClose}
+                    >
+                      Close
+                    </AppButton>
+                  ) : null}
+                  {allowEdit ? (
+                    <AppButton
+                      type="button"
+                      onClick={() => onModeChange?.("edit")}
+                    >
+                      Edit Course
+                    </AppButton>
+                  ) : null}
+                  {showEnrollButton && onEnroll ? (
+                    <AppButton type="button" onClick={onEnroll}>
+                      Enroll Now
+                    </AppButton>
+                  ) : null}
+                  {showRefundButton ? (
+                    <AppButton
+                      type="button"
+                      variant="destructive"
+                      disabled={!refundEligible || isRefunding}
+                      isLoading={isRefunding}
+                      title={
+                        !refundEligible && refundDisabledReason
+                          ? refundDisabledReason
+                          : undefined
+                      }
+                      onClick={onRequestRefund}
+                    >
+                      Request Refund
+                    </AppButton>
+                  ) : null}
+                </>
+              ) : (
+                <>
+                  {mode === "edit" ? (
+                    <AppButton
+                      type="button"
+                      variant="outline"
+                      disabled={isLoading}
+                      onClick={handleViewMode}
+                    >
+                      Back to View
+                    </AppButton>
+                  ) : null}
                   <AppButton
-                    type="button"
-                    variant="outline"
-                    onClick={handleClose}
+                    type="submit"
+                    iconLeft={mode === "create" ? CirclePlus : undefined}
+                    loading={isLoading || form.formState.isSubmitting}
+                    disabled={isLoading || !form.formState.isValid}
                   >
-                    Close
+                    {mode === "edit" ? "Save Changes" : "Create Course"}
                   </AppButton>
-                ) : null}
-                {allowEdit ? (
-                  <AppButton
-                    type="button"
-                    onClick={() => onModeChange?.("edit")}
-                  >
-                    Edit Course
-                  </AppButton>
-                ) : null}
-                {showEnrollButton && onEnroll ? (
-                  <AppButton type="button" onClick={onEnroll}>
-                    Enroll Now
-                  </AppButton>
-                ) : null}
-                {showRefundButton ? (
-                  <AppButton
-                    type="button"
-                    variant="destructive"
-                    disabled={!refundEligible || isRefunding}
-                    isLoading={isRefunding}
-                    title={
-                      !refundEligible && refundDisabledReason
-                        ? refundDisabledReason
-                        : undefined
-                    }
-                    onClick={onRequestRefund}
-                  >
-                    Request Refund
-                  </AppButton>
-                ) : null}
-              </>
-            ) : (
-              <>
-                {mode === "edit" ? (
-                  <AppButton
-                    type="button"
-                    variant="outline"
-                    disabled={isLoading}
-                    onClick={handleViewMode}
-                  >
-                    Back to View
-                  </AppButton>
-                ) : null}
-                <AppButton
-                  type="submit"
-                  iconLeft={mode === "create" ? CirclePlus : undefined}
-                  loading={isLoading || form.formState.isSubmitting}
-                  disabled={isLoading || !form.formState.isValid}
-                >
-                  {mode === "edit" ? "Save Changes" : "Create Course"}
-                </AppButton>
-              </>
-            )}
+                </>
+              )}
             </div>
           </div>
         ) : null}

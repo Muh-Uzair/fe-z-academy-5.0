@@ -7,7 +7,6 @@ import type {
   GetInstructorsResponse,
   GetStudentsResponse,
   GetUserDetailsResponse,
-  GetInstructorOnboardingLinkResponse,
 } from "@/response-types/userResponseTypes";
 
 // Each query below throws on a non-success response instead of returning it,
@@ -22,10 +21,6 @@ type GetStudentsSuccessResponse = Extract<
 >;
 type GetUserDetailsSuccessResponse = Extract<
   GetUserDetailsResponse,
-  { status: "success" }
->;
-type GetInstructorOnboardingLinkSuccessResponse = Extract<
-  GetInstructorOnboardingLinkResponse,
   { status: "success" }
 >;
 
@@ -141,29 +136,6 @@ export async function getUserDetailsQuery(
     return json;
   } catch (err) {
     console.error("getUserDetailsQuery failed:", err);
-    throw err;
-  }
-}
-
-/**
- * Instructor only. Returns a fresh Stripe Express onboarding URL.
- * Intentionally NOT cached — the link is single-use/short-lived per
- * Stripe's rules, a new one must be requested every time.
- */
-export async function getInstructorOnboardingLinkQuery(): Promise<GetInstructorOnboardingLinkSuccessResponse> {
-  try {
-    const res = await apiClient("/users/get-instructor-onboarding-link", {
-      method: "GET",
-    });
-    const json: GetInstructorOnboardingLinkResponse = await res.json();
-
-    if (json.status !== "success") {
-      throw new Error(json.message);
-    }
-
-    return json;
-  } catch (err) {
-    console.error("getInstructorOnboardingLinkQuery failed:", err);
     throw err;
   }
 }

@@ -1,7 +1,10 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
+import AppButton from "@/components/AppButton";
+import AppLoadingScreen from "@/components/AppLoadingScreen";
 import PageFlexCol from "@/components/PageFlexCol";
 import PageHeader from "@/components/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,6 +24,8 @@ import type {
   UploadCourseVideoResponse,
 } from "@/response-types/courseResponseTypes";
 import { getVideoDurationInMinutes } from "@/features/course-management/courseHelpers";
+import { getInstructorOnboardingLinkAction } from "@/services/user/actions";
+import type { AuthUser } from "@/response-types/authResponseTypes";
 
 // Both upload-URL responses share this shape: an S3 POST policy plus the
 // object key to send back when creating/updating the course.
@@ -59,6 +64,40 @@ const CreateNewCourses = ({
 }: CreateNewCoursesProps) => {
   const router = useRouter();
   const { run: runCreateAction, isLoading: isCreating } = useClientAction();
+  const { run: runOnboardingAction, isLoading: isOnboarding } =
+    useClientAction();
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [isUserLoaded, setIsUserLoaded] = useState(false);
+
+  useEffect(() => {
+    const loadStoredUser = () => {
+      const storedUser = window.localStorage.getItem("currentUser");
+
+      if (storedUser) {
+        try {
+          setUser(JSON.parse(storedUser) as AuthUser);
+        } catch {
+          window.localStorage.removeItem("currentUser");
+        }
+      }
+
+      setIsUserLoaded(true);
+    };
+
+    const timeoutId = window.setTimeout(loadStoredUser, 0);
+
+    return () => window.clearTimeout(timeoutId);
+  }, []);
+
+  const handleStripeOnboarding = async () => {
+    const response = await runOnboardingAction(() =>
+      getInstructorOnboardingLinkAction(),
+    );
+
+    if (response?.status === "success") {
+      window.location.assign(response.data.url);
+    }
+  };
 
   const updateCategoryQuery = (next: {
     search?: string;
@@ -155,6 +194,39 @@ const CreateNewCourses = ({
     return false;
   };
 
+  if (!isUserLoaded) {
+    return <AppLoadingScreen />;
+  }
+
+  if (user?.role === "instructor" && !user.stripeOnboardingComplete) {
+    return (
+      <PageFlexCol>
+        <PageHeader
+          pageHeading="Complete Stripe Onboarding"
+          pageDescription="Connect your Stripe account before creating and publishing courses."
+        />
+        <Card>
+          <CardHeader>
+            <CardTitle>Stripe onboarding required</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col items-start gap-4">
+            <p className="max-w-2xl text-sm text-muted-foreground">
+              Complete Stripe onboarding to receive payouts from your courses.
+              Once your account is ready, return here to create a course.
+            </p>
+            <AppButton
+              type="button"
+              isLoading={isOnboarding}
+              onClick={handleStripeOnboarding}
+            >
+              Complete Stripe onboarding
+            </AppButton>
+          </CardContent>
+        </Card>
+      </PageFlexCol>
+    );
+  }
+
   return (
     <PageFlexCol>
       <PageHeader
@@ -192,4 +264,3 @@ const CreateNewCourses = ({
 };
 
 export default CreateNewCourses;
-
