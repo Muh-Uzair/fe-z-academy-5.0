@@ -69,6 +69,7 @@ interface CourseDetailsProps {
   hasReviewed?: boolean;
   refundEligibility?: CourseRefundEligibility | null;
   enrollmentId?: string | null;
+  resumePositionInSeconds?: number;
 }
 
 // Both upload-URL responses share this shape: an S3 POST policy plus the
@@ -104,6 +105,7 @@ const CourseDetails = ({
   hasReviewed = false,
   refundEligibility = null,
   enrollmentId = null,
+  resumePositionInSeconds = 0,
 }: CourseDetailsProps) => {
   console.log("Course Details:==========================", course);
 
@@ -453,6 +455,7 @@ const CourseDetails = ({
                         })
                     : undefined
                 }
+                initialVideoPosition={resumePositionInSeconds}
               />
             </CardContent>
           </Card>

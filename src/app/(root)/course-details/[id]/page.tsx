@@ -80,13 +80,22 @@ const UnifiedCourseDetailsPage = async ({
   // Needed to report watch progress (see API 3 in the enrollment guide) —
   // that endpoint is addressed by enrollment id, not course id.
   let enrollmentId: string | null = null;
+  let resumePositionInSeconds = 0;
   if (isEnrolledStudent) {
     try {
       const enrollmentsResponse = await getEnrollmentsQuery({
         course: id,
         limit: 1,
       });
-      enrollmentId = enrollmentsResponse.data.enrollments[0]?._id ?? null;
+      const enrollment = enrollmentsResponse.data.enrollments[0];
+      enrollmentId = enrollment?._id ?? null;
+      resumePositionInSeconds =
+        enrollment && course.totalDurationInMinutes > 0
+          ? (course.totalDurationInMinutes *
+              60 *
+              enrollment.watchPercentage) /
+            100
+          : 0;
     } catch {
       enrollmentId = null;
     }
@@ -111,6 +120,7 @@ const UnifiedCourseDetailsPage = async ({
       hasReviewed={hasReviewed}
       refundEligibility={refundEligibility}
       enrollmentId={enrollmentId}
+      resumePositionInSeconds={resumePositionInSeconds}
     />
   );
 };

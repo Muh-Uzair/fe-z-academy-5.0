@@ -26,8 +26,6 @@ type ContinueWatchingProps = {
 };
 
 const ContinueWatching = ({ courses, pagination }: ContinueWatchingProps) => {
-  console.log("ContinueWatching courses ----------------------- \n", courses);
-
   const heroCourse =
     courses.find(({ enrollment }) => enrollment.mostRecentlySeen) ?? courses[0];
   const otherCourses = courses.filter((item) => item !== heroCourse);
@@ -47,7 +45,13 @@ const ContinueWatching = ({ courses, pagination }: ContinueWatchingProps) => {
           <h2 className="text-xl font-bold tracking-tight mb-4 text-foreground">
             Most recently seen
           </h2>
-          <Card className="overflow-hidden border-2 shadow-sm transition-all hover:shadow-md group relative">
+          <Card
+            className={`overflow-hidden border-2 shadow-sm transition-all hover:shadow-md group relative ${
+              heroCourse.enrollment.watchedCompletely
+                ? "border-amber-400"
+                : "border-border"
+            }`}
+          >
             <div className="flex flex-col md:flex-row">
               {/* Left side: Large Thumbnail */}
               <div className="md:w-5/12 lg:w-4/12 relative overflow-hidden">
@@ -130,6 +134,7 @@ const ContinueWatching = ({ courses, pagination }: ContinueWatchingProps) => {
               ...course,
               totalDurationWatchedInMinutes:
                 enrollment.totalDurationWatchedInMinutes,
+              watchedCompletely: enrollment.watchedCompletely,
             }))}
             mode="in-progress"
             renderFooter={(course) => (

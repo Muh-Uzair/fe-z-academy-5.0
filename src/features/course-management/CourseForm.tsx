@@ -140,6 +140,7 @@ interface CourseFormProps {
   isRefunding?: boolean;
   isLoading?: boolean;
   hideCloseButton?: boolean;
+  initialVideoPosition?: number;
   // Called every time the course video is paused, with its current playback
   // position in seconds — lets the caller track how much a student watched.
   onVideoPause?: (currentTime: number) => void;
@@ -203,6 +204,7 @@ const CourseForm = ({
   isRefunding = false,
   isLoading = false,
   hideCloseButton = false,
+  initialVideoPosition = 0,
   onVideoPause,
 }: CourseFormProps) => {
   const [thumbnailPreviewUrl, setThumbnailPreviewUrl] = useState<string | null>(
@@ -656,6 +658,12 @@ const CourseForm = ({
                           onContextMenu={(event) => event.preventDefault()}
                           preload="metadata"
                           className="aspect-video w-full rounded-lg border bg-black"
+                          onLoadedMetadata={(event) => {
+                            if (initialVideoPosition > 0) {
+                              event.currentTarget.currentTime =
+                                initialVideoPosition;
+                            }
+                          }}
                           onPause={(event) =>
                             onVideoPause?.(event.currentTarget.currentTime)
                           }

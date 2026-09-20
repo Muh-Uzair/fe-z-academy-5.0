@@ -25,6 +25,7 @@ interface CourseCardProps {
     totalStudentsEnrolled: number;
     totalDurationInMinutes: number;
     totalDurationWatchedInMinutes?: number;
+    watchedCompletely?: boolean;
   };
 
   footer?: ReactNode;
@@ -33,7 +34,11 @@ interface CourseCardProps {
 
 const CourseCard = ({ course, footer = null, mode = "default" }: CourseCardProps) => {
   return (
-    <div className="w-full rounded-2xl border bg-card text-card-foreground shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col group">
+    <div
+      className={`w-full rounded-2xl ${
+        course.watchedCompletely ? "border-2 border-amber-400" : "border"
+      } bg-card text-card-foreground shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col group`}
+    >
       {/* Image Section */}
       <div className="relative w-full overflow-hidden">
         <AspectRatio ratio={16 / 9}>
