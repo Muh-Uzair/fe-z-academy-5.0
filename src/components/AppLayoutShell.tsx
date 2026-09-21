@@ -30,7 +30,6 @@ import {
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarInset,
   SidebarMenu,
@@ -326,7 +325,6 @@ const AppLayoutShell = ({ role, user, children }: AppLayoutShellProps) => {
 
           <SidebarContent className="bg-white">
             <SidebarGroup>
-              <SidebarGroupLabel>Navigation</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu className="gap-2">
                   {navigation.map((item) => {
