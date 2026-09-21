@@ -1,47 +1,47 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
+
 import PageHeader from "@/components/PageHeader";
-import AppSearchBar from "@/components/AppSearchBar";
-import AppCourseCardsGridLayout from "@/components/AppCourseCardsGridLayout";
-import { coursesData } from "@/dummy-data/coursesData";
 import AppButton from "@/components/AppButton";
+import AppEnrollmentCardsGridLayout from "@/components/AppEnrollmentCardsGridLayout";
+import PageFlexCol from "@/components/PageFlexCol";
+import type { Enrollment } from "@/response-types/enrollmentResponseTypes";
+import type { Pagination } from "@/response-types/userResponseTypes";
 
-const AdminEnrollments = () => {
-  const [searchQuery, setSearchQuery] = useState("");
+type AdminEnrollmentsProps = {
+  enrollments: Enrollment[];
+  pagination: Pagination;
+};
 
-  const filteredCourses = useMemo(() => {
-    if (!searchQuery) return coursesData;
-    return coursesData.filter((course) =>
-      course.title.toLowerCase().includes(searchQuery.toLowerCase()),
-    );
-  }, [searchQuery]);
+const AdminEnrollments = ({
+  enrollments,
+  pagination,
+}: AdminEnrollmentsProps) => {
+  const router = useRouter();
 
   return (
-    <div className="flex flex-col space-y-6 max-w-[1200px] mx-auto w-full">
+    <PageFlexCol>
       <PageHeader
-        pageHeading="Course Enrollments"
-        pageDescription="View and manage student enrollments across all courses."
+        pageHeading="Enrollments"
+        pageDescription="View all student enrollments across the academy."
       />
 
-      <AppCourseCardsGridLayout
-        courses={filteredCourses as any}
+      <AppEnrollmentCardsGridLayout
+        enrollments={enrollments}
         pagination={true}
-        upperHeader={
-          <div className="w-full sm:w-96">
-            <AppSearchBar
-              placeholder="Search courses..."
-              onChange={(val) => setSearchQuery(val)}
-            />
-          </div>
-        }
-        renderFooter={(course) => (
-          <AppButton href={`/course-enrollments/${course._id}`} className="w-full">
-              View Enrollments
-            </AppButton>
+        paginationMeta={pagination}
+        onPageChange={(page) => router.push(`/admin/enrollments?page=${page}`)}
+        renderFooter={(enrollment) => (
+          <AppButton
+            href={`/course-details/${enrollment.courseDetails._id}?role=admin`}
+            className="w-full"
+          >
+            View Course
+          </AppButton>
         )}
       />
-    </div>
+    </PageFlexCol>
   );
 };
 
