@@ -8,9 +8,9 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   Bell,
   BookOpen,
+  ClipboardList,
   FolderKanban,
   GraduationCap,
-  Grid2X2,
   LayoutDashboard,
   MessageSquare,
   Wallet,
@@ -109,7 +109,7 @@ const navigationByRole: Record<AppRole, NavigationItem[]> = {
     {
       title: "Enrollments",
       href: "/admin/enrollments",
-      icon: Grid2X2,
+      icon: ClipboardList,
     },
     {
       title: "Categories",
@@ -170,7 +170,7 @@ const navigationByRole: Record<AppRole, NavigationItem[]> = {
     {
       title: "Enrollments",
       href: "/instructor/enrollments",
-      icon: Grid2X2,
+      icon: ClipboardList,
     },
     {
       title: "Transactions",
@@ -213,11 +213,17 @@ const navigationByRole: Record<AppRole, NavigationItem[]> = {
           title: "Enrolled Courses",
           href: "/student/my-learning/enrolled-courses",
         },
+
         {
           title: "Continue Watching",
           href: "/student/my-learning/continue-watching",
         },
       ],
+    },
+    {
+      title: "Enrollments",
+      href: "/student/enrollments",
+      icon: ClipboardList,
     },
     {
       title: "Transactions",
