@@ -4,11 +4,9 @@
 import { SuccessApiResponse, ApiErrorResponse } from "./authResponseTypes";
 import { Pagination } from "./userResponseTypes";
 
-export enum CourseLevel {
-  Beginner = "beginner",
-  Intermediate = "intermediate",
-  Advanced = "advanced",
-}
+export const CourseLevel = ["beginner", "intermediate", "advanced"] as const;
+
+export type CourseLevel = (typeof CourseLevel)[number];
 
 // Derived review status accepted by the `status` query param on API 7
 // (GET /api/v1/courses) — see the integration guide for the mapping to
@@ -55,10 +53,7 @@ export interface CourseCategorySummary {
 // Course shape returned by the list endpoint (API 7) and the details endpoint
 // (API 8), where instructor/category ids are replaced by joined *Details
 // summaries.
-export interface CourseListItem extends Omit<
-  Course,
-  "instructor" | "category"
-> {
+export interface CourseListItem extends Omit<Course, "instructor" | "category"> {
   instructorDetails: CourseInstructorSummary;
   categoryDetails: CourseCategorySummary;
 }
@@ -90,7 +85,7 @@ export interface UploadCourseVideoResponseData {
   key: string;
 }
 
-export type UploadCourseVideoResponse =
+export type UploadCourseVideoResponse = 
   | SuccessApiResponse<
       UploadCourseVideoResponseData,
       "Course video upload URL generated successfully"
@@ -166,12 +161,7 @@ export type RequestCourseRefundResponse =
 export interface CourseRefundEligibility {
   eligible: boolean;
   reason: string | null;
-  paymentStatus:
-    | "pending"
-    | "paid"
-    | "failed"
-    | "refund_processing"
-    | "refunded";
+  paymentStatus: "pending" | "paid" | "failed" | "refund_processing" | "refunded";
   watchPercentage: number;
   daysSincePurchase: number | null;
   daysRemaining: number | null;
@@ -269,8 +259,10 @@ export type GetInstructorCoursesResponse =
   | ApiErrorResponse;
 
 // API 15: GET /api/v1/courses/student/:id
-// Admin only. Same response envelope as API 7 (GetCoursesResponse) — the
-// data shape is identical, only the success message differs.
+// Admin or Instructor. Admins see all courses the student is enrolled in;
+// instructors see only that student's enrollments in their own courses.
+// Same response envelope as API 7 (GetCoursesResponse) — the data shape is
+// identical, only the success message differs.
 // Response: { status, message, data: { courses, pagination } }
 export type GetStudentCoursesResponseData = GetCoursesResponseData;
 
