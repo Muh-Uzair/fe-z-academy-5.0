@@ -235,6 +235,11 @@ const navigationByRole: Record<AppRole, NavigationItem[]> = {
       icon: MessageSquare,
     },
     {
+      title: "Reviews",
+      href: "/student/reviews",
+      icon: Star,
+    },
+    {
       title: "Settings",
       href: "/student/settings",
       icon: Settings,

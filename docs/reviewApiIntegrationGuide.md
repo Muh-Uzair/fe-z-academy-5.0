@@ -224,6 +224,8 @@ Behavior differs by role:
 
 HTTP `200`
 
+If the student has reviewed this course:
+
 ```json
 {
   "status": "success",
@@ -232,6 +234,18 @@ HTTP `200`
     "review": {
       /* joined review shape, see above */
     }
+  }
+}
+```
+
+If the student has **not** reviewed this course:
+
+```json
+{
+  "status": "success",
+  "message": "Review details fetched successfully",
+  "data": {
+    "review": null
   }
 }
 ```
@@ -262,14 +276,13 @@ HTTP `200`
 
 ### Possible errors
 
-| HTTP status | Message                                                      | When                                                                |
-| ----------- | ------------------------------------------------------------ | ------------------------------------------------------------------- |
-| 400         | `Validation failed`                                          | An invalid or undocumented query param is sent.                     |
-| 401         | _(see auth guide `/me` 401 rows)_                            | Access-token cookie missing/invalid/expired.                        |
-| 403         | `You do not have permission to perform this action`          | Caller is not a student, instructor, or admin.                      |
-| 403         | `You do not have permission to view reviews for this course` | Instructor is not the owner of this course.                         |
-| 404         | `Course not found`                                           | Instructor case — no course exists with that `courseId`.            |
-| 404         | `Review not found`                                           | Student case — the logged-in student has no review for this course. |
+| HTTP status | Message                                                      | When                                                     |
+| ----------- | ------------------------------------------------------------ | -------------------------------------------------------- |
+| 400         | `Validation failed`                                          | An invalid or undocumented query param is sent.          |
+| 401         | _(see auth guide `/me` 401 rows)_                            | Access-token cookie missing/invalid/expired.             |
+| 403         | `You do not have permission to perform this action`          | Caller is not a student, instructor, or admin.           |
+| 403         | `You do not have permission to view reviews for this course` | Instructor is not the owner of this course.              |
+| 404         | `Course not found`                                           | Instructor case — no course exists with that `courseId`. |
 
 ## API 3 — Get review details
 

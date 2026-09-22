@@ -10,24 +10,13 @@ import type {
   GetReviewsByCourseIdResponse,
 } from "@/response-types/reviewResponseTypes";
 
+
 // Each query below throws on a non-success response instead of returning it,
 // so the resolved type only ever needs to describe the success shape.
-type GetReviewsSuccessResponse = Extract<
-  GetReviewsResponse,
-  { status: "success" }
->;
-type GetReviewDetailsSuccessResponse = Extract<
-  GetReviewDetailsResponse,
-  { status: "success" }
->;
-type GetReviewsByCourseIdStudentSuccessResponse = Extract<
-  GetReviewsByCourseIdStudentResponse,
-  { status: "success" }
->;
-type GetReviewsByCourseIdSuccessResponse = Extract<
-  GetReviewsByCourseIdResponse,
-  { status: "success" }
->;
+type GetReviewsSuccessResponse = Extract<GetReviewsResponse, { status: "success" }>;
+type GetReviewDetailsSuccessResponse = Extract<GetReviewDetailsResponse, { status: "success" }>;
+type GetReviewsByCourseIdStudentSuccessResponse = Extract<GetReviewsByCourseIdStudentResponse, { status: "success" }>;
+type GetReviewsByCourseIdSuccessResponse = Extract<GetReviewsByCourseIdResponse, { status: "success" }>;
 
 type GetReviewsParams = {
   course?: string;
@@ -115,6 +104,35 @@ export async function getReviewDetailsQuery(
     return json;
   } catch (err) {
     console.error("getReviewDetailsQuery failed:", err);
+    throw err;
+  }
+}
+
+/**
+ * Student only. Returns the single review left by the logged-in student for
+ * the given course, or null if they haven't reviewed it yet.
+ * Uses 'use cache: private' so the cache entry is scoped to the student.
+ */
+export async function getReviewByCourseIdAsStudentQuery(
+  courseId: string,
+): Promise<GetReviewsByCourseIdStudentSuccessResponse> {
+  "use cache: private";
+  cacheTag(REVIEW_TAGS.reviewByCourse(courseId));
+  cacheLife("minutes");
+
+  try {
+    const res = await apiClient(`/reviews/course/${courseId}`, {
+      method: "GET",
+    });
+    const json: GetReviewsByCourseIdStudentResponse = await res.json();
+
+    if (json.status !== "success") {
+      throw new Error(json.message);
+    }
+
+    return json;
+  } catch (err) {
+    console.error("getReviewByCourseIdAsStudentQuery failed:", err);
     throw err;
   }
 }
