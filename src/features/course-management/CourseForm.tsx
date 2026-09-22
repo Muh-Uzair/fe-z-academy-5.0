@@ -57,7 +57,7 @@ const courseSchema = z.object({
       error: "Course price is required.",
     })
     .min(1, "Course price must be greater than 0."),
-  level: z.nativeEnum(CourseLevel, {
+  level: z.enum(CourseLevel, {
     error: "Course level is required.",
   }),
   categoryId: z.string().trim().min(1, "Course category is required."),
@@ -150,7 +150,7 @@ const emptyValues: CourseFormValues = {
   title: "",
   description: "",
   price: 1,
-  level: CourseLevel.Beginner,
+  level: "beginner",
   categoryId: "",
   thumbnailFile: undefined,
   videoFile: undefined,
@@ -162,7 +162,7 @@ const getDefaultValues = (
   title: initialData?.title ?? "",
   description: initialData?.description ?? "",
   price: initialData?.price ?? 1,
-  level: (initialData?.level as CourseLevel) ?? CourseLevel.Beginner,
+  level: (initialData?.level as CourseLevel) ?? "beginner",
   categoryId: initialData?.categoryDetails._id ?? "",
   thumbnailFile: undefined,
   videoFile: undefined,
@@ -492,13 +492,13 @@ const CourseForm = ({
                           <SelectValue placeholder="Select course level" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value={CourseLevel.Beginner}>
+                          <SelectItem value="beginner">
                             Beginner
                           </SelectItem>
-                          <SelectItem value={CourseLevel.Intermediate}>
+                          <SelectItem value="intermediate">
                             Intermediate
                           </SelectItem>
-                          <SelectItem value={CourseLevel.Advanced}>
+                          <SelectItem value="advanced">
                             Advanced
                           </SelectItem>
                         </SelectContent>
