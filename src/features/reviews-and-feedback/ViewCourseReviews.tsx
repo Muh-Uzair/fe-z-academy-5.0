@@ -14,6 +14,7 @@ type ViewCourseReviewsProps = {
   course: CourseListItem;
   reviews: Review[];
   pagination: Pagination;
+  role: string;
 };
 
 const StarRating = ({ rating }: { rating: number }) => (
@@ -35,6 +36,7 @@ const ViewCourseReviews = ({
   course,
   reviews,
   pagination,
+  role,
 }: ViewCourseReviewsProps) => {
   const router = useRouter();
 
@@ -66,6 +68,7 @@ const ViewCourseReviews = ({
             }
           />
 
+          {role !== "instructor" && (
           <Card className="border-border/60 shadow-sm">
             <CardContent className="p-5">
               <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-4">
@@ -102,6 +105,7 @@ const ViewCourseReviews = ({
               </AppButton>
             </CardFooter>
           </Card>
+          )}
         </div>
 
         {/* ── Right Column: Reviews ───────────────────────── */}

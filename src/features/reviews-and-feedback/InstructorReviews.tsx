@@ -1,23 +1,38 @@
 "use client";
 
-import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import PageFlexCol from "@/components/PageFlexCol";
 import PageHeader from "@/components/PageHeader";
 import AppCourseCardsGridLayout from "@/components/AppCourseCardsGridLayout";
 import AppButton from "@/components/AppButton";
-import { coursesData } from "@/dummy-data/coursesData";
 import AppSearchBar from "@/components/AppSearchBar";
+import type { CourseListItem } from "@/response-types/courseResponseTypes";
+import type { Pagination } from "@/response-types/userResponseTypes";
 
-const InstructorReviews = () => {
-  const [search, setSearch] = useState("");
+type InstructorReviewsProps = {
+  courses: CourseListItem[];
+  pagination: Pagination;
+  search: string;
+};
 
-  const filteredCourses = coursesData.filter((course) => {
-    return (
-      course.title.toLowerCase().includes(search.toLowerCase()) ||
-      course.categoryName.toLowerCase().includes(search.toLowerCase()) ||
-      course.instructorName.toLowerCase().includes(search.toLowerCase())
-    );
-  });
+const InstructorReviews = ({
+  courses,
+  pagination,
+  search,
+}: InstructorReviewsProps) => {
+  const router = useRouter();
+
+  const updateQuery = (next: { search?: string; page?: number }) => {
+    const nextSearch = next.search ?? search;
+    const nextPage = next.page ?? pagination.page ?? 1;
+
+    const searchParams = new URLSearchParams();
+    if (nextSearch) searchParams.set("search", nextSearch);
+    if (nextPage > 1) searchParams.set("page", String(nextPage));
+
+    const query = searchParams.toString();
+    router.push(`/instructor/reviews${query ? `?${query}` : ""}`);
+  };
 
   return (
     <PageFlexCol>
@@ -26,16 +41,19 @@ const InstructorReviews = () => {
         pageDescription="View what your students are saying about your courses."
       />
       <AppCourseCardsGridLayout
-        courses={filteredCourses as any}
+        courses={courses}
         upperHeader={
           <div className="max-w-sm">
             <AppSearchBar
-              placeholder="Search courses by title, category or instructor..."
-              onChange={(value: string) => setSearch(value)}
+              placeholder="Search courses by title..."
+              defaultValue={search}
+              onChange={(value: string) => updateQuery({ search: value, page: 1 })}
             />
           </div>
         }
         pagination={true}
+        paginationMeta={pagination}
+        onPageChange={(page) => updateQuery({ page })}
         renderFooter={(course) => (
           <AppButton href={`/view-course-reviews/${course._id}`} className="w-full mt-2">
             View Reviews
