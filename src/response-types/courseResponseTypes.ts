@@ -4,9 +4,7 @@
 import { SuccessApiResponse, ApiErrorResponse } from "./authResponseTypes";
 import { Pagination } from "./userResponseTypes";
 
-export const CourseLevel = ["beginner", "intermediate", "advanced"] as const;
-
-export type CourseLevel = (typeof CourseLevel)[number];
+export type CourseLevel = "beginner" | "intermediate" | "advanced";
 
 // Derived review status accepted by the `status` query param on API 7
 // (GET /api/v1/courses) — see the integration guide for the mapping to
@@ -53,7 +51,10 @@ export interface CourseCategorySummary {
 // Course shape returned by the list endpoint (API 7) and the details endpoint
 // (API 8), where instructor/category ids are replaced by joined *Details
 // summaries.
-export interface CourseListItem extends Omit<Course, "instructor" | "category"> {
+export interface CourseListItem extends Omit<
+  Course,
+  "instructor" | "category"
+> {
   instructorDetails: CourseInstructorSummary;
   categoryDetails: CourseCategorySummary;
 }
@@ -85,7 +86,7 @@ export interface UploadCourseVideoResponseData {
   key: string;
 }
 
-export type UploadCourseVideoResponse = 
+export type UploadCourseVideoResponse =
   | SuccessApiResponse<
       UploadCourseVideoResponseData,
       "Course video upload URL generated successfully"
@@ -161,7 +162,12 @@ export type RequestCourseRefundResponse =
 export interface CourseRefundEligibility {
   eligible: boolean;
   reason: string | null;
-  paymentStatus: "pending" | "paid" | "failed" | "refund_processing" | "refunded";
+  paymentStatus:
+    | "pending"
+    | "paid"
+    | "failed"
+    | "refund_processing"
+    | "refunded";
   watchPercentage: number;
   daysSincePurchase: number | null;
   daysRemaining: number | null;
@@ -246,8 +252,11 @@ export type GetPublicCourseDetailsResponse =
   | ApiErrorResponse;
 
 // API 14: GET /api/v1/courses/instructor/:id
-// Admin only. Same response envelope as API 7 (GetCoursesResponse) — the
+// Admin or Student. Same response envelope as API 7 (GetCoursesResponse) — the
 // data shape is identical, only the success message differs.
+// Role-based visibility:
+//   Admin   → all courses of the instructor (verified + unverified + rejected)
+//   Student → only verified courses of the instructor (isVerified: true, verificationRejectionReason: null)
 // Response: { status, message, data: { courses, pagination } }
 export type GetInstructorCoursesResponseData = GetCoursesResponseData;
 

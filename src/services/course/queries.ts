@@ -270,8 +270,11 @@ export async function getPublicCourseDetailsQuery(
 }
 
 /**
- * Admin only. Fetches a paginated, sortable, searchable list of courses created by a specific instructor.
- * Uses 'use cache: private' so the cache entry is scoped to the requesting Admin.
+ * Admin or Student. Fetches a paginated, sortable, searchable list of courses
+ * belonging to a specific instructor (identified by their user _id).
+ * - Admin: sees all courses — verified, rejected, and pending review.
+ * - Student: sees only verified courses of the instructor.
+ * Uses 'use cache: private' so the cache entry is scoped to the requesting caller.
  * Use updateTag(COURSE_TAGS.courses) to invalidate.
  */
 export async function getInstructorCoursesQuery(
@@ -302,8 +305,11 @@ export async function getInstructorCoursesQuery(
 }
 
 /**
- * Admin only. Fetches a paginated, sortable, searchable list of courses a specific student is enrolled in.
- * Uses 'use cache: private' so the cache entry is scoped to the requesting Admin.
+ * Admin or Instructor. Fetches a paginated, sortable, searchable list of
+ * courses a specific student is enrolled in (identified by their user _id).
+ * - Admin: sees all courses the student is enrolled in.
+ * - Instructor: sees only the student's enrollments in their own courses.
+ * Uses 'use cache: private' so the cache entry is scoped to the requesting caller.
  * Use updateTag(COURSE_TAGS.courses) to invalidate.
  */
 export async function getStudentCoursesQuery(
