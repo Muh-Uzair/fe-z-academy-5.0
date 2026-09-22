@@ -1,9 +1,31 @@
 import ViewCourseReviews from "@/features/reviews-and-feedback/ViewCourseReviews";
-import React from "react";
+import { getCourseDetailsQuery } from "@/services/course/queries";
+import { getReviewsByCourseIdQuery } from "@/services/review/queries";
 
-const ViewCourseReviewsPage = async ({ params }: { params: Promise<{ id: string }> }) => {
-  const resolvedParams = await params;
-  return <ViewCourseReviews courseId={resolvedParams.id} />;
+type ViewCourseReviewsPageProps = {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ page?: string }>;
+};
+
+const ViewCourseReviewsPage = async ({
+  params,
+  searchParams,
+}: ViewCourseReviewsPageProps) => {
+  const { id } = await params;
+  const { page } = await searchParams;
+
+  const [courseResponse, reviewsResponse] = await Promise.all([
+    getCourseDetailsQuery(id),
+    getReviewsByCourseIdQuery(id, { page: page ? Number(page) : 1 }),
+  ]);
+
+  return (
+    <ViewCourseReviews
+      course={courseResponse.data.course}
+      reviews={reviewsResponse.data.reviews}
+      pagination={reviewsResponse.data.pagination}
+    />
+  );
 };
 
 export default ViewCourseReviewsPage;

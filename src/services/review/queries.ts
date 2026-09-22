@@ -6,8 +6,8 @@ import { REVIEW_TAGS } from "./tags";
 import type {
   GetReviewsResponse,
   GetReviewDetailsResponse,
-  GetMyReviewsResponse,
-  GetReviewByCourseAndStudentResponse,
+  GetReviewsByCourseIdStudentResponse,
+  GetReviewsByCourseIdResponse,
 } from "@/response-types/reviewResponseTypes";
 
 // Each query below throws on a non-success response instead of returning it,
@@ -20,12 +20,12 @@ type GetReviewDetailsSuccessResponse = Extract<
   GetReviewDetailsResponse,
   { status: "success" }
 >;
-type GetMyReviewsSuccessResponse = Extract<
-  GetMyReviewsResponse,
+type GetReviewsByCourseIdStudentSuccessResponse = Extract<
+  GetReviewsByCourseIdStudentResponse,
   { status: "success" }
 >;
-type GetReviewByCourseAndStudentSuccessResponse = Extract<
-  GetReviewByCourseAndStudentResponse,
+type GetReviewsByCourseIdSuccessResponse = Extract<
+  GetReviewsByCourseIdResponse,
   { status: "success" }
 >;
 
@@ -42,8 +42,7 @@ type GetReviewsParams = {
   sortOrder?: "asc" | "desc";
 };
 
-type GetMyReviewsParams = {
-  course?: string;
+type GetReviewsByCourseIdParams = {
   rating?: number;
   search?: string;
   projection?: string;
@@ -121,26 +120,25 @@ export async function getReviewDetailsQuery(
 }
 
 /**
- * Student only. Fetches a paginated, sortable, searchable, filterable list
- * of reviews left by the logged-in student — reviewBy is always scoped to
- * the caller and cannot be overridden.
- * Uses 'use cache: private' so the cache entry is scoped to the requesting
- * student, based on the cookies read inside apiClient.
+ * Admin / Instructor only. Fetches a paginated list of all reviews for the
+ * given course. Admin can access any course; instructor only their own.
+ * Uses 'use cache: private' so the cache entry is scoped to the caller.
  */
-export async function getMyReviewsQuery(
-  params: GetMyReviewsParams = {},
-): Promise<GetMyReviewsSuccessResponse> {
+export async function getReviewsByCourseIdQuery(
+  courseId: string,
+  params: GetReviewsByCourseIdParams = {},
+): Promise<GetReviewsByCourseIdSuccessResponse> {
   "use cache: private";
-  cacheTag(REVIEW_TAGS.myReviews);
+  cacheTag(REVIEW_TAGS.reviewsByCourse(courseId));
   cacheLife("minutes");
 
   const query = buildQueryString(params);
 
   try {
-    const res = await apiClient(`/reviews/me${query}`, {
+    const res = await apiClient(`/reviews/course/${courseId}${query}`, {
       method: "GET",
     });
-    const json: GetMyReviewsResponse = await res.json();
+    const json: GetReviewsByCourseIdResponse = await res.json();
 
     if (json.status !== "success") {
       throw new Error(json.message);
@@ -148,38 +146,7 @@ export async function getMyReviewsQuery(
 
     return json;
   } catch (err) {
-    console.error("getMyReviewsQuery failed:", err);
-    throw err;
-  }
-}
-
-/**
- * Student only. Looks up the single review (if any) left by the logged-in
- * student for the given course — the student id is taken from the
- * accessToken cookie, not the URL.
- * Uses 'use cache: private' so the cache entry is scoped to the requesting
- * student, based on the cookies read inside apiClient.
- */
-export async function getReviewByCourseAndStudentQuery(
-  courseId: string,
-): Promise<GetReviewByCourseAndStudentSuccessResponse> {
-  "use cache: private";
-  cacheTag(REVIEW_TAGS.reviewByCourse(courseId));
-  cacheLife("minutes");
-
-  try {
-    const res = await apiClient(`/reviews/course/${courseId}`, {
-      method: "GET",
-    });
-    const json: GetReviewByCourseAndStudentResponse = await res.json();
-
-    if (json.status !== "success") {
-      throw new Error(json.message);
-    }
-
-    return json;
-  } catch (err) {
-    console.error("getReviewByCourseAndStudentQuery failed:", err);
+    console.error("getReviewsByCourseIdQuery failed:", err);
     throw err;
   }
 }

@@ -7,9 +7,9 @@ import {
   getCourseRefundEligibilityQuery,
 } from "@/services/course/queries";
 import { getCategoriesQuery } from "@/services/category/queries";
-import { getReviewByCourseAndStudentQuery } from "@/services/review/queries";
 import { getEnrollmentsQuery } from "@/services/enrollment/queries";
 import type { CourseRefundEligibility } from "@/response-types/courseResponseTypes";
+import { getReviewsByCourseIdQuery } from "@/services/review/queries";
 
 type CourseDetailsPageProps = {
   params: Promise<{ id: string }>;
@@ -57,7 +57,7 @@ const UnifiedCourseDetailsPage = async ({
   let hasReviewed = false;
   if (isEnrolledStudent) {
     try {
-      await getReviewByCourseAndStudentQuery(id);
+      await getReviewsByCourseIdQuery(id);
       hasReviewed = true;
     } catch {
       hasReviewed = false;
@@ -91,9 +91,7 @@ const UnifiedCourseDetailsPage = async ({
       enrollmentId = enrollment?._id ?? null;
       resumePositionInSeconds =
         enrollment && course.totalDurationInMinutes > 0
-          ? (course.totalDurationInMinutes *
-              60 *
-              enrollment.watchPercentage) /
+          ? (course.totalDurationInMinutes * 60 * enrollment.watchPercentage) /
             100
           : 0;
     } catch {
