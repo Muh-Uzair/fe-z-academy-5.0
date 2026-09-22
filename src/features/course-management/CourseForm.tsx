@@ -56,8 +56,8 @@ const courseSchema = z.object({
     .number({
       error: "Course price is required.",
     })
-    .min(1, "Course price must be greater than 0."),
-  level: z.enum(CourseLevel, {
+    .min(0, "Course price must be 0 or greater."),
+  level: z.enum(["beginner", "intermediate", "advanced"] as const, {
     error: "Course level is required.",
   }),
   categoryId: z.string().trim().min(1, "Course category is required."),
@@ -345,7 +345,7 @@ const CourseForm = ({
       return;
     }
 
-    if (!videoUrl) {
+    if (!hideVideo && !videoUrl) {
       form.setError("videoFile", {
         type: "manual",
         message: "Course video is required.",
@@ -576,7 +576,7 @@ const CourseForm = ({
                             <AppButton
                               type="button"
                               variant="outline"
-                              iconLeft={ImagePlus}
+                              leftIcon={ImagePlus}
                               onClick={() =>
                                 thumbnailFileInputRef.current?.click()
                               }
@@ -686,7 +686,7 @@ const CourseForm = ({
                             <AppButton
                               type="button"
                               variant="outline"
-                              iconLeft={Video}
+                              leftIcon={Video}
                               onClick={() => videoFileInputRef.current?.click()}
                             >
                               Choose Another Video
@@ -801,7 +801,7 @@ const CourseForm = ({
                   ) : null}
                   <AppButton
                     type="submit"
-                    iconLeft={mode === "create" ? CirclePlus : undefined}
+                    leftIcon={mode === "create" ? CirclePlus : undefined}
                     loading={isLoading || form.formState.isSubmitting}
                     disabled={isLoading || !form.formState.isValid}
                   >

@@ -31,6 +31,7 @@ const UserProfile = ({
   role,
 }: UserProfileProps) => {
   const router = useRouter();
+  const currentUser = JSON.parse(localStorage.getItem("currentUser")!);
 
   const updateQuery = (next: { search?: string; page?: number }) => {
     const nextSearch = next.search ?? search;
@@ -95,14 +96,15 @@ const UserProfile = ({
                 <span className="font-medium">{user.highestEducation}</span>
               </div>
             )}
-            {user.yearsOfExperience !== undefined && user.role !== "student" && (
-              <div className="flex items-center gap-2 text-sm">
-                <Briefcase className="h-4 w-4 text-primary" />
-                <span className="font-medium">
-                  {user.yearsOfExperience} Years Experience
-                </span>
-              </div>
-            )}
+            {user.yearsOfExperience !== undefined &&
+              user.role !== "student" && (
+                <div className="flex items-center gap-2 text-sm">
+                  <Briefcase className="h-4 w-4 text-primary" />
+                  <span className="font-medium">
+                    {user.yearsOfExperience} Years Experience
+                  </span>
+                </div>
+              )}
           </div>
         </div>
       </div>
@@ -132,7 +134,11 @@ const UserProfile = ({
           }
           renderFooter={(course) => (
             <AppButton
-              href={`/course-details/${course._id}`}
+              href={
+                currentUser?.role === "student"
+                  ? `/course-details/${course._id}?role=student&source=browse`
+                  : `/course-details/${course._id}`
+              }
               className="w-full"
             >
               View Course
