@@ -23,9 +23,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import { CourseLevel } from "@/response-types/courseResponseTypes";
-
 // -------------------- Constants --------------------
+
+const COURSE_LEVELS = ["beginner", "intermediate", "advanced"];
 
 const CATEGORIES = [
   "Web Development",
@@ -292,7 +292,7 @@ const Courses = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Levels</SelectItem>
-                  {Object.values(CourseLevel).map((level) => (
+                  {COURSE_LEVELS.map((level) => (
                     <SelectItem
                       key={level}
                       value={level}
