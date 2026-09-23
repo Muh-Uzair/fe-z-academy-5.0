@@ -56,7 +56,6 @@ const AddReviewDialog = ({ courseId }: AddReviewDialogProps) => {
 
     if (response?.status === "success") {
       handleOpenChange(false);
-      router.refresh();
     }
   };
 

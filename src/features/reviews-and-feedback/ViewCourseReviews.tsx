@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Star, Users, Trash2, Loader2 } from "lucide-react";
+import { Star, Users, Trash2, Loader2, Pencil } from "lucide-react";
 import AppButton from "@/components/AppButton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
@@ -18,6 +18,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import CourseCard from "@/components/CourseCard";
+import EditReviewDialog from "./EditReviewDialog";
 import type { CourseListItem } from "@/response-types/courseResponseTypes";
 import type { Review } from "@/response-types/reviewResponseTypes";
 import { deleteReviewAction } from "@/services/review/actions";
@@ -51,9 +52,11 @@ type ReviewCardProps = {
   canDelete?: boolean;
   isDeleting?: boolean;
   onDelete?: () => void;
+  canEdit?: boolean;
+  onEdit?: () => void;
 };
 
-const ReviewCard = ({ review, canDelete, isDeleting, onDelete }: ReviewCardProps) => (
+const ReviewCard = ({ review, canDelete, isDeleting, onDelete, canEdit, onEdit }: ReviewCardProps) => (
   <Card className="border-border/50 shadow-sm transition-shadow hover:shadow-md">
     <CardContent className="p-5">
       <div className="flex gap-4">
@@ -82,37 +85,50 @@ const ReviewCard = ({ review, canDelete, isDeleting, onDelete }: ReviewCardProps
             </div>
             <div className="flex items-center gap-3">
               <StarRating rating={review.rating} />
-              {canDelete && (
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <button
-                      disabled={isDeleting}
-                      className="text-destructive hover:text-destructive/80 disabled:opacity-50 transition-colors ml-2 cursor-pointer"
-                      title="Delete Review"
-                    >
-                      {isDeleting ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Trash2 className="h-4 w-4" />
-                      )}
-                    </button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Delete Review?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Are you sure you want to delete your review? This action cannot be undone.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction variant="destructive" onClick={onDelete}>
-                        Delete
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              )}
+              
+              <div className="flex items-center gap-1 ml-2">
+                {canEdit && (
+                  <button
+                    onClick={onEdit}
+                    className="text-muted-foreground hover:text-foreground transition-colors p-1"
+                    title="Edit Review"
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </button>
+                )}
+                
+                {canDelete && (
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <button
+                        disabled={isDeleting}
+                        className="text-destructive hover:text-destructive/80 disabled:opacity-50 transition-colors p-1 cursor-pointer"
+                        title="Delete Review"
+                      >
+                        {isDeleting ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Trash2 className="h-4 w-4" />
+                        )}
+                      </button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Review?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to delete your review? This action cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction variant="destructive" onClick={onDelete}>
+                          Delete
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                )}
+              </div>
             </div>
           </div>
           <p className="text-sm text-foreground/85 leading-relaxed pt-1">
@@ -133,6 +149,7 @@ const ViewCourseReviews = ({
 }: ViewCourseReviewsProps) => {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const [isEditOpen, setIsEditOpen] = useState(false);
 
   const handleDeleteReview = async () => {
     if (!studentReview) return;
@@ -221,12 +238,21 @@ const ViewCourseReviews = ({
               </div>
 
               {studentReview ? (
-                <ReviewCard
-                  review={studentReview}
-                  canDelete={true}
-                  isDeleting={isPending}
-                  onDelete={handleDeleteReview}
-                />
+                <>
+                  <ReviewCard
+                    review={studentReview}
+                    canDelete={true}
+                    isDeleting={isPending}
+                    onDelete={handleDeleteReview}
+                    canEdit={true}
+                    onEdit={() => setIsEditOpen(true)}
+                  />
+                  <EditReviewDialog
+                    review={studentReview}
+                    open={isEditOpen}
+                    onOpenChange={setIsEditOpen}
+                  />
+                </>
               ) : (
                 <Card className="border-dashed shadow-none bg-muted/20">
                   <CardContent className="flex flex-col items-center justify-center py-14 gap-2">
