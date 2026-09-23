@@ -1,13 +1,26 @@
 "use client";
 
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Star, Users } from "lucide-react";
+import { Star, Users, Trash2, Loader2 } from "lucide-react";
 import AppButton from "@/components/AppButton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import CourseCard from "@/components/CourseCard";
 import type { CourseListItem } from "@/response-types/courseResponseTypes";
 import type { Review } from "@/response-types/reviewResponseTypes";
+import { deleteReviewAction } from "@/services/review/actions";
 import type { Pagination } from "@/response-types/userResponseTypes";
 
 type ViewCourseReviewsProps = {
@@ -33,7 +46,14 @@ const StarRating = ({ rating }: { rating: number }) => (
   </div>
 );
 
-const ReviewCard = ({ review }: { review: Review }) => (
+type ReviewCardProps = {
+  review: Review;
+  canDelete?: boolean;
+  isDeleting?: boolean;
+  onDelete?: () => void;
+};
+
+const ReviewCard = ({ review, canDelete, isDeleting, onDelete }: ReviewCardProps) => (
   <Card className="border-border/50 shadow-sm transition-shadow hover:shadow-md">
     <CardContent className="p-5">
       <div className="flex gap-4">
@@ -60,7 +80,40 @@ const ReviewCard = ({ review }: { review: Review }) => (
                 })}
               </p>
             </div>
-            <StarRating rating={review.rating} />
+            <div className="flex items-center gap-3">
+              <StarRating rating={review.rating} />
+              {canDelete && (
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <button
+                      disabled={isDeleting}
+                      className="text-destructive hover:text-destructive/80 disabled:opacity-50 transition-colors ml-2 cursor-pointer"
+                      title="Delete Review"
+                    >
+                      {isDeleting ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="h-4 w-4" />
+                      )}
+                    </button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete Review?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Are you sure you want to delete your review? This action cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction variant="destructive" onClick={onDelete}>
+                        Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              )}
+            </div>
           </div>
           <p className="text-sm text-foreground/85 leading-relaxed pt-1">
             {review.feedback}
@@ -79,6 +132,14 @@ const ViewCourseReviews = ({
   studentReview,
 }: ViewCourseReviewsProps) => {
   const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+
+  const handleDeleteReview = async () => {
+    if (!studentReview) return;
+    startTransition(async () => {
+      await deleteReviewAction(studentReview._id);
+    });
+  };
 
   const updateQuery = (page: number) => {
     const searchParams = new URLSearchParams();
@@ -160,7 +221,12 @@ const ViewCourseReviews = ({
               </div>
 
               {studentReview ? (
-                <ReviewCard review={studentReview} />
+                <ReviewCard
+                  review={studentReview}
+                  canDelete={true}
+                  isDeleting={isPending}
+                  onDelete={handleDeleteReview}
+                />
               ) : (
                 <Card className="border-dashed shadow-none bg-muted/20">
                   <CardContent className="flex flex-col items-center justify-center py-14 gap-2">
