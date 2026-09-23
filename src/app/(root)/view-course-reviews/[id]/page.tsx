@@ -7,6 +7,7 @@ import {
 import { getMeQuery } from "@/services/auth/queries";
 import type { Review } from "@/response-types/reviewResponseTypes";
 import type { Pagination } from "@/response-types/userResponseTypes";
+import { getEnrollmentsQuery } from "@/services/enrollment/queries";
 
 type ViewCourseReviewsPageProps = {
   params: Promise<{ id: string }>;
@@ -30,10 +31,27 @@ const ViewCourseReviewsPage = async ({
   let reviews: Review[] = [];
   let pagination: Pagination | null = null;
   let studentReview: Review | null = null;
+  let isEnrolled = false;
 
   if (role === "student") {
-    const studentReviewResponse = await getReviewByCourseIdAsStudentQuery(id);
-    studentReview = studentReviewResponse.data.review;
+    try {
+      const studentReviewResponse = await getReviewByCourseIdAsStudentQuery(id);
+      studentReview = studentReviewResponse.data.review;
+    } catch {
+      studentReview = null;
+    }
+
+    try {
+      const enrollmentsResponse = await getEnrollmentsQuery({
+        course: id,
+        limit: 1,
+      });
+      if (enrollmentsResponse.data.enrollments.length > 0) {
+        isEnrolled = true;
+      }
+    } catch {
+      isEnrolled = false;
+    }
   } else {
     const reviewsResponse = await getReviewsByCourseIdQuery(id, {
       page: page ? Number(page) : 1,
@@ -49,6 +67,7 @@ const ViewCourseReviewsPage = async ({
       pagination={pagination}
       role={role}
       studentReview={studentReview}
+      isEnrolled={isEnrolled}
     />
   );
 };

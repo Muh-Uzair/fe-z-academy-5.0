@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import CourseCard from "@/components/CourseCard";
 import EditReviewDialog from "./EditReviewDialog";
+import AddReviewDialog from "@/features/course-management/AddReviewDialog";
 import type { CourseListItem } from "@/response-types/courseResponseTypes";
 import type { Review } from "@/response-types/reviewResponseTypes";
 import { deleteReviewAction } from "@/services/review/actions";
@@ -30,6 +31,7 @@ type ViewCourseReviewsProps = {
   pagination: Pagination | null;
   role: string;
   studentReview: Review | null;
+  isEnrolled?: boolean;
 };
 
 const StarRating = ({ rating }: { rating: number }) => (
@@ -146,6 +148,7 @@ const ViewCourseReviews = ({
   pagination,
   role,
   studentReview,
+  isEnrolled,
 }: ViewCourseReviewsProps) => {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -257,9 +260,10 @@ const ViewCourseReviews = ({
                 <Card className="border-dashed shadow-none bg-muted/20">
                   <CardContent className="flex flex-col items-center justify-center py-14 gap-2">
                     <Star className="h-8 w-8 text-muted-foreground/40" />
-                    <p className="text-muted-foreground text-sm">
+                    <p className="text-muted-foreground text-sm mb-3">
                       You have not reviewed this course yet.
                     </p>
+                    {isEnrolled && <AddReviewDialog courseId={course._id} />}
                   </CardContent>
                 </Card>
               )}
