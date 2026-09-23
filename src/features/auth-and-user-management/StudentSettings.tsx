@@ -30,8 +30,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Bell, Camera, Lock } from "lucide-react";
+import { Bell, Camera, Lock, User } from "lucide-react";
 import PageFlexCol from "@/components/PageFlexCol";
+import type { AuthUser } from "@/response-types/authResponseTypes";
+import type { UploadAvatarResponse } from "@/response-types/userResponseTypes";
+import useClientAction from "@/hooks/useClientAction";
+import { updateProfileAction, uploadAvatarAction } from "@/services/user/actions";
 
 // ─── SCHEMA (editable fields only) ───────────────────────────────────────────
 const studentSettingsSchema = z.object({
@@ -44,52 +48,92 @@ const studentSettingsSchema = z.object({
 
 type StudentSettingsFormValues = z.infer<typeof studentSettingsSchema>;
 
-// ─── MOCK DATA ────────────────────────────────────────────────────────────────
-const mockStudent = {
-  fullName: "Alex Johnson",
-  email: "alex.johnson@example.com",
-  bio: "Computer science student passionate about web development and open-source projects. Always looking to learn something new.",
-  highestEducation: "Bachelor's",
-  avatar: "https://i.pravatar.cc/150?u=user3",
-  role: "student",
+async function uploadImageToS3(
+  uploadData: Extract<UploadAvatarResponse, { status: "success" }>["data"],
+  file: File,
+) {
+  const formData = new FormData();
+  Object.entries(uploadData.fields).forEach(([key, value]) => {
+    formData.append(key, value);
+  });
+  formData.append("file", file);
+
+  const res = await fetch(uploadData.uploadUrl, {
+    method: "POST",
+    body: formData,
+  });
+
+  return res.ok;
+}
+
+type StudentSettingsProps = {
+  user: AuthUser;
 };
 
 // CMP CMP CMP
-const StudentSettings = () => {
+const StudentSettings = ({ user }: StudentSettingsProps) => {
   // VARS
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-  const [avatarPreview, setAvatarPreview] = useState(mockStudent.avatar);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(user.avatar);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const initials = mockStudent.fullName
-    .split(" ")
-    .map((n) => n[0])
-    .join("");
+  const { run, isLoading } = useClientAction();
 
   const form = useForm<StudentSettingsFormValues>({
     resolver: zodResolver(studentSettingsSchema),
     mode: "onChange",
     defaultValues: {
-      fullName: mockStudent.fullName,
-      bio: mockStudent.bio,
-      highestEducation: mockStudent.highestEducation,
+      fullName: user.fullName,
+      bio: user.bio,
+      highestEducation: user.highestEducation,
     },
   });
 
   // FUNCTIONS
-  const onSubmit = (values: StudentSettingsFormValues) => {
-    console.log("Student profile info:", values);
+  const onSubmit = async (values: StudentSettingsFormValues) => {
+    const response = await run(async () => {
+      let avatarKey: string | undefined;
+
+      if (avatarFile) {
+        const uploadResponse = await uploadAvatarAction({
+          fileName: avatarFile.name,
+          fileType: avatarFile.type as "image/jpeg" | "image/png",
+        });
+
+        if (uploadResponse.status !== "success") {
+          return uploadResponse;
+        }
+
+        const uploaded = await uploadImageToS3(uploadResponse.data, avatarFile);
+
+        if (!uploaded) {
+          return {
+            status: "error" as const,
+            message: "Failed to upload avatar. Please try again.",
+            data: null,
+          };
+        }
+
+        avatarKey = uploadResponse.data.fields.key;
+      }
+
+      return updateProfileAction({
+        fullName: values.fullName,
+        bio: values.bio,
+        highestEducation: values.highestEducation,
+        ...(avatarKey ? { avatarKey } : {}),
+      });
+    });
+
+    if (response?.status === "success") {
+      setAvatarFile(null);
+    }
   };
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    console.log("Avatar image details:", {
-      name: file.name,
-      size: file.size,
-      type: file.type,
-      lastModified: file.lastModified,
-    });
+    setAvatarFile(file);
     const objectUrl = URL.createObjectURL(file);
     setAvatarPreview(objectUrl);
   };
@@ -119,13 +163,15 @@ const StudentSettings = () => {
           {/* AVATAR SECTION */}
           <div className="flex items-center gap-5">
             <Avatar className="h-20 w-20">
-              <AvatarImage src={avatarPreview} alt={mockStudent.fullName} />
-              <AvatarFallback className="text-xl font-bold">
-                {initials}
+              {avatarPreview ? (
+                <AvatarImage src={avatarPreview} alt={user.fullName} />
+              ) : null}
+              <AvatarFallback className="bg-muted">
+                <User className="h-10 w-10 text-muted-foreground" />
               </AvatarFallback>
             </Avatar>
             <div className="space-y-1">
-              <p className="text-sm font-medium">{mockStudent.fullName}</p>
+              <p className="text-sm font-medium">{user.fullName}</p>
               <input
                 ref={fileInputRef}
                 type="file"
@@ -155,7 +201,7 @@ const StudentSettings = () => {
                 <Lock className="h-3 w-3" /> Email
               </Label>
               <p className="text-sm font-medium text-muted-foreground">
-                {mockStudent.email}
+                {user.email}
               </p>
             </div>
 
@@ -166,7 +212,7 @@ const StudentSettings = () => {
               </Label>
               <div>
                 <Badge variant="secondary" className="capitalize">
-                  {mockStudent.role}
+                  {user.role}
                 </Badge>
               </div>
             </div>
@@ -239,7 +285,7 @@ const StudentSettings = () => {
                 )}
               />
 
-              <AppButton type="submit" disabled={form.formState.isSubmitting}>
+              <AppButton type="submit" isLoading={isLoading} disabled={form.formState.isSubmitting}>
                 Save Changes
               </AppButton>
             </form>

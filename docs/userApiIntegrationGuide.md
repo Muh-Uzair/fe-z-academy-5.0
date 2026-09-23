@@ -18,10 +18,12 @@ Base path: `/api/v1/users`
 | ------------------------------------- | ------------------------------------------------------ |
 | `GET /instructors`                    | Admin or Student                                       |
 | `GET /students`                       | Admin or Instructor                                    |
-| `GET /user/:id`                       | Admin or Student                                       |
+| `GET /user/:id`                       | Admin, Student, or Instructor                          |
 | `PATCH /user/:id/verification`        | Admin only                                             |
 | `GET /get-instructor-onboarding-link` | Instructor only                                        |
-| `PATCH /update-profile`               | Any authenticated user (student, instructor, or admin) |
+| `GET /profile`                        | Any authenticated user (student, instructor, or admin) |
+| `PATCH /profile`                      | Any authenticated user (student, instructor, or admin) |
+| `POST /profile/upload-avatar`         | Any authenticated user (student, instructor, or admin) |
 
 A caller with the wrong role receives `403 You do not have permission to perform this action`. A missing/invalid/expired `accessToken` cookie receives the same `401` errors documented for `/auth/me`.
 
@@ -148,7 +150,14 @@ By default (no `projection` sent), each student object contains only the same pu
 
 `GET /api/v1/users/user/:id`
 
-Admin or Student. Fetches a single user's public fields, scoped to an expected role. `role` accepts any of `"student" | "instructor" | "admin"` regardless of caller — a student caller isn't restricted to `role=instructor` only.
+Admin, Student, or Instructor. Fetches a single user's public fields, scoped to an expected role. `role` accepts any of `"student" | "instructor" | "admin"`. An instructor may view a student only when that student is enrolled in at least one course owned by the requesting instructor.
+
+When calling this endpoint as an instructor:
+
+- The requested `role` must be `"student"`.
+- The backend checks for an enrollment containing both the requested student ID and the authenticated instructor ID.
+- Enrollment in another instructor's course does not grant access.
+- If no matching enrollment exists, the API returns `403`.
 
 ### URL params
 
@@ -181,6 +190,7 @@ HTTP `200`
       "highestEducation": "Master's degree",
       "yearsOfExperience": 6,
       "isVerified": true,
+      "stripeOnboardingComplete": true,
       "createdAt": "2026-08-25T10:00:00.000Z",
       "updatedAt": "2026-08-25T10:00:00.000Z"
     }
@@ -196,7 +206,7 @@ HTTP `200`
 | ----------- | --------------------------------------------------- | ----------------------------------------------------------- |
 | 400         | `Validation failed`                                 | `id` is missing or `role` is not one of the allowed values. |
 | 401         | _(see auth guide `/me` 401 rows)_                   | Access-token cookie missing/invalid/expired.                |
-| 403         | `You do not have permission to perform this action` | Caller is not an admin or student (e.g. an instructor).     |
+| 403         | `You do not have permission to perform this action`<br>`You do not have permission to view this student's details` | Caller is not an admin, student, or instructor, or an instructor requests a student who is not enrolled in one of the instructor's courses. |
 | 404         | `<role> not found`                                  | No user exists with that `id` and `role` combination.       |
 
 ## API 4 — Approve or reject a user's verification
@@ -309,9 +319,48 @@ Redirect the instructor's browser to `data.url` to complete Stripe onboarding. T
 | 404         | `Instructor not found`                              | The signed-in instructor's account no longer exists. |
 | 500         | `Something went wrong. Please try again later.`     | Unexpected server or Stripe API error.               |
 
-## API 6 — Update own profile
+## API 6 — Get own profile
 
-`PATCH /api/v1/users/update-profile`
+`GET /api/v1/users/profile`
+
+Available to any authenticated user (student, instructor, or admin). Fetches the signed-in user's own profile details.
+
+### Success response
+
+HTTP `200`
+
+```json
+{
+  "status": "success",
+  "message": "Profile fetched successfully",
+  "data": {
+    "user": {
+      "_id": "66d1a1b2c3d4e5f678901234",
+      "fullName": "Jane Smith",
+      "email": "jane@example.com",
+      "role": "instructor",
+      "avatar": "https://cdn.example.com/avatars/jane.png",
+      "bio": "Backend engineering instructor",
+      "highestEducation": "Master's degree",
+      "yearsOfExperience": 6,
+      "isVerified": true,
+      "createdAt": "2026-08-25T10:00:00.000Z",
+      "updatedAt": "2026-08-25T10:00:00.000Z"
+    }
+  }
+}
+```
+
+### Possible errors
+
+| HTTP status | Message                                             | When                                                 |
+| ----------- | --------------------------------------------------- | ---------------------------------------------------- |
+| 401         | _(see auth guide `/me` 401 rows)_                   | Access-token cookie missing/invalid/expired.         |
+| 404         | `User not found`                                    | The signed-in user's account no longer exists.       |
+
+## API 7 — Update own profile
+
+`PATCH /api/v1/users/profile`
 
 Available to any authenticated user (student, instructor, or admin). Updates the signed-in user's own profile. All fields are optional, but at least one must be sent, and each role may only update its own allowed subset.
 
@@ -320,7 +369,7 @@ Available to any authenticated user (student, instructor, or admin). Updates the
 | Field               | Student | Instructor | Admin |
 | ------------------- | ------- | ---------- | ----- |
 | `fullName`          | ✅      | ✅         | ✅    |
-| `avatar`            | ✅      | ✅         | ✅    |
+| `avatarKey`         | ✅      | ✅         | ✅    |
 | `bio`               | ✅      | ✅         | ❌    |
 | `highestEducation`  | ✅      | ✅         | ❌    |
 | `yearsOfExperience` | ❌      | ✅         | ❌    |
@@ -335,14 +384,14 @@ Sending a field your role isn't allowed to change returns a `403`, not a validat
   "bio": "Senior backend engineering instructor",
   "highestEducation": "PhD",
   "yearsOfExperience": 7,
-  "avatar": "https://cdn.example.com/avatars/jane.png"
+  "avatarKey": "user-avatars/123-abc.png"
 }
 ```
 
 | Field               | Rules                                          |
 | ------------------- | ---------------------------------------------- |
 | `fullName`          | String, trimmed, 2–100 characters.             |
-| `avatar`            | Non-empty string, or `null` to clear it.       |
+| `avatarKey`         | Non-empty string, or `null` to clear it.       |
 | `bio`               | Non-empty string, trimmed, max 500 characters. |
 | `highestEducation`  | Non-empty string, trimmed, max 150 characters. |
 | `yearsOfExperience` | Number, 0–60.                                  |
@@ -384,6 +433,62 @@ HTTP `200`
 | 403         | `<role>s are not allowed to update: <fields>` | One or more sent fields are outside the caller's role's editable set. Lists every disallowed field, comma-separated. |
 | 404         | `User not found`                              | The signed-in user's account no longer exists.                                                                       |
 
+## API 8 — Get avatar S3 upload URL
+
+`POST /api/v1/users/profile/upload-avatar`
+
+Available to any authenticated user (student, instructor, or admin). Generates a time-limited S3 presigned POST URL for directly uploading an avatar image from the browser, bypassing backend streaming limits.
+
+### Request body
+
+```json
+{
+  "fileName": "my-photo.jpg",
+  "fileType": "image/jpeg"
+}
+```
+
+| Field      | Rules                                    |
+| ---------- | ---------------------------------------- |
+| `fileName` | Required, non-empty string.              |
+| `fileType` | Required, non-empty string (e.g. `image/jpeg` or `image/png`). |
+
+### Success response
+
+HTTP `200`
+
+```json
+{
+  "status": "success",
+  "message": "Avatar upload URL generated successfully",
+  "data": {
+    "uploadUrl": "https://s3.amazonaws.com/your-bucket",
+    "fields": {
+      "key": "user-avatars/uuid.jpeg",
+      "bucket": "your-bucket",
+      "X-Amz-Algorithm": "AWS4-HMAC-SHA256",
+      "X-Amz-Credential": "...",
+      "X-Amz-Date": "20260825T100000Z",
+      "Policy": "...",
+      "X-Amz-Signature": "..."
+    }
+  }
+}
+```
+
+Upload the file directly to S3 by submitting a `multipart/form-data` request to `data.uploadUrl`. The form fields must exactly match the key-value pairs in `data.fields`, appended in order, with the actual file appended last under the key `file`.
+
+After a successful `204 No Content` response from S3, the client must save the `fields.key` value and send it as `avatarKey` to `PATCH /profile`.
+
+### Possible errors
+
+| HTTP status | Message                                         | When                                                               |
+| ----------- | ----------------------------------------------- | ------------------------------------------------------------------ |
+| 400         | `Validation failed`                             | Body is empty or missing `fileName` / `fileType`.                  |
+| 400         | `Unsupported file type: <type>`                 | The `fileType` is not an allowed image MIME type.                  |
+| 401         | _(see auth guide `/me` 401 rows)_               | Access-token cookie missing/invalid/expired.                       |
+| 500         | `Failed to generate S3 upload URL`              | AWS credentials/permissions are misconfigured.                     |
+
 ## Frontend types
 
-Copy [`src/response-types/userResponseTypes.ts`](../src/response-types/userResponseTypes.ts) into the frontend project. It is a pure TypeScript file with no backend imports (it reuses `AuthUser`, `SuccessApiResponse`, and `ApiErrorResponse` from [`authResponseTypes.ts`](../src/response-types/authResponseTypes.ts)) and exports `GetInstructorsResponse`, `GetStudentsResponse`, `GetUserDetailsResponse`, `UpdateUserVerificationResponse`, `GetInstructorOnboardingLinkResponse`, `UpdateProfileResponse`, and the shared `UserDetails`/`Pagination` types.
+Copy [`src/response-types/userResponseTypes.ts`](../src/response-types/userResponseTypes.ts) into the frontend project. It is a pure TypeScript file with no backend imports (it reuses `AuthUser`, `SuccessApiResponse`, and `ApiErrorResponse` from [`authResponseTypes.ts`](../src/response-types/authResponseTypes.ts)) and exports `GetInstructorsResponse`, `GetStudentsResponse`, `GetUserDetailsResponse`, `UpdateUserVerificationResponse`, `GetInstructorOnboardingLinkResponse`, `GetProfileResponse`, `UpdateProfileResponse`, and the shared `UserDetails`/`Pagination` types.

@@ -30,7 +30,11 @@ import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Bell, Camera, Lock } from "lucide-react";
+import { Bell, Camera, Lock, User } from "lucide-react";
+import type { AuthUser } from "@/response-types/authResponseTypes";
+import type { UploadAvatarResponse } from "@/response-types/userResponseTypes";
+import useClientAction from "@/hooks/useClientAction";
+import { updateProfileAction, uploadAvatarAction } from "@/services/user/actions";
 
 // ─── SCHEMA (editable fields only) ───────────────────────────────────────────
 const adminSettingsSchema = z.object({
@@ -39,48 +43,88 @@ const adminSettingsSchema = z.object({
 
 type AdminSettingsFormValues = z.infer<typeof adminSettingsSchema>;
 
-// ─── MOCK DATA ────────────────────────────────────────────────────────────────
-const mockAdmin = {
-  fullName: "Omar Abdullah",
-  email: "omar.admin@z-academy.com",
-  avatar: "https://i.pravatar.cc/150?u=admin01",
-  role: "admin",
+async function uploadImageToS3(
+  uploadData: Extract<UploadAvatarResponse, { status: "success" }>["data"],
+  file: File,
+) {
+  const formData = new FormData();
+  Object.entries(uploadData.fields).forEach(([key, value]) => {
+    formData.append(key, value);
+  });
+  formData.append("file", file);
+
+  const res = await fetch(uploadData.uploadUrl, {
+    method: "POST",
+    body: formData,
+  });
+
+  return res.ok;
+}
+
+type AdminSettingsProps = {
+  user: AuthUser;
 };
 
 // CMP CMP CMP
-const AdminSettings = () => {
+const AdminSettings = ({ user }: AdminSettingsProps) => {
   // VARS
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-  const [avatarPreview, setAvatarPreview] = useState(mockAdmin.avatar);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(user.avatar);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const initials = mockAdmin.fullName
-    .split(" ")
-    .map((n) => n[0])
-    .join("");
+  const { run, isLoading } = useClientAction();
 
   const form = useForm<AdminSettingsFormValues>({
     resolver: zodResolver(adminSettingsSchema),
     mode: "onChange",
     defaultValues: {
-      fullName: mockAdmin.fullName,
+      fullName: user.fullName,
     },
   });
 
   // FUNCTIONS
-  const onSubmit = (values: AdminSettingsFormValues) => {
-    console.log("Admin profile info:", values);
+  const onSubmit = async (values: AdminSettingsFormValues) => {
+    const response = await run(async () => {
+      let avatarKey: string | undefined;
+
+      if (avatarFile) {
+        const uploadResponse = await uploadAvatarAction({
+          fileName: avatarFile.name,
+          fileType: avatarFile.type as "image/jpeg" | "image/png",
+        });
+
+        if (uploadResponse.status !== "success") {
+          return uploadResponse;
+        }
+
+        const uploaded = await uploadImageToS3(uploadResponse.data, avatarFile);
+
+        if (!uploaded) {
+          return {
+            status: "error" as const,
+            message: "Failed to upload avatar. Please try again.",
+            data: null,
+          };
+        }
+
+        avatarKey = uploadResponse.data.fields.key;
+      }
+
+      return updateProfileAction({
+        fullName: values.fullName,
+        ...(avatarKey ? { avatarKey } : {}),
+      });
+    });
+
+    if (response?.status === "success") {
+      setAvatarFile(null);
+    }
   };
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    console.log("Avatar image details:", {
-      name: file.name,
-      size: file.size,
-      type: file.type,
-      lastModified: file.lastModified,
-    });
+    setAvatarFile(file);
     const objectUrl = URL.createObjectURL(file);
     setAvatarPreview(objectUrl);
   };
@@ -111,13 +155,15 @@ const AdminSettings = () => {
           {/* AVATAR SECTION */}
           <div className="flex items-center gap-5">
             <Avatar className="h-20 w-20">
-              <AvatarImage src={avatarPreview} alt={mockAdmin.fullName} />
-              <AvatarFallback className="text-xl font-bold">
-                {initials}
+              {avatarPreview ? (
+                <AvatarImage src={avatarPreview} alt={user.fullName} />
+              ) : null}
+              <AvatarFallback className="bg-muted">
+                <User className="h-10 w-10 text-muted-foreground" />
               </AvatarFallback>
             </Avatar>
             <div className="space-y-1">
-              <p className="text-sm font-medium">{mockAdmin.fullName}</p>
+              <p className="text-sm font-medium">{user.fullName}</p>
               <input
                 ref={fileInputRef}
                 type="file"
@@ -147,7 +193,7 @@ const AdminSettings = () => {
                 <Lock className="h-3 w-3" /> Email
               </Label>
               <p className="text-sm font-medium text-muted-foreground">
-                {mockAdmin.email}
+                {user.email}
               </p>
             </div>
 
@@ -157,7 +203,7 @@ const AdminSettings = () => {
                 <Lock className="h-3 w-3" /> Role
               </Label>
               <div>
-                <Badge className="capitalize">{mockAdmin.role}</Badge>
+                <Badge className="capitalize">{user.role}</Badge>
               </div>
             </div>
           </div>
@@ -180,7 +226,7 @@ const AdminSettings = () => {
                     <FormControl>
                       <Input
                         {...field}
-                        placeholder="Omar Abdullah"
+                        placeholder="John Doe"
                         autoComplete="name"
                       />
                     </FormControl>
@@ -189,7 +235,7 @@ const AdminSettings = () => {
                 )}
               />
 
-              <AppButton type="submit" disabled={form.formState.isSubmitting}>
+              <AppButton type="submit" isLoading={isLoading} disabled={form.formState.isSubmitting}>
                 Save Changes
               </AppButton>
             </form>

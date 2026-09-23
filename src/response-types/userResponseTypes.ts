@@ -1,14 +1,10 @@
 // This file is intentionally framework-independent. Copy it directly into a
 // frontend project; it has no backend imports and represents JSON values only.
 
-import {
-  AuthUser,
-  SuccessApiResponse,
-  ApiErrorResponse,
-} from "./authResponseTypes";
+import { AuthUser, SuccessApiResponse, ApiErrorResponse } from "./authResponseTypes";
 
-// Full user document shape as returned by the user-management endpoints.
-// Same public projection as AuthUser (see authResponseTypes.ts).
+// Public user shape returned by the user-management endpoints.
+// Instructor details may additionally include stripeOnboardingComplete.
 export type UserDetails = AuthUser;
 
 export type UserRole = "admin" | "instructor" | "student";
@@ -50,6 +46,9 @@ export type GetStudentsResponse =
 // API 3: GET /api/v1/users/user/:id
 // Response: { status, message, data: { user } }
 // `message` is "<Role> details fetched successfully" for the requested role.
+// Allowed callers: admin, student, or instructor. An instructor may request
+// student details only when the student is enrolled in one of that
+// instructor's courses.
 export interface GetUserDetailsResponseData {
   user: UserDetails;
 }
@@ -88,15 +87,33 @@ export type GetInstructorOnboardingLinkResponse =
     >
   | ApiErrorResponse;
 
-// API 6: PATCH /api/v1/users/update-profile
+// API 6: GET /api/v1/users/profile
+// Response: { status, message, data: { user } }
+export interface GetProfileResponseData {
+  user: UserDetails;
+}
+
+export type GetProfileResponse =
+  | SuccessApiResponse<GetProfileResponseData, "Profile fetched successfully">
+  | ApiErrorResponse;
+
+// API 7: PATCH /api/v1/users/profile
 // Response: { status, message, data: { user } }
 export interface UpdateProfileResponseData {
   user: UserDetails;
 }
 
 export type UpdateProfileResponse =
-  | SuccessApiResponse<
-      UpdateProfileResponseData,
-      "Profile updated successfully"
-    >
+  | SuccessApiResponse<UpdateProfileResponseData, "Profile updated successfully">
+  | ApiErrorResponse;
+
+// API 8: POST /api/v1/users/profile/upload-avatar
+// Response: { status, message, data: { uploadUrl, fields } }
+export interface UploadAvatarResponseData {
+  uploadUrl: string;
+  fields: Record<string, string>;
+}
+
+export type UploadAvatarResponse =
+  | SuccessApiResponse<UploadAvatarResponseData, "Avatar upload URL generated successfully">
   | ApiErrorResponse;

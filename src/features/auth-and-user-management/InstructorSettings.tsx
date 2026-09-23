@@ -31,9 +31,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Bell, Camera, Lock } from "lucide-react";
+import { Bell, Camera, Lock, User } from "lucide-react";
 import type { AuthUser } from "@/response-types/authResponseTypes";
+import type { UploadAvatarResponse } from "@/response-types/userResponseTypes";
 import { getInstructorOnboardingLinkAction } from "@/services/user/actions";
+import { updateProfileAction, uploadAvatarAction } from "@/services/user/actions";
 import useClientAction from "@/hooks/useClientAction";
 
 // ─── SCHEMA (editable fields only) ───────────────────────────────────────────
@@ -51,6 +53,24 @@ const instructorSettingsSchema = z.object({
 
 type InstructorSettingsFormValues = z.infer<typeof instructorSettingsSchema>;
 
+async function uploadImageToS3(
+  uploadData: Extract<UploadAvatarResponse, { status: "success" }>["data"],
+  file: File,
+) {
+  const formData = new FormData();
+  Object.entries(uploadData.fields).forEach(([key, value]) => {
+    formData.append(key, value);
+  });
+  formData.append("file", file);
+
+  const res = await fetch(uploadData.uploadUrl, {
+    method: "POST",
+    body: formData,
+  });
+
+  return res.ok;
+}
+
 type InstructorSettingsProps = {
   user: AuthUser;
 };
@@ -58,15 +78,12 @@ type InstructorSettingsProps = {
 const InstructorSettings = ({ user }: InstructorSettingsProps) => {
   // VARS
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-  const [avatarPreview, setAvatarPreview] = useState(user.avatar);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(user.avatar);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { run: runOnboardingAction, isLoading: isOnboardingLoading } =
     useClientAction();
-
-  const initials = user.fullName
-    .split(" ")
-    .map((n) => n[0])
-    .join("");
+  const { run: runUpdateAction, isLoading: isUpdateLoading } = useClientAction();
 
   const form = useForm<InstructorSettingsFormValues>({
     resolver: zodResolver(instructorSettingsSchema),
@@ -80,19 +97,51 @@ const InstructorSettings = ({ user }: InstructorSettingsProps) => {
   });
 
   // FUNCTIONS
-  const onSubmit = (values: InstructorSettingsFormValues) => {
-    console.log("Instructor profile info:", values);
+  const onSubmit = async (values: InstructorSettingsFormValues) => {
+    const response = await runUpdateAction(async () => {
+      let avatarKey: string | undefined;
+
+      if (avatarFile) {
+        const uploadResponse = await uploadAvatarAction({
+          fileName: avatarFile.name,
+          fileType: avatarFile.type as "image/jpeg" | "image/png",
+        });
+
+        if (uploadResponse.status !== "success") {
+          return uploadResponse;
+        }
+
+        const uploaded = await uploadImageToS3(uploadResponse.data, avatarFile);
+
+        if (!uploaded) {
+          return {
+            status: "error" as const,
+            message: "Failed to upload avatar. Please try again.",
+            data: null,
+          };
+        }
+
+        avatarKey = uploadResponse.data.fields.key;
+      }
+
+      return updateProfileAction({
+        fullName: values.fullName,
+        bio: values.bio,
+        highestEducation: values.highestEducation,
+        yearsOfExperience: values.yearsOfExperience,
+        ...(avatarKey ? { avatarKey } : {}),
+      });
+    });
+
+    if (response?.status === "success") {
+      setAvatarFile(null);
+    }
   };
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    console.log("Avatar image details:", {
-      name: file.name,
-      size: file.size,
-      type: file.type,
-      lastModified: file.lastModified,
-    });
+    setAvatarFile(file);
     const objectUrl = URL.createObjectURL(file);
     setAvatarPreview(objectUrl);
   };
@@ -133,9 +182,11 @@ const InstructorSettings = ({ user }: InstructorSettingsProps) => {
           {/* AVATAR SECTION */}
           <div className="flex items-center gap-5">
             <Avatar className="h-20 w-20">
-              <AvatarImage src={avatarPreview ?? undefined} alt={user.fullName} />
-              <AvatarFallback className="text-xl font-bold">
-                {initials}
+              {avatarPreview ? (
+                <AvatarImage src={avatarPreview} alt={user.fullName} />
+              ) : null}
+              <AvatarFallback className="bg-muted">
+                <User className="h-10 w-10 text-muted-foreground" />
               </AvatarFallback>
             </Avatar>
             <div className="space-y-1">
@@ -324,7 +375,7 @@ const InstructorSettings = ({ user }: InstructorSettingsProps) => {
                 )}
               />
 
-              <AppButton type="submit" disabled={form.formState.isSubmitting}>
+              <AppButton type="submit" isLoading={isUpdateLoading} disabled={form.formState.isSubmitting}>
                 Save Changes
               </AppButton>
             </form>

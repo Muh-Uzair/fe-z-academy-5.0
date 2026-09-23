@@ -7,6 +7,7 @@ import type {
   GetInstructorsResponse,
   GetStudentsResponse,
   GetUserDetailsResponse,
+  GetProfileResponse,
 } from "@/response-types/userResponseTypes";
 
 // Each query below throws on a non-success response instead of returning it,
@@ -21,6 +22,10 @@ type GetStudentsSuccessResponse = Extract<
 >;
 type GetUserDetailsSuccessResponse = Extract<
   GetUserDetailsResponse,
+  { status: "success" }
+>;
+type GetProfileSuccessResponse = Extract<
+  GetProfileResponse,
   { status: "success" }
 >;
 
@@ -136,6 +141,32 @@ export async function getUserDetailsQuery(
     return json;
   } catch (err) {
     console.error("getUserDetailsQuery failed:", err);
+    throw err;
+  }
+}
+
+/**
+ * Any authenticated user. Fetches the signed-in user's own profile details.
+ * Use updateTag(USER_TAGS.profile) to invalidate this after an update.
+ */
+export async function getProfileQuery(): Promise<GetProfileSuccessResponse> {
+  "use cache: private";
+  cacheTag(USER_TAGS.profile);
+  cacheLife("minutes");
+
+  try {
+    const res = await apiClient(`/users/profile`, {
+      method: "GET",
+    });
+    const json: GetProfileResponse = await res.json();
+
+    if (json.status !== "success") {
+      throw new Error(json.message);
+    }
+
+    return json;
+  } catch (err) {
+    console.error("getProfileQuery failed:", err);
     throw err;
   }
 }

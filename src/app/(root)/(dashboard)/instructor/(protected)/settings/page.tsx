@@ -1,8 +1,8 @@
 import InstructorSettings from "@/features/auth-and-user-management/InstructorSettings";
-import { getMeQuery } from "@/services/auth/queries";
+import { getProfileQuery } from "@/services/user/queries";
 
 const InstructorSettingsPage = async () => {
-  const response = await getMeQuery();
+  const response = await getProfileQuery();
 
   return <InstructorSettings user={response.data.user} />;
 };

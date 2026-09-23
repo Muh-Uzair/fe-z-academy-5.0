@@ -8,6 +8,7 @@ import type {
   GetInstructorOnboardingLinkResponse,
   UpdateUserVerificationResponse,
   UpdateProfileResponse,
+  UploadAvatarResponse,
 } from "@/response-types/userResponseTypes";
 
 /**
@@ -46,12 +47,12 @@ export async function updateUserVerificationAction(
  */
 export async function updateProfileAction(data: {
   fullName?: string;
-  avatar?: string | null;
+  avatarKey?: string | null;
   bio?: string;
   highestEducation?: string;
   yearsOfExperience?: number;
 }): Promise<UpdateProfileResponse> {
-  const res = await apiClient("/users/update-profile", {
+  const res = await apiClient("/users/profile", {
     method: "PATCH",
     body: JSON.stringify(data),
   });
@@ -62,6 +63,7 @@ export async function updateProfileAction(data: {
   // invalidate it so the next getMeQuery() call reflects the update.
   if (json.status === "success") {
     updateTag(AUTH_TAGS.currentUser);
+    updateTag(USER_TAGS.profile);
   }
 
   return json;
@@ -78,4 +80,19 @@ export async function getInstructorOnboardingLinkAction(): Promise<GetInstructor
   });
 
   return res.json() as Promise<GetInstructorOnboardingLinkResponse>;
+}
+
+/**
+ * Any authenticated user. Generates a presigned URL for direct-to-S3 avatar upload.
+ */
+export async function uploadAvatarAction(data: {
+  fileName: string;
+  fileType: "image/jpeg" | "image/png";
+}): Promise<UploadAvatarResponse> {
+  const res = await apiClient("/users/profile/upload-avatar", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+
+  return res.json() as Promise<UploadAvatarResponse>;
 }
