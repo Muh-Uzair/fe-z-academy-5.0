@@ -3,7 +3,7 @@
 import PageHeader from "@/components/PageHeader";
 import PageFlexCol from "@/components/PageFlexCol";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -34,8 +34,10 @@ import { Separator } from "@/components/ui/separator";
 import { Bell, Camera, Lock, User } from "lucide-react";
 import type { AuthUser } from "@/response-types/authResponseTypes";
 import type { UploadAvatarResponse } from "@/response-types/userResponseTypes";
-import { getInstructorOnboardingLinkAction } from "@/services/user/actions";
-import { updateProfileAction, uploadAvatarAction } from "@/services/user/actions";
+import {
+  updateProfileAction,
+  uploadAvatarAction,
+} from "@/services/user/actions";
 import useClientAction from "@/hooks/useClientAction";
 
 // ─── SCHEMA (editable fields only) ───────────────────────────────────────────
@@ -76,14 +78,22 @@ type InstructorSettingsProps = {
 };
 
 const InstructorSettings = ({ user }: InstructorSettingsProps) => {
-  // VARS
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(user.avatar);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const { run: runOnboardingAction, isLoading: isOnboardingLoading } =
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(
+    user.avatar ?? null,
+  );
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const { run: runUpdateAction, isLoading: isUpdateLoading } =
     useClientAction();
-  const { run: runUpdateAction, isLoading: isUpdateLoading } = useClientAction();
+
+  useEffect(() => {
+    return () => {
+      if (avatarPreview?.startsWith("blob:")) {
+        URL.revokeObjectURL(avatarPreview);
+      }
+    };
+  }, [avatarPreview]);
 
   const form = useForm<InstructorSettingsFormValues>({
     resolver: zodResolver(instructorSettingsSchema),
@@ -96,7 +106,6 @@ const InstructorSettings = ({ user }: InstructorSettingsProps) => {
     },
   });
 
-  // FUNCTIONS
   const onSubmit = async (values: InstructorSettingsFormValues) => {
     const response = await runUpdateAction(async () => {
       let avatarKey: string | undefined;
@@ -141,24 +150,17 @@ const InstructorSettings = ({ user }: InstructorSettingsProps) => {
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    if (avatarPreview?.startsWith("blob:")) {
+      URL.revokeObjectURL(avatarPreview);
+    }
+
     setAvatarFile(file);
-    const objectUrl = URL.createObjectURL(file);
-    setAvatarPreview(objectUrl);
+    setAvatarPreview(URL.createObjectURL(file));
   };
 
   const handleNotificationToggle = (checked: boolean) => {
     setNotificationsEnabled(checked);
-    console.log(checked ? "Notification on" : "Notification off");
-  };
-
-  const handleStripeOnboarding = async () => {
-    const response = await runOnboardingAction(() =>
-      getInstructorOnboardingLinkAction(),
-    );
-
-    if (response?.status === "success") {
-      window.location.assign(response.data.url);
-    }
   };
 
   return (
@@ -194,7 +196,7 @@ const InstructorSettings = ({ user }: InstructorSettingsProps) => {
               <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/*"
+                accept=".jpg,.jpeg,.png,image/jpeg,image/png"
                 className="hidden"
                 onChange={handleAvatarChange}
               />
@@ -207,38 +209,6 @@ const InstructorSettings = ({ user }: InstructorSettingsProps) => {
                 <Camera className="mr-2 h-4 w-4" />
                 Edit Avatar
               </AppButton>
-            </div>
-          </div>
-
-          <Separator />
-
-          <div className="flex items-center justify-between rounded-lg border p-4">
-            <div className="space-y-1">
-              <p className="text-sm font-medium">Stripe onboarding</p>
-              <p className="text-sm text-muted-foreground">
-                {user.stripeOnboardingComplete
-                  ? "Your Stripe account is ready to receive course payouts."
-                  : "Complete Stripe onboarding to receive course payouts."}
-              </p>
-            </div>
-            <div className="flex items-center gap-3">
-              <Badge
-                variant={
-                  user.stripeOnboardingComplete ? "default" : "secondary"
-                }
-              >
-                {user.stripeOnboardingComplete ? "Complete" : "Incomplete"}
-              </Badge>
-              {!user.stripeOnboardingComplete && (
-                <AppButton
-                  type="button"
-                  size="sm"
-                  isLoading={isOnboardingLoading}
-                  onClick={handleStripeOnboarding}
-                >
-                  Complete onboarding
-                </AppButton>
-              )}
             </div>
           </div>
 
@@ -375,7 +345,11 @@ const InstructorSettings = ({ user }: InstructorSettingsProps) => {
                 )}
               />
 
-              <AppButton type="submit" isLoading={isUpdateLoading} disabled={form.formState.isSubmitting}>
+              <AppButton
+                type="submit"
+                isLoading={isUpdateLoading}
+                disabled={form.formState.isSubmitting}
+              >
                 Save Changes
               </AppButton>
             </form>
