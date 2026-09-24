@@ -7,6 +7,7 @@ import {
   getFeaturedCoursesQuery,
   getTrendingCoursesQuery,
 } from "@/services/course/queries";
+import { getPlatformStatsQuery } from "@/services/stat/queries";
 import type { AuthUser } from "@/response-types/authResponseTypes";
 
 const HomePage = async () => {
@@ -26,12 +27,16 @@ const HomePage = async () => {
   // Fetch trending courses (doesn't require auth)
   const trendingCoursesRes = await getTrendingCoursesQuery();
 
+  // Fetch platform stats (doesn't require auth)
+  const platformStatsRes = await getPlatformStatsQuery();
+
   return (
     <Home
       user={user}
       topCategories={topCategoriesRes.data.categories}
       featuredCourses={featuredCoursesRes.data.courses}
       trendingCourses={trendingCoursesRes.data.courses}
+      platformStats={platformStatsRes.data}
     />
   );
 };

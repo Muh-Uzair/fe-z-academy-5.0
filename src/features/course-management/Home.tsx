@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Search, MonitorPlay, Users, Award, Star, ArrowRight, BookOpen } from "lucide-react";
 
 import AppButton from "@/components/AppButton";
@@ -14,12 +15,14 @@ import { Badge } from "@/components/ui/badge";
 import type { AuthUser } from "@/response-types/authResponseTypes";
 import type { TopCategory } from "@/response-types/categoryResponseTypes";
 import type { PublicCourseListItem } from "@/response-types/courseResponseTypes";
+import type { GetPlatformStatsResponseData } from "@/response-types/statResponseTypes";
 
 type HomeProps = {
   user: AuthUser | null;
   topCategories: TopCategory[];
   featuredCourses: PublicCourseListItem[];
   trendingCourses: PublicCourseListItem[];
+  platformStats: GetPlatformStatsResponseData;
 };
 
 export default function Home({
@@ -27,8 +30,18 @@ export default function Home({
   topCategories,
   featuredCourses,
   trendingCourses,
+  platformStats,
 }: HomeProps) {
   const [search, setSearch] = useState("");
+  const router = useRouter();
+
+  const handleSearch = () => {
+    if (search.trim()) {
+      router.push(`/courses?search=${encodeURIComponent(search.trim())}`);
+    } else {
+      router.push(`/courses`);
+    }
+  };
 
   return (
     <div className="w-full min-h-screen flex flex-col bg-background overflow-x-hidden">
@@ -43,11 +56,9 @@ export default function Home({
 
         <div className="max-w-[1200px] mx-auto w-full px-6 grid lg:grid-cols-2 gap-12 items-center">
           <div className="flex flex-col gap-6 relative z-10">
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-black text-foreground tracking-tight leading-[1.1]">
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-br from-primary-very-dark from-20% via-primary via-60% to-primary-light tracking-tight leading-[1.1]">
               Master New Skills <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary-dark">
-                Advance Your Career
-              </span>
+              Advance Your Career
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground max-w-xl leading-relaxed">
               Join millions of learners from around the world. Access thousands of expert-led courses, ranging from web development to business design.
@@ -59,11 +70,18 @@ export default function Home({
                 <Input
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleSearch();
+                  }}
                   placeholder="What do you want to learn today?"
                   className="w-full pl-12 pr-4 h-14 rounded-full text-base bg-background shadow-sm border-border/60 focus-visible:ring-primary/50"
                 />
               </div>
-              <AppButton size="lg" className="h-14 px-8 rounded-full shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all font-bold text-base">
+              <AppButton 
+                size="lg" 
+                onClick={handleSearch}
+                className="h-14 px-8 rounded-full shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all font-bold text-base"
+              >
                 Search Courses
               </AppButton>
             </div>
@@ -71,11 +89,11 @@ export default function Home({
             <div className="flex items-center gap-6 mt-6 text-sm text-muted-foreground font-medium">
               <div className="flex items-center gap-2">
                 <div className="bg-primary/10 p-2 rounded-full"><Users className="h-4 w-4 text-primary" /></div>
-                <span>50k+ Active Students</span>
+                <span>{platformStats.totalStudents.toLocaleString()} Active Students</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="bg-primary/10 p-2 rounded-full"><MonitorPlay className="h-4 w-4 text-primary" /></div>
-                <span>2,000+ Courses</span>
+                <span>{platformStats.totalCourses.toLocaleString()} Courses</span>
               </div>
             </div>
           </div>
@@ -83,7 +101,7 @@ export default function Home({
           <div className="relative hidden lg:block z-10">
             <div className="relative rounded-3xl overflow-hidden shadow-2xl aspect-[4/3] border border-border/50">
               <img
-                src="https://s3.amazonaws.com/dummy-bucket/dummy-image.jpg"
+                src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2071&auto=format&fit=crop"
                 alt="Student learning online"
                 className="w-full h-full object-cover"
               />
@@ -177,7 +195,7 @@ export default function Home({
             </p>
             <ul className="space-y-4 mt-2">
               {[
-                "Unlimited access to 2,000+ top-rated courses",
+                `Unlimited access to ${platformStats.totalCourses.toLocaleString()} top-rated courses`,
                 "Detailed analytics and learning paths",
                 "Dedicated customer success manager"
               ].map((item, i) => (
