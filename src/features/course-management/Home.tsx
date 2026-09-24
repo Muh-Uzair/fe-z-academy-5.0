@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Search, MonitorPlay, Users, Award, Star, ArrowRight, BookOpen } from "lucide-react";
 
@@ -100,10 +101,11 @@ export default function Home({
 
           <div className="relative hidden lg:block z-10">
             <div className="relative rounded-3xl overflow-hidden shadow-2xl aspect-[4/3] border border-border/50">
-              <img
+              <Image
                 src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2071&auto=format&fit=crop"
                 alt="Student learning online"
-                className="w-full h-full object-cover"
+                fill
+                className="object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
             </div>
@@ -176,38 +178,41 @@ export default function Home({
         </div>
       </section>
 
-      {/* Split Info Section */}
+      {/* Info Split Section */}
       <section className="py-24 px-6 max-w-[1200px] mx-auto w-full">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
-          <div className="relative rounded-3xl overflow-hidden shadow-2xl aspect-video lg:aspect-square order-2 lg:order-1">
-            <img
-              src="https://s3.amazonaws.com/dummy-bucket/dummy-image.jpg"
-              alt="Team collaboration"
-              className="w-full h-full object-cover"
+          <div className="relative rounded-3xl overflow-hidden shadow-2xl aspect-video lg:aspect-square order-2 lg:order-1 border border-border/50">
+            <Image
+              src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?q=80&w=2070&auto=format&fit=crop"
+              alt="Students in a classroom"
+              fill
+              className="object-cover transition-transform duration-700 hover:scale-105"
             />
-            <div className="absolute inset-0 bg-primary/20 mix-blend-multiply" />
+            <div className="absolute inset-0 bg-primary/10 mix-blend-multiply" />
           </div>
           <div className="flex flex-col gap-6 order-1 lg:order-2">
-            <Badge variant="outline" className="w-fit text-primary border-primary/30">For Businesses</Badge>
-            <h2 className="text-4xl font-bold text-foreground leading-tight">Upskill your entire team with Z-Academy Business</h2>
-            <p className="text-lg text-muted-foreground">
-              Get unlimited access to top courses for your team. Empower your workforce with the skills they need to stay competitive in the digital age.
+            <Badge variant="outline" className="w-fit text-primary border-primary/30">Your Learning Partner</Badge>
+            <h2 className="text-4xl lg:text-5xl font-bold text-foreground leading-tight tracking-tight">Unlock your true potential with Z-Academy</h2>
+            <p className="text-lg text-muted-foreground leading-relaxed">
+              Join a vibrant community of learners and get access to world-class education from the comfort of your home. Master the skills you need to achieve your career goals.
             </p>
             <ul className="space-y-4 mt-2">
               {[
-                `Unlimited access to ${platformStats.totalCourses.toLocaleString()} top-rated courses`,
-                "Detailed analytics and learning paths",
-                "Dedicated customer success manager"
+                "Learn from top industry experts and professionals",
+                "Flexible learning on any device, anywhere",
+                "Earn certificates to showcase your new skills"
               ].map((item, i) => (
-                <li key={i} className="flex items-center gap-3">
-                  <div className="bg-primary/10 p-1 rounded-full"><Star className="h-4 w-4 text-primary" /></div>
-                  <span className="font-medium">{item}</span>
+                <li key={i} className="flex items-center gap-4">
+                  <div className="bg-primary/10 p-2 rounded-full"><Star className="h-5 w-5 text-primary" /></div>
+                  <span className="font-medium text-foreground">{item}</span>
                 </li>
               ))}
             </ul>
-            <AppButton size="lg" variant="outline" className="w-fit mt-4 border-primary text-primary hover:bg-primary/5">
-              Discover Z-Academy Business
-            </AppButton>
+            <Link href="/courses">
+              <AppButton size="lg" className="w-fit mt-4 px-8 rounded-full shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all font-bold">
+                Start Learning Now
+              </AppButton>
+            </Link>
           </div>
         </div>
       </section>
@@ -237,6 +242,45 @@ export default function Home({
                 }
               />
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Become an Instructor Section */}
+      <section className="py-24 px-6 max-w-[1200px] mx-auto w-full">
+        <div className="grid lg:grid-cols-2 gap-16 items-center">
+          <div className="flex flex-col gap-6 order-1">
+            <Badge variant="outline" className="w-fit text-primary border-primary/30">For Instructors</Badge>
+            <h2 className="text-4xl lg:text-5xl font-bold text-foreground leading-tight tracking-tight">Become an Instructor</h2>
+            <p className="text-lg text-muted-foreground leading-relaxed">
+              Instructors from around the world teach millions of students on Z-Academy. We provide the tools and skills to teach what you love.
+            </p>
+            <ul className="space-y-4 mt-2">
+              {[
+                "Earn money by sharing your expertise",
+                "Inspire students globally with your courses",
+                "Get access to exclusive instructor tools"
+              ].map((item, i) => (
+                <li key={i} className="flex items-center gap-4">
+                  <div className="bg-primary/10 p-2 rounded-full"><BookOpen className="h-5 w-5 text-primary" /></div>
+                  <span className="font-medium text-foreground">{item}</span>
+                </li>
+              ))}
+            </ul>
+            <Link href="/signup">
+              <AppButton size="lg" className="w-fit mt-4 px-8 rounded-full shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all font-bold">
+                Start Teaching Today
+              </AppButton>
+            </Link>
+          </div>
+          <div className="relative rounded-3xl overflow-hidden shadow-2xl aspect-video lg:aspect-square order-2 border border-border/50">
+            <Image
+              src="https://images.unsplash.com/photo-1573164713988-8665fc963095?q=80&w=2069&auto=format&fit=crop"
+              alt="Instructor working on a course"
+              fill
+              className="object-cover transition-transform duration-700 hover:scale-105"
+            />
+            <div className="absolute inset-0 bg-primary/10 mix-blend-multiply" />
           </div>
         </div>
       </section>
