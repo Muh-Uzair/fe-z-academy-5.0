@@ -6,4 +6,5 @@ export const COURSE_TAGS = {
   publicCourses: "public-courses",
   publicCourseDetails: (id: string) => `public-course-details-${id}`,
   featuredCourses: "featured-courses",
+  trendingCourses: "trending-courses",
 } as const;

@@ -80,6 +80,7 @@ export async function createCourseAction(data: {
   if (json.status === "success") {
     updateTag(COURSE_TAGS.courses);
     updateTag(COURSE_TAGS.featuredCourses);
+    updateTag(COURSE_TAGS.trendingCourses);
   }
 
   return json;
@@ -116,6 +117,7 @@ export async function updateCourseAction(
   if (json.status === "success") {
     updateTag(COURSE_TAGS.courses);
     updateTag(COURSE_TAGS.featuredCourses);
+    updateTag(COURSE_TAGS.trendingCourses);
     updateTag(COURSE_TAGS.courseDetails(id));
   }
 
@@ -138,6 +140,7 @@ export async function deleteCourseAction(
   if (json.status === "success") {
     updateTag(COURSE_TAGS.courses);
     updateTag(COURSE_TAGS.featuredCourses);
+    updateTag(COURSE_TAGS.trendingCourses);
     updateTag(COURSE_TAGS.courseDetails(id));
   }
 
@@ -166,6 +169,7 @@ export async function updateCourseVerificationAction(
   if (json.status === "success") {
     updateTag(COURSE_TAGS.courses);
     updateTag(COURSE_TAGS.featuredCourses);
+    updateTag(COURSE_TAGS.trendingCourses);
     updateTag(COURSE_TAGS.courseDetails(id));
   }
 

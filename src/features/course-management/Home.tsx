@@ -11,7 +11,6 @@ import PublicFooter from "@/components/PublicFooter";
 import CourseCard from "@/components/CourseCard";
 import { Badge } from "@/components/ui/badge";
 
-import { coursesData as mockCourses } from "@/dummy-data/coursesData";
 import type { AuthUser } from "@/response-types/authResponseTypes";
 import type { TopCategory } from "@/response-types/categoryResponseTypes";
 import type { PublicCourseListItem } from "@/response-types/courseResponseTypes";
@@ -20,9 +19,15 @@ type HomeProps = {
   user: AuthUser | null;
   topCategories: TopCategory[];
   featuredCourses: PublicCourseListItem[];
+  trendingCourses: PublicCourseListItem[];
 };
 
-export default function Home({ user, topCategories, featuredCourses }: HomeProps) {
+export default function Home({
+  user,
+  topCategories,
+  featuredCourses,
+  trendingCourses,
+}: HomeProps) {
   const [search, setSearch] = useState("");
 
   return (
@@ -203,7 +208,7 @@ export default function Home({ user, topCategories, featuredCourses }: HomeProps
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-            {mockCourses.slice(3, 6).map((course) => (
+            {trendingCourses.map((course) => (
               <CourseCard
                 key={course._id}
                 course={course}

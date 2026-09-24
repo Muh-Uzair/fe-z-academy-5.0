@@ -13,6 +13,7 @@ import type {
   GetInstructorCoursesResponse,
   GetStudentCoursesResponse,
   GetFeaturedCoursesResponse,
+  GetTrendingCoursesResponse,
   CourseStatus,
 } from "@/response-types/courseResponseTypes";
 
@@ -52,6 +53,10 @@ type GetStudentCoursesSuccessResponse = Extract<
 >;
 type GetFeaturedCoursesSuccessResponse = Extract<
   GetFeaturedCoursesResponse,
+  { status: "success" }
+>;
+type GetTrendingCoursesSuccessResponse = Extract<
+  GetTrendingCoursesResponse,
   { status: "success" }
 >;
 
@@ -267,6 +272,36 @@ export async function getFeaturedCoursesQuery(): Promise<GetFeaturedCoursesSucce
     return json;
   } catch (err) {
     console.error("getFeaturedCoursesQuery failed:", err);
+    throw err;
+  }
+}
+
+/**
+ * No authentication required — cookies are not sent. Always scoped to
+ * verified courses only. Returns the top 3 trending courses based on enrollments.
+ * Uses a shared (non-private) 'use cache' since the response doesn't depend
+ * on the caller's identity.
+ */
+export async function getTrendingCoursesQuery(): Promise<GetTrendingCoursesSuccessResponse> {
+  "use cache";
+  cacheTag(COURSE_TAGS.trendingCourses);
+  cacheLife("minutes");
+
+  try {
+    const res = await apiClient(
+      `/courses/trending`,
+      { method: "GET" },
+      { includeCookies: false },
+    );
+    const json: GetTrendingCoursesResponse = await res.json();
+
+    if (json.status !== "success") {
+      throw new Error(json.message);
+    }
+
+    return json;
+  } catch (err) {
+    console.error("getTrendingCoursesQuery failed:", err);
     throw err;
   }
 }
