@@ -46,6 +46,7 @@ export async function createCategoryAction(data: {
 
   if (json.status === "success") {
     updateTag(CATEGORY_TAGS.categories);
+    updateTag(CATEGORY_TAGS.topCategories);
   }
 
   return json;
@@ -73,6 +74,7 @@ export async function updateCategoryAction(
 
   if (json.status === "success") {
     updateTag(CATEGORY_TAGS.categories);
+    updateTag(CATEGORY_TAGS.topCategories);
     updateTag(CATEGORY_TAGS.categoryDetails(id));
   }
 
@@ -94,6 +96,7 @@ export async function deleteCategoryAction(
 
   if (json.status === "success") {
     updateTag(CATEGORY_TAGS.categories);
+    updateTag(CATEGORY_TAGS.topCategories);
     updateTag(CATEGORY_TAGS.categoryDetails(id));
   }
 

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Search, MonitorPlay, Users, Award, Star, ArrowRight } from "lucide-react";
+import { Search, MonitorPlay, Users, Award, Star, ArrowRight, BookOpen } from "lucide-react";
 
 import AppButton from "@/components/AppButton";
 import { Input } from "@/components/ui/input";
@@ -13,19 +13,14 @@ import { Badge } from "@/components/ui/badge";
 
 import { coursesData as mockCourses } from "@/dummy-data/coursesData";
 import type { AuthUser } from "@/response-types/authResponseTypes";
-
-const categories = [
-  { name: "Development", icon: <MonitorPlay className="h-6 w-6" />, count: "1.2k Courses" },
-  { name: "Design", icon: <Star className="h-6 w-6" />, count: "850 Courses" },
-  { name: "Business", icon: <Users className="h-6 w-6" />, count: "600 Courses" },
-  { name: "Marketing", icon: <Award className="h-6 w-6" />, count: "400 Courses" },
-];
+import type { TopCategory } from "@/response-types/categoryResponseTypes";
 
 type HomeProps = {
   user: AuthUser | null;
+  topCategories: TopCategory[];
 };
 
-export default function Home({ user }: HomeProps) {
+export default function Home({ user, topCategories }: HomeProps) {
   const [search, setSearch] = useState("");
 
   return (
@@ -81,7 +76,7 @@ export default function Home({ user }: HomeProps) {
           <div className="relative hidden lg:block z-10">
             <div className="relative rounded-3xl overflow-hidden shadow-2xl aspect-[4/3] border border-border/50">
               <img
-                src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=1200&auto=format&fit=crop"
+                src="https://s3.amazonaws.com/dummy-bucket/dummy-image.jpg"
                 alt="Student learning online"
                 className="w-full h-full object-cover"
               />
@@ -114,13 +109,17 @@ export default function Home({ user }: HomeProps) {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {categories.map((cat, i) => (
-            <div key={i} className="group p-6 rounded-2xl border border-border/50 bg-card hover:bg-primary/5 hover:border-primary/20 transition-all cursor-pointer shadow-sm hover:shadow-md">
-              <div className="bg-primary/10 w-14 h-14 rounded-xl flex items-center justify-center text-primary group-hover:scale-110 transition-transform mb-6">
-                {cat.icon}
+          {topCategories.map((cat) => (
+            <div key={cat._id} className="group p-6 rounded-2xl border border-border/50 bg-card hover:bg-primary/5 hover:border-primary/20 transition-all cursor-pointer shadow-sm hover:shadow-md">
+              <div className="bg-primary/10 w-14 h-14 rounded-xl flex items-center justify-center overflow-hidden group-hover:scale-110 transition-transform mb-6">
+                {cat.imageUrl ? (
+                  <img src={cat.imageUrl} alt={cat.name} className="w-full h-full object-cover" />
+                ) : (
+                  <MonitorPlay className="h-6 w-6 text-primary" />
+                )}
               </div>
               <h3 className="text-lg font-bold text-foreground group-hover:text-primary transition-colors">{cat.name}</h3>
-              <p className="text-sm text-muted-foreground mt-1">{cat.count}</p>
+              <p className="text-sm text-muted-foreground mt-1">{cat.courseCount} {cat.courseCount === 1 ? 'Course' : 'Courses'}</p>
             </div>
           ))}
         </div>
@@ -157,7 +156,7 @@ export default function Home({ user }: HomeProps) {
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           <div className="relative rounded-3xl overflow-hidden shadow-2xl aspect-video lg:aspect-square order-2 lg:order-1">
             <img
-              src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=1200&auto=format&fit=crop"
+              src="https://s3.amazonaws.com/dummy-bucket/dummy-image.jpg"
               alt="Team collaboration"
               className="w-full h-full object-cover"
             />

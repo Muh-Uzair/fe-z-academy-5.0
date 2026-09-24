@@ -6,6 +6,7 @@ import { CATEGORY_TAGS } from "./tags";
 import type {
   GetCategoriesResponse,
   GetCategoryDetailsResponse,
+  GetTopCategoriesResponse,
 } from "@/response-types/categoryResponseTypes";
 
 // Each query below throws on a non-success response instead of returning it,
@@ -16,6 +17,11 @@ type GetCategoriesSuccessResponse = Extract<
 >;
 type GetCategoryDetailsSuccessResponse = Extract<
   GetCategoryDetailsResponse,
+  { status: "success" }
+>;
+
+type GetTopCategoriesSuccessResponse = Extract<
+  GetTopCategoriesResponse,
   { status: "success" }
 >;
 
@@ -90,6 +96,36 @@ export async function getCategoryDetailsQuery(
     return json;
   } catch (err) {
     console.error("getCategoryDetailsQuery failed:", err);
+    throw err;
+  }
+}
+
+/**
+ * Public. Fetches the top categories based on course count.
+ * Shared cache — the same result is served to every caller.
+ * Use updateTag(CATEGORY_TAGS.topCategories) to invalidate this after
+ * an update that affects course counts.
+ */
+export async function getTopCategoriesQuery(): Promise<GetTopCategoriesSuccessResponse> {
+  "use cache";
+  cacheTag(CATEGORY_TAGS.topCategories);
+  cacheLife("minutes");
+
+  try {
+    const res = await apiClient(
+      `/categories/top`,
+      { method: "GET" },
+      { includeCookies: false },
+    );
+    const json: GetTopCategoriesResponse = await res.json();
+
+    if (json.status !== "success") {
+      throw new Error(json.message);
+    }
+
+    return json;
+  } catch (err) {
+    console.error("getTopCategoriesQuery failed:", err);
     throw err;
   }
 }
