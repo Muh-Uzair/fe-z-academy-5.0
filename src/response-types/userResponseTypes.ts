@@ -1,7 +1,11 @@
 // This file is intentionally framework-independent. Copy it directly into a
 // frontend project; it has no backend imports and represents JSON values only.
 
-import { AuthUser, SuccessApiResponse, ApiErrorResponse } from "./authResponseTypes";
+import {
+  AuthUser,
+  SuccessApiResponse,
+  ApiErrorResponse,
+} from "./authResponseTypes";
 
 // Public user shape returned by the user-management endpoints.
 // Instructor details may additionally include stripeOnboardingComplete.
@@ -104,16 +108,23 @@ export interface UpdateProfileResponseData {
 }
 
 export type UpdateProfileResponse =
-  | SuccessApiResponse<UpdateProfileResponseData, "Profile updated successfully">
+  | SuccessApiResponse<
+      UpdateProfileResponseData,
+      "Profile updated successfully"
+    >
   | ApiErrorResponse;
 
 // API 8: POST /api/v1/users/profile/upload-avatar
-// Response: { status, message, data: { uploadUrl, fields } }
+// Response: { status, message, data: { uploadUrl, fields, key } }
 export interface UploadAvatarResponseData {
   uploadUrl: string;
   fields: Record<string, string>;
+  key: string;
 }
 
 export type UploadAvatarResponse =
-  | SuccessApiResponse<UploadAvatarResponseData, "Avatar upload URL generated successfully">
+  | SuccessApiResponse<
+      UploadAvatarResponseData,
+      "Avatar upload URL generated successfully"
+    >
   | ApiErrorResponse;

@@ -3,7 +3,7 @@
 import PageHeader from "@/components/PageHeader";
 import PageFlexCol from "@/components/PageFlexCol";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -34,7 +34,10 @@ import { Bell, Camera, Lock, User } from "lucide-react";
 import type { AuthUser } from "@/response-types/authResponseTypes";
 import type { UploadAvatarResponse } from "@/response-types/userResponseTypes";
 import useClientAction from "@/hooks/useClientAction";
-import { updateProfileAction, uploadAvatarAction } from "@/services/user/actions";
+import {
+  updateProfileAction,
+  uploadAvatarAction,
+} from "@/services/user/actions";
 
 // ─── SCHEMA (editable fields only) ───────────────────────────────────────────
 const adminSettingsSchema = z.object({
@@ -65,14 +68,23 @@ type AdminSettingsProps = {
   user: AuthUser;
 };
 
-// CMP CMP CMP
 const AdminSettings = ({ user }: AdminSettingsProps) => {
-  // VARS
+
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(user.avatar);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(
+    user.avatar ?? null,
+  );
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const { run, isLoading } = useClientAction();
+
+  useEffect(() => {
+    return () => {
+      if (avatarPreview?.startsWith("blob:")) {
+        URL.revokeObjectURL(avatarPreview);
+      }
+    };
+  }, [avatarPreview]);
 
   const form = useForm<AdminSettingsFormValues>({
     resolver: zodResolver(adminSettingsSchema),
@@ -82,7 +94,6 @@ const AdminSettings = ({ user }: AdminSettingsProps) => {
     },
   });
 
-  // FUNCTIONS
   const onSubmit = async (values: AdminSettingsFormValues) => {
     const response = await run(async () => {
       let avatarKey: string | undefined;
@@ -107,7 +118,7 @@ const AdminSettings = ({ user }: AdminSettingsProps) => {
           };
         }
 
-        avatarKey = uploadResponse.data.fields.key;
+        avatarKey = uploadResponse.data.key;
       }
 
       return updateProfileAction({
@@ -124,14 +135,17 @@ const AdminSettings = ({ user }: AdminSettingsProps) => {
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    if (avatarPreview?.startsWith("blob:")) {
+      URL.revokeObjectURL(avatarPreview);
+    }
+
     setAvatarFile(file);
-    const objectUrl = URL.createObjectURL(file);
-    setAvatarPreview(objectUrl);
+    setAvatarPreview(URL.createObjectURL(file));
   };
 
   const handleNotificationToggle = (checked: boolean) => {
     setNotificationsEnabled(checked);
-    console.log(checked ? "Notification on" : "Notification off");
   };
 
   return (
@@ -167,7 +181,7 @@ const AdminSettings = ({ user }: AdminSettingsProps) => {
               <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/*"
+                accept=".jpg,.jpeg,.png,image/jpeg,image/png"
                 className="hidden"
                 onChange={handleAvatarChange}
               />
@@ -235,7 +249,11 @@ const AdminSettings = ({ user }: AdminSettingsProps) => {
                 )}
               />
 
-              <AppButton type="submit" isLoading={isLoading} disabled={form.formState.isSubmitting}>
+              <AppButton
+                type="submit"
+                isLoading={isLoading}
+                disabled={form.formState.isSubmitting}
+              >
                 Save Changes
               </AppButton>
             </form>

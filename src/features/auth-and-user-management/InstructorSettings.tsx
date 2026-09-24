@@ -121,7 +121,7 @@ const InstructorSettings = ({ user }: InstructorSettingsProps) => {
           };
         }
 
-        avatarKey = uploadResponse.data.fields.key;
+        avatarKey = uploadResponse.data.key;
       }
 
       return updateProfileAction({

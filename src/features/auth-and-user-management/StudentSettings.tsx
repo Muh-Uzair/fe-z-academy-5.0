@@ -114,7 +114,7 @@ const StudentSettings = ({ user }: StudentSettingsProps) => {
           };
         }
 
-        avatarKey = uploadResponse.data.fields.key;
+        avatarKey = uploadResponse.data.key;
       }
 
       return updateProfileAction({

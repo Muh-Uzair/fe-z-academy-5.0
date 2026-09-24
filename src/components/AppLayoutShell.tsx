@@ -21,6 +21,7 @@ import {
   UserCheck,
   Users,
   LogOut,
+  User,
 } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -453,16 +454,20 @@ const AppLayoutShell = ({ role, user, children }: AppLayoutShellProps) => {
                   <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-primary ring-2 ring-white" />
                 </div>
 
-                {/* Avatar */}
-                <Avatar className="h-9 w-9 ring-2 ring-primary/20 transition-shadow hover:ring-primary/50">
-                  <AvatarImage
-                    src="https://i.pravatar.cc/150?img=47"
-                    alt="User avatar"
-                  />
-                  <AvatarFallback className="bg-primary text-white text-xs font-semibold">
-                    {meta.shortLabel}
-                  </AvatarFallback>
-                </Avatar>
+                {/* Avatar — links to settings, shows real avatar or User icon fallback */}
+                <Link
+                  href={`/${role}/settings`}
+                  className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                >
+                  <Avatar className="h-9 w-9 ring-2 ring-primary/20 transition-shadow hover:ring-primary/50">
+                    {user.avatar ? (
+                      <AvatarImage src={user.avatar} alt={user.fullName} />
+                    ) : null}
+                    <AvatarFallback className="bg-muted">
+                      <User className="h-5 w-5 text-muted-foreground" />
+                    </AvatarFallback>
+                  </Avatar>
+                </Link>
               </div>
             </div>
           </header>
