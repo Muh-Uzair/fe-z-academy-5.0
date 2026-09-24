@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import Home from "@/features/course-management/Home";
 import { getMeQuery } from "@/services/auth/queries";
 import { getTopCategoriesQuery } from "@/services/category/queries";
+import { getFeaturedCoursesQuery } from "@/services/course/queries";
 import type { AuthUser } from "@/response-types/authResponseTypes";
 
 const HomePage = async () => {
@@ -16,7 +17,16 @@ const HomePage = async () => {
   // Fetch top categories (doesn't require auth)
   const topCategoriesRes = await getTopCategoriesQuery();
 
-  return <Home user={user} topCategories={topCategoriesRes.data.categories} />;
+  // Fetch featured courses (doesn't require auth)
+  const featuredCoursesRes = await getFeaturedCoursesQuery();
+
+  return (
+    <Home
+      user={user}
+      topCategories={topCategoriesRes.data.categories}
+      featuredCourses={featuredCoursesRes.data.courses}
+    />
+  );
 };
 
 export default HomePage;

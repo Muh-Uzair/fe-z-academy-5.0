@@ -5,4 +5,5 @@ export const COURSE_TAGS = {
   refundEligibility: (id: string) => `course-refund-eligibility-${id}`,
   publicCourses: "public-courses",
   publicCourseDetails: (id: string) => `public-course-details-${id}`,
+  featuredCourses: "featured-courses",
 } as const;

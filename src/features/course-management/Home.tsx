@@ -14,13 +14,15 @@ import { Badge } from "@/components/ui/badge";
 import { coursesData as mockCourses } from "@/dummy-data/coursesData";
 import type { AuthUser } from "@/response-types/authResponseTypes";
 import type { TopCategory } from "@/response-types/categoryResponseTypes";
+import type { PublicCourseListItem } from "@/response-types/courseResponseTypes";
 
 type HomeProps = {
   user: AuthUser | null;
   topCategories: TopCategory[];
+  featuredCourses: PublicCourseListItem[];
 };
 
-export default function Home({ user, topCategories }: HomeProps) {
+export default function Home({ user, topCategories, featuredCourses }: HomeProps) {
   const [search, setSearch] = useState("");
 
   return (
@@ -136,7 +138,7 @@ export default function Home({ user, topCategories }: HomeProps) {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-            {mockCourses.slice(0, 3).map((course) => (
+            {featuredCourses.map((course) => (
               <CourseCard
                 key={course._id}
                 course={course}

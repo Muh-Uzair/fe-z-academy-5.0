@@ -12,6 +12,7 @@ import type {
   GetPublicCourseDetailsResponse,
   GetInstructorCoursesResponse,
   GetStudentCoursesResponse,
+  GetFeaturedCoursesResponse,
   CourseStatus,
 } from "@/response-types/courseResponseTypes";
 
@@ -47,6 +48,10 @@ type GetInstructorCoursesSuccessResponse = Extract<
 >;
 type GetStudentCoursesSuccessResponse = Extract<
   GetStudentCoursesResponse,
+  { status: "success" }
+>;
+type GetFeaturedCoursesSuccessResponse = Extract<
+  GetFeaturedCoursesResponse,
   { status: "success" }
 >;
 
@@ -232,6 +237,36 @@ export async function getPublicCoursesQuery(
     return json;
   } catch (err) {
     console.error("getPublicCoursesQuery failed:", err);
+    throw err;
+  }
+}
+
+/**
+ * No authentication required — cookies are not sent. Always scoped to
+ * verified courses only. Returns the top 3 featured courses based on rating.
+ * Uses a shared (non-private) 'use cache' since the response doesn't depend
+ * on the caller's identity.
+ */
+export async function getFeaturedCoursesQuery(): Promise<GetFeaturedCoursesSuccessResponse> {
+  "use cache";
+  cacheTag(COURSE_TAGS.featuredCourses);
+  cacheLife("minutes");
+
+  try {
+    const res = await apiClient(
+      `/courses/featured`,
+      { method: "GET" },
+      { includeCookies: false },
+    );
+    const json: GetFeaturedCoursesResponse = await res.json();
+
+    if (json.status !== "success") {
+      throw new Error(json.message);
+    }
+
+    return json;
+  } catch (err) {
+    console.error("getFeaturedCoursesQuery failed:", err);
     throw err;
   }
 }
