@@ -51,7 +51,9 @@ const DURATION_OPTIONS = [
   { label: "10+ hours", min: 600, max: Infinity },
 ];
 
-import { coursesData as courses } from "@/dummy-data/coursesData";
+import type { PublicCourseListItem } from "@/response-types/courseResponseTypes";
+import type { Pagination } from "@/response-types/userResponseTypes";
+
 // -------------------- Sidebar --------------------
 
 type FilterSidebarProps = {
@@ -185,9 +187,26 @@ const FilterSidebar = ({
 
 // -------------------- Page --------------------
 
-const Courses = () => {
+type CoursesProps = {
+  courses: PublicCourseListItem[];
+  pagination: Pagination;
+  initialSearch: string;
+};
+
+const Courses = ({ courses, pagination, initialSearch }: CoursesProps) => {
   const router = useRouter();
-  const [search, setSearch] = useState("");
+  
+  const updateQuery = (next: { search?: string; page?: number }) => {
+    const nextSearch = next.search ?? initialSearch;
+    const nextPage = next.page ?? pagination.page ?? 1;
+
+    const searchParams = new URLSearchParams();
+    if (nextSearch) searchParams.set("search", nextSearch);
+    if (nextPage > 1) searchParams.set("page", String(nextPage));
+
+    const query = searchParams.toString();
+    router.push(`/courses${query ? `?${query}` : ""}`);
+  };
   const [selectedLevel, setSelectedLevel] = useState<string>("all");
   const [maxPrice, setMaxPrice] = useState([1000]);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
@@ -202,21 +221,23 @@ const Courses = () => {
     setMinRating(null);
     setSelectedDuration(null);
     setVerifiedOnly(false);
-    setSearch("");
+    updateQuery({ search: "", page: 1 });
   };
 
   const filteredCourses = useMemo(() => {
-    const q = search.toLowerCase();
+    const q = initialSearch.toLowerCase();
 
     const durationRange = DURATION_OPTIONS.find(
       (d) => d.label === selectedDuration,
     );
 
     return courses.filter((course) => {
+      const title = course.title?.toLowerCase() || "";
+      const categoryName = course.categoryDetails?.name?.toLowerCase() || "";
+      const instructorName = course.instructorDetails?.fullName?.toLowerCase() || "";
+      
       const matchesSearch =
-        course.title.toLowerCase().includes(q) ||
-        course.categoryName.toLowerCase().includes(q) ||
-        course.instructorName.toLowerCase().includes(q);
+        title.includes(q) || categoryName.includes(q) || instructorName.includes(q);
 
       const matchesLevel =
         selectedLevel === "all" || course.level === selectedLevel;
@@ -224,7 +245,7 @@ const Courses = () => {
       const matchesPrice = course.price <= maxPrice[0];
 
       const matchesCategory =
-        selectedCategory === "all" || course.categoryName === selectedCategory;
+        selectedCategory === "all" || (course.categoryDetails?.name || "") === selectedCategory;
 
       const matchesRating =
         minRating === null || course.averageRating >= minRating;
@@ -247,7 +268,7 @@ const Courses = () => {
       );
     });
   }, [
-    search,
+    initialSearch,
     selectedLevel,
     maxPrice,
     selectedCategory,
@@ -265,7 +286,8 @@ const Courses = () => {
           <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
             <AppSearchBar
               placeholder="Search by title, category or instructor..."
-              onChange={(value) => setSearch(value)}
+              defaultValue={initialSearch}
+              onChange={(value) => updateQuery({ search: value, page: 1 })}
               className="w-full flex-1"
             />
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full md:w-auto">
@@ -325,6 +347,8 @@ const Courses = () => {
             <AppCourseCardsGridLayout
               courses={filteredCourses as any}
               pagination={true}
+              paginationMeta={pagination}
+              onPageChange={(p) => updateQuery({ page: p })}
               renderFooter={(course) => (
                 <AppButton
                   className="w-full"
