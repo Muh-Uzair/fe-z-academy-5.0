@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   BookOpen,
   Users,
@@ -18,7 +19,21 @@ import PublicFooter from "@/components/PublicFooter";
 import AppButton from "@/components/AppButton";
 import { Card, CardContent } from "@/components/ui/card";
 
-const AboutUs = () => {
+interface AboutUsProps {
+  platformStats?: {
+    totalStudents: number;
+    totalCourses: number;
+  };
+}
+
+const AboutUs = ({ platformStats }: AboutUsProps) => {
+  const formatNumber = (num: number) => {
+    if (num >= 1000) return (num / 1000).toFixed(0) + "k+";
+    return num.toString();
+  };
+
+  const studentsText = platformStats ? formatNumber(platformStats.totalStudents) : "50k+";
+
   return (
     <>
       <PublicNavbar />
@@ -53,10 +68,11 @@ const AboutUs = () => {
               </div>
               <div className="relative mx-auto w-full max-w-[500px] lg:max-w-none">
                 <div className="relative rounded-2xl overflow-hidden shadow-2xl aspect-square md:aspect-[4/3] lg:aspect-square">
-                  <img
-                    src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=1400&auto=format&fit=crop"
+                  <Image
+                    src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=1400&auto=format&fit=crop"
                     alt="Students learning together"
-                    className="object-cover w-full h-full"
+                    fill
+                    className="object-cover"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                 </div>
@@ -67,7 +83,7 @@ const AboutUs = () => {
                     <Users className="h-8 w-8" />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold text-foreground">50k+</p>
+                    <p className="text-2xl font-bold text-foreground">{studentsText}</p>
                     <p className="text-sm text-muted-foreground">Active Students</p>
                   </div>
                 </div>
@@ -125,10 +141,11 @@ const AboutUs = () => {
 
               {/* Image side */}
               <div className="order-2 lg:order-1 relative rounded-2xl overflow-hidden shadow-xl aspect-video lg:aspect-square">
-                <img
-                  src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?q=80&w=1200&auto=format&fit=crop"
+                <Image
+                  src="https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=1200&auto=format&fit=crop"
                   alt="Instructor teaching"
-                  className="object-cover w-full h-full"
+                  fill
+                  className="object-cover"
                 />
               </div>
 
