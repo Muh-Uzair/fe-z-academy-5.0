@@ -4,6 +4,7 @@ import { apiClient } from "@/lib/apiClient";
 import { updateTag } from "next/cache";
 import { USER_TAGS } from "./tags";
 import { AUTH_TAGS } from "../auth/tags";
+import { DASHBOARD_TAGS } from "@/services/dashboard/tags";
 import type {
   GetInstructorOnboardingLinkResponse,
   UpdateUserVerificationResponse,
@@ -36,6 +37,7 @@ export async function updateUserVerificationAction(
   if (json.status === "success") {
     updateTag(USER_TAGS.instructors);
     updateTag(USER_TAGS.userDetails(id));
+    updateTag(DASHBOARD_TAGS.admin);
   }
 
   return json;
@@ -64,6 +66,9 @@ export async function updateProfileAction(data: {
   if (json.status === "success") {
     updateTag(AUTH_TAGS.currentUser);
     updateTag(USER_TAGS.profile);
+    updateTag(DASHBOARD_TAGS.admin);
+    updateTag(DASHBOARD_TAGS.instructor);
+    updateTag(DASHBOARD_TAGS.student);
   }
 
   return json;

@@ -3,6 +3,7 @@
 import { apiClient } from "@/lib/apiClient";
 import { updateTag } from "next/cache";
 import { ENROLLMENT_TAGS } from "./tags";
+import { DASHBOARD_TAGS } from "@/services/dashboard/tags";
 import type {
   UpdateEnrollmentProgressRequestBody,
   UpdateEnrollmentProgressResponse,
@@ -28,6 +29,8 @@ export async function updateEnrollmentProgressAction(
   if (json.status === "success") {
     updateTag(ENROLLMENT_TAGS.enrollments);
     updateTag(ENROLLMENT_TAGS.enrollmentDetails(id));
+    updateTag(DASHBOARD_TAGS.student);
+    updateTag(DASHBOARD_TAGS.instructor);
   }
 
   return json;

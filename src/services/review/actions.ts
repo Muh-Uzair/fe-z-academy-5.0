@@ -3,6 +3,7 @@
 import { apiClient } from "@/lib/apiClient";
 import { updateTag } from "next/cache";
 import { REVIEW_TAGS } from "./tags";
+import { DASHBOARD_TAGS } from "@/services/dashboard/tags";
 import type {
   CreateReviewResponse,
   UpdateReviewResponse,
@@ -30,6 +31,8 @@ export async function createReviewAction(data: {
     updateTag(REVIEW_TAGS.reviews);
     updateTag(REVIEW_TAGS.reviewByCourse(data.course));
     updateTag(REVIEW_TAGS.reviewsByCourse(data.course));
+    updateTag(DASHBOARD_TAGS.instructor);
+    updateTag(DASHBOARD_TAGS.admin);
   }
 
   return json;
@@ -56,6 +59,8 @@ export async function updateReviewAction(
   if (json.status === "success") {
     updateTag(REVIEW_TAGS.reviews);
     updateTag(REVIEW_TAGS.reviewDetails(id));
+    updateTag(DASHBOARD_TAGS.instructor);
+    updateTag(DASHBOARD_TAGS.admin);
   }
 
   return json;
@@ -76,6 +81,8 @@ export async function deleteReviewAction(
   if (json.status === "success") {
     updateTag(REVIEW_TAGS.reviews);
     updateTag(REVIEW_TAGS.reviewDetails(id));
+    updateTag(DASHBOARD_TAGS.instructor);
+    updateTag(DASHBOARD_TAGS.admin);
   }
 
   return json;
