@@ -23,10 +23,10 @@ const ViewCourseReviewsPage = async ({
 
   const [courseResponse, meResponse] = await Promise.all([
     getCourseDetailsQuery(id),
-    getMeQuery(),
+    getMeQuery(false),
   ]);
 
-  const role = meResponse.data.user.role;
+  const role = meResponse?.data.user.role || null;
 
   let reviews: Review[] = [];
   let pagination: Pagination | null = null;

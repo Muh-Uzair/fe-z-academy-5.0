@@ -43,8 +43,36 @@ export async function apiClient(
 
   console.log(`${method} ${url}`);
 
-  return fetch(url, {
+  if (init.body) {
+    let parsedBody = init.body;
+    try {
+      if (typeof init.body === "string") parsedBody = JSON.parse(init.body);
+    } catch (e) {}
+    console.log("------------------------------\n", "requestBody \n", parsedBody);
+  }
+
+  const res = await fetch(url, {
     ...init,
     headers,
   });
+
+  try {
+    const clonedRes = res.clone();
+    const json = await clonedRes.json();
+    console.log(
+      "responseBody \n",
+      json,
+      "\n",
+      "------------------------------ \n"
+    );
+  } catch (error) {
+    console.log(
+      "responseBody \n",
+      "[Could not parse JSON response or no body]",
+      "\n",
+      "------------------------------ \n"
+    );
+  }
+
+  return res;
 }

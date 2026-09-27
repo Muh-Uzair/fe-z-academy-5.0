@@ -15,6 +15,9 @@ import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
+import PagedSearchSelect, {
+  type PagedSearchSelectItem,
+} from "@/components/PagedSearchSelect";
 import {
   Select,
   SelectContent,
@@ -24,18 +27,6 @@ import {
 } from "@/components/ui/select";
 
 // -------------------- Constants --------------------
-
-const COURSE_LEVELS = ["beginner", "intermediate", "advanced"];
-
-const CATEGORIES = [
-  "Web Development",
-  "Frontend",
-  "Backend",
-  "Design",
-  "Data Science",
-  "DevOps",
-  "Cloud",
-];
 
 const RATING_OPTIONS = [
   { label: "4.5 & up", value: 4.5 },
@@ -51,8 +42,13 @@ const DURATION_OPTIONS = [
   { label: "10+ hours", min: 600, max: Infinity },
 ];
 
-import type { PublicCourseListItem } from "@/response-types/courseResponseTypes";
+import type {
+  PublicCourseListItem,
+  CourseLevel,
+} from "@/response-types/courseResponseTypes";
 import type { Pagination } from "@/response-types/userResponseTypes";
+
+const COURSE_LEVELS: CourseLevel[] = ["beginner", "intermediate", "advanced"];
 
 // -------------------- Sidebar --------------------
 
@@ -63,8 +59,6 @@ type FilterSidebarProps = {
   onRatingChange: (val: number | null) => void;
   selectedDuration: string | null;
   onDurationChange: (val: string | null) => void;
-  verifiedOnly: boolean;
-  onVerifiedChange: (val: boolean) => void;
   onReset: () => void;
 };
 
@@ -75,8 +69,6 @@ const FilterSidebar = ({
   onRatingChange,
   selectedDuration,
   onDurationChange,
-  verifiedOnly,
-  onVerifiedChange,
   onReset,
 }: FilterSidebarProps) => (
   <aside className="rounded-xl border bg-card p-4 sm:p-5 h-fit space-y-5 static lg:sticky lg:top-4">
@@ -91,23 +83,6 @@ const FilterSidebar = ({
       >
         Reset all
       </AppButton>
-    </div>
-
-    <Separator />
-
-    {/* Verified only */}
-    <div className="flex items-center justify-between">
-      <Label
-        htmlFor="verified-toggle"
-        className="text-sm font-medium cursor-pointer"
-      >
-        Verified only
-      </Label>
-      <Switch
-        id="verified-toggle"
-        checked={verifiedOnly}
-        onCheckedChange={onVerifiedChange}
-      />
     </div>
 
     <Separator />
@@ -191,91 +166,85 @@ type CoursesProps = {
   courses: PublicCourseListItem[];
   pagination: Pagination;
   initialSearch: string;
+  category: string;
+  level: string;
+  maxPrice: number;
+  minRating: number | null;
+  duration: string | null;
+  categoryItems: PagedSearchSelectItem[];
+  categoryPagination: Pagination;
+  categorySearch: string;
 };
 
-const Courses = ({ courses, pagination, initialSearch }: CoursesProps) => {
+const Courses = ({
+  courses,
+  pagination,
+  initialSearch,
+  category,
+  level,
+  maxPrice,
+  minRating,
+  duration,
+  categoryItems,
+  categoryPagination,
+  categorySearch,
+}: CoursesProps) => {
   const router = useRouter();
-  
-  const updateQuery = (next: { search?: string; page?: number }) => {
+
+  const updateQuery = (next: {
+    search?: string;
+    page?: number;
+    category?: string;
+    categorySearch?: string;
+    categoryPage?: number;
+    level?: string;
+    maxPrice?: number;
+    minRating?: number | null;
+    duration?: string | null;
+  }) => {
     const nextSearch = next.search ?? initialSearch;
     const nextPage = next.page ?? pagination.page ?? 1;
+    const nextCategory = next.category ?? category;
+    const nextCategorySearch = next.categorySearch ?? categorySearch;
+    const nextCategoryPage = next.categoryPage ?? categoryPagination.page ?? 1;
+    const nextLevel = next.level ?? level;
+    const nextMaxPrice = next.maxPrice ?? maxPrice;
+    const nextMinRating =
+      next.minRating !== undefined ? next.minRating : minRating;
+    const nextDuration = next.duration !== undefined ? next.duration : duration;
 
     const searchParams = new URLSearchParams();
     if (nextSearch) searchParams.set("search", nextSearch);
+    if (nextCategory && nextCategory !== "all")
+      searchParams.set("category", nextCategory);
+    if (nextCategorySearch)
+      searchParams.set("categorySearch", nextCategorySearch);
+    if (nextCategoryPage > 1)
+      searchParams.set("categoryPage", String(nextCategoryPage));
+    if (nextLevel && nextLevel !== "all") searchParams.set("level", nextLevel);
     if (nextPage > 1) searchParams.set("page", String(nextPage));
+    if (nextMaxPrice < 1000) searchParams.set("maxPrice", String(nextMaxPrice));
+    if (nextMinRating !== null)
+      searchParams.set("minRating", String(nextMinRating));
+    if (nextDuration) searchParams.set("duration", nextDuration);
 
     const query = searchParams.toString();
     router.push(`/courses${query ? `?${query}` : ""}`);
   };
-  const [selectedLevel, setSelectedLevel] = useState<string>("all");
-  const [maxPrice, setMaxPrice] = useState([1000]);
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const [minRating, setMinRating] = useState<number | null>(null);
-  const [selectedDuration, setSelectedDuration] = useState<string | null>(null);
-  const [verifiedOnly, setVerifiedOnly] = useState(false);
 
   const handleReset = () => {
-    setSelectedLevel("all");
-    setMaxPrice([1000]);
-    setSelectedCategory("all");
-    setMinRating(null);
-    setSelectedDuration(null);
-    setVerifiedOnly(false);
-    updateQuery({ search: "", page: 1 });
-  };
-
-  const filteredCourses = useMemo(() => {
-    const q = initialSearch.toLowerCase();
-
-    const durationRange = DURATION_OPTIONS.find(
-      (d) => d.label === selectedDuration,
-    );
-
-    return courses.filter((course) => {
-      const title = course.title?.toLowerCase() || "";
-      const categoryName = course.categoryDetails?.name?.toLowerCase() || "";
-      const instructorName = course.instructorDetails?.fullName?.toLowerCase() || "";
-      
-      const matchesSearch =
-        title.includes(q) || categoryName.includes(q) || instructorName.includes(q);
-
-      const matchesLevel =
-        selectedLevel === "all" || course.level === selectedLevel;
-
-      const matchesPrice = course.price <= maxPrice[0];
-
-      const matchesCategory =
-        selectedCategory === "all" || (course.categoryDetails?.name || "") === selectedCategory;
-
-      const matchesRating =
-        minRating === null || course.averageRating >= minRating;
-
-      const matchesDuration =
-        !durationRange ||
-        (course.totalDurationInMinutes >= durationRange.min &&
-          course.totalDurationInMinutes < durationRange.max);
-
-      const matchesVerified = !verifiedOnly || course.isVerified;
-
-      return (
-        matchesSearch &&
-        matchesLevel &&
-        matchesPrice &&
-        matchesCategory &&
-        matchesRating &&
-        matchesDuration &&
-        matchesVerified
-      );
+    updateQuery({
+      search: "",
+      page: 1,
+      category: "all",
+      categorySearch: "",
+      categoryPage: 1,
+      level: "all",
+      maxPrice: 1000,
+      minRating: null,
+      duration: null,
     });
-  }, [
-    initialSearch,
-    selectedLevel,
-    maxPrice,
-    selectedCategory,
-    minRating,
-    selectedDuration,
-    verifiedOnly,
-  ]);
+  };
 
   return (
     <>
@@ -291,36 +260,39 @@ const Courses = ({ courses, pagination, initialSearch }: CoursesProps) => {
               className="w-full flex-1"
             />
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full md:w-auto">
-              <Select
-                value={selectedCategory}
-                onValueChange={setSelectedCategory}
-              >
-                <SelectTrigger className="w-full md:w-[180px] bg-card">
-                  <SelectValue placeholder="Category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Categories</SelectItem>
-                  {CATEGORIES.map((cat) => (
-                    <SelectItem key={cat} value={cat}>
-                      {cat}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="w-full md:w-[220px]">
+                <PagedSearchSelect
+                  items={[
+                    { id: "all", label: "All Categories" },
+                    ...categoryItems,
+                  ]}
+                  pagination={categoryPagination}
+                  search={categorySearch}
+                  value={category}
+                  onValueChange={(val) =>
+                    updateQuery({ category: val, page: 1 })
+                  }
+                  onSearchChange={(val) =>
+                    updateQuery({ categorySearch: val, categoryPage: 1 })
+                  }
+                  onPageChange={(p) => updateQuery({ categoryPage: p })}
+                  placeholder="All Categories"
+                  emptyMessage="No categories found."
+                />
+              </div>
 
-              <Select value={selectedLevel} onValueChange={setSelectedLevel}>
+              <Select
+                value={level}
+                onValueChange={(val) => updateQuery({ level: val, page: 1 })}
+              >
                 <SelectTrigger className="w-full md:w-[180px] bg-card capitalize">
                   <SelectValue placeholder="Level" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Levels</SelectItem>
-                  {COURSE_LEVELS.map((level) => (
-                    <SelectItem
-                      key={level}
-                      value={level}
-                      className="capitalize"
-                    >
-                      {level}
+                  {COURSE_LEVELS.map((lvl) => (
+                    <SelectItem key={lvl} value={lvl} className="capitalize">
+                      {lvl}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -332,20 +304,22 @@ const Courses = ({ courses, pagination, initialSearch }: CoursesProps) => {
           <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-6 items-start">
             {/* Sidebar */}
             <FilterSidebar
-              maxPrice={maxPrice}
-              onPriceChange={setMaxPrice}
+              maxPrice={[maxPrice]}
+              onPriceChange={(val) =>
+                updateQuery({ maxPrice: val[0], page: 1 })
+              }
               minRating={minRating}
-              onRatingChange={setMinRating}
-              selectedDuration={selectedDuration}
-              onDurationChange={setSelectedDuration}
-              verifiedOnly={verifiedOnly}
-              onVerifiedChange={setVerifiedOnly}
+              onRatingChange={(val) => updateQuery({ minRating: val, page: 1 })}
+              selectedDuration={duration}
+              onDurationChange={(val) =>
+                updateQuery({ duration: val, page: 1 })
+              }
               onReset={handleReset}
             />
 
             {/* Courses grid */}
             <AppCourseCardsGridLayout
-              courses={filteredCourses as any}
+              courses={courses as any}
               pagination={true}
               paginationMeta={pagination}
               onPageChange={(p) => updateQuery({ page: p })}

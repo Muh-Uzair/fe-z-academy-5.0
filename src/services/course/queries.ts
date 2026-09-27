@@ -76,6 +76,15 @@ type GetCoursesParams = {
 type GetPublicCoursesParams = {
   search?: string;
   category?: string;
+  level?: "beginner" | "intermediate" | "advanced";
+  instructor?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  minRating?: number;
+  minDuration?: number;
+  maxDuration?: number;
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
   page?: number;
   limit?: number;
 };

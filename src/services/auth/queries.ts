@@ -13,7 +13,9 @@ type GetMeSuccessResponse = Extract<GetMeResponse, { status: "success" }>;
  * user, based on the cookies read inside apiClient.
  * Use updateTag(AUTH_TAGS.currentUser) to immediately invalidate this.
  */
-export async function getMeQuery(): Promise<GetMeSuccessResponse> {
+export async function getMeQuery(
+  withRedirect: boolean = true,
+): Promise<GetMeSuccessResponse | null> {
   "use cache: private";
   cacheTag(AUTH_TAGS.currentUser);
   cacheLife("hours");
@@ -27,6 +29,10 @@ export async function getMeQuery(): Promise<GetMeSuccessResponse> {
     return json;
   }
 
-  // Redirect to signin if fetching the current user fails (e.g. 401 Unauthorized)
-  redirect("/signin");
+  if (withRedirect) {
+    // Redirect to signin if fetching the current user fails (e.g. 401 Unauthorized)
+    redirect("/signin");
+  }
+
+  return null;
 }

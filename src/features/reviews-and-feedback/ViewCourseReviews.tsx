@@ -29,7 +29,7 @@ type ViewCourseReviewsProps = {
   course: CourseListItem;
   reviews: Review[];
   pagination: Pagination | null;
-  role: string;
+  role: string | null;
   studentReview: Review | null;
   isEnrolled?: boolean;
 };

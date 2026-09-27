@@ -14,9 +14,8 @@ const HomePage = async () => {
   const cookieStore = await cookies();
   const hasAccessToken = cookieStore.has("accessToken");
 
-  const user: AuthUser | null = hasAccessToken
-    ? (await getMeQuery()).data.user
-    : null;
+  const meQueryRes = hasAccessToken ? await getMeQuery(false) : null;
+  const user: AuthUser | null = meQueryRes?.data.user || null;
 
   // Fetch top categories (doesn't require auth)
   const topCategoriesRes = await getTopCategoriesQuery();
