@@ -220,7 +220,8 @@ const Courses = ({
     const nextCategoryPage = next.categoryPage ?? categoryPagination.page ?? 1;
     const nextInstructor = next.instructor ?? instructor;
     const nextInstructorSearch = next.instructorSearch ?? instructorSearch;
-    const nextInstructorPage = next.instructorPage ?? instructorPagination.page ?? 1;
+    const nextInstructorPage =
+      next.instructorPage ?? instructorPagination.page ?? 1;
     const nextLevel = next.level ?? level;
     const nextMaxPrice = next.maxPrice ?? maxPrice;
     const nextMinRating =
@@ -371,7 +372,7 @@ const Courses = ({
                 <AppButton
                   className="w-full"
                   onClick={() =>
-                    router.push(`/course-details/${course._id}?role=student`)
+                    router.push(`/course-details/${course._id}?source=browse`)
                   }
                 >
                   View Details
