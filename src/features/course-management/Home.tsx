@@ -192,7 +192,7 @@ export default function Home({
 
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-10">
             {featuredCourses.map((course) => (
-              <div key={course._id} className="group transition-transform duration-300 hover:-translate-y-2">
+              <div key={course._id} className="group transition-transform duration-300 hover:-translate-y-2 h-full">
                 <CourseCard
                   course={course}
                   footer={
@@ -289,7 +289,7 @@ export default function Home({
 
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-10">
             {trendingCourses.map((course) => (
-              <div key={course._id} className="group transition-transform duration-300 hover:-translate-y-2">
+              <div key={course._id} className="group transition-transform duration-300 hover:-translate-y-2 h-full">
                 <CourseCard
                   course={course}
                   footer={

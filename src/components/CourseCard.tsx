@@ -35,7 +35,7 @@ interface CourseCardProps {
 const CourseCard = ({ course, footer = null, mode = "default" }: CourseCardProps) => {
   return (
     <div
-      className={`w-full rounded-2xl ${
+      className={`w-full h-full rounded-2xl ${
         course.watchedCompletely ? "border-2 border-amber-400" : "border"
       } bg-card text-card-foreground shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col group`}
     >
