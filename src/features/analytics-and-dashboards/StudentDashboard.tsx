@@ -1,12 +1,19 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import PageFlexCol from "@/components/PageFlexCol";
 import StatCard from "@/components/StatCard";
 import AppTable from "@/components/AppTable";
 import CourseCard from "@/components/CourseCard";
 import { Badge } from "@/components/ui/badge";
 import AppButton from "@/components/AppButton";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   BookOpen,
   CheckCircle,
@@ -167,13 +174,28 @@ const StudentDashboard = () => {
     { key: "date", label: "Time" },
   ];
 
+  const [period, setPeriod] = useState("month");
+
   return (
     <PageFlexCol>
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Student Dashboard</h1>
-        <p className="text-muted-foreground mt-2">
-          Track your learning progress, resume courses, and view achievements.
-        </p>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Student Dashboard</h1>
+          <p className="text-muted-foreground mt-2">
+            Track your learning progress, resume courses, and view achievements.
+          </p>
+        </div>
+        
+        <Select value={period} onValueChange={setPeriod}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Select period" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="week">This Week</SelectItem>
+            <SelectItem value="month">This Month</SelectItem>
+            <SelectItem value="year">This Year</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
