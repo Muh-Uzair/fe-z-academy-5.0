@@ -1,6 +1,7 @@
 import Courses from "@/features/course-management/Courses";
 import { getPublicCoursesQuery } from "@/services/course/queries";
 import { getCategoriesQuery } from "@/services/category/queries";
+import { getPublicInstructorsQuery } from "@/services/user/queries";
 
 type CoursesPageProps = {
   searchParams: Promise<{
@@ -9,6 +10,9 @@ type CoursesPageProps = {
     category?: string;
     categorySearch?: string;
     categoryPage?: string;
+    instructor?: string;
+    instructorSearch?: string;
+    instructorPage?: string;
     level?: string;
     maxPrice?: string;
     minRating?: string;
@@ -17,9 +21,19 @@ type CoursesPageProps = {
 };
 
 const CoursesPage = async ({ searchParams }: CoursesPageProps) => {
-  const { 
-    search, page, category, categorySearch, categoryPage, level,
-    maxPrice, minRating, duration
+  const {
+    search,
+    page,
+    category,
+    categorySearch,
+    categoryPage,
+    level,
+    instructor,
+    instructorSearch,
+    instructorPage,
+    maxPrice,
+    minRating,
+    duration,
   } = await searchParams;
 
   const normalizedLevel =
@@ -29,17 +43,27 @@ const CoursesPage = async ({ searchParams }: CoursesPageProps) => {
 
   let minDuration: number | undefined;
   let maxDuration: number | undefined;
-  if (duration === "Under 2 hours") { minDuration = 0; maxDuration = 120; }
-  else if (duration === "2 – 5 hours") { minDuration = 120; maxDuration = 300; }
-  else if (duration === "5 – 10 hours") { minDuration = 300; maxDuration = 600; }
-  else if (duration === "10+ hours") { minDuration = 600; maxDuration = 999999; }
+  if (duration === "Under 2 hours") {
+    minDuration = 0;
+    maxDuration = 120;
+  } else if (duration === "2 – 5 hours") {
+    minDuration = 120;
+    maxDuration = 300;
+  } else if (duration === "5 – 10 hours") {
+    minDuration = 300;
+    maxDuration = 600;
+  } else if (duration === "10+ hours") {
+    minDuration = 600;
+    maxDuration = 999999;
+  }
 
-  const [coursesRes, categoriesRes] = await Promise.all([
+  const [coursesRes, categoriesRes, instructorsRes] = await Promise.all([
     getPublicCoursesQuery({
       search,
       page: page ? Number(page) : 1,
       limit: 12,
       category: category && category !== "all" ? category : undefined,
+      instructor: instructor && instructor !== "all" ? instructor : undefined,
       level: normalizedLevel,
       maxPrice: maxPrice ? Number(maxPrice) : undefined,
       minRating: minRating ? Number(minRating) : undefined,
@@ -51,11 +75,21 @@ const CoursesPage = async ({ searchParams }: CoursesPageProps) => {
       page: categoryPage ? Number(categoryPage) : 1,
       limit: 10,
     }),
+    getPublicInstructorsQuery({
+      search: instructorSearch,
+      page: instructorPage ? Number(instructorPage) : 1,
+      limit: 10,
+    }),
   ]);
 
   const categoryItems = categoriesRes.data.categories.map((c) => ({
     id: c._id,
     label: c.name,
+  }));
+
+  const instructorItems = instructorsRes.data.instructors.map((i) => ({
+    id: i._id,
+    label: i.fullName,
   }));
 
   return (
@@ -71,6 +105,10 @@ const CoursesPage = async ({ searchParams }: CoursesPageProps) => {
       categoryItems={categoryItems}
       categoryPagination={categoriesRes.data.pagination}
       categorySearch={categorySearch ?? ""}
+      instructor={instructor ?? "all"}
+      instructorItems={instructorItems}
+      instructorPagination={instructorsRes.data.pagination}
+      instructorSearch={instructorSearch ?? ""}
     />
   );
 };

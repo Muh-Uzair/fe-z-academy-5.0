@@ -5,6 +5,7 @@ import { buildQueryString } from "@/lib/buildQueryString";
 import { USER_TAGS } from "./tags";
 import type {
   GetInstructorsResponse,
+  GetPublicInstructorsResponse,
   GetStudentsResponse,
   GetUserDetailsResponse,
   GetProfileResponse,
@@ -14,6 +15,10 @@ import type {
 // so the resolved type only ever needs to describe the success shape.
 type GetInstructorsSuccessResponse = Extract<
   GetInstructorsResponse,
+  { status: "success" }
+>;
+type GetPublicInstructorsSuccessResponse = Extract<
+  GetPublicInstructorsResponse,
   { status: "success" }
 >;
 type GetStudentsSuccessResponse = Extract<
@@ -60,6 +65,46 @@ export async function getInstructorsQuery(
       method: "GET",
     });
     const json: GetInstructorsResponse = await res.json();
+
+    if (json.status !== "success") {
+      throw new Error(json.message);
+    }
+
+    return json;
+  } catch (err) {
+    throw err;
+  }
+}
+
+type GetPublicInstructorsParams = {
+  search?: string;
+  projection?: string;
+  page?: number;
+  limit?: number;
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
+};
+
+/**
+ * Public (No auth required). Fetches a paginated, filterable, searchable list of
+ * verified instructor accounts. This endpoint is open to the public.
+ */
+export async function getPublicInstructorsQuery(
+  params: GetPublicInstructorsParams = {},
+): Promise<GetPublicInstructorsSuccessResponse> {
+  "use cache";
+  cacheTag(USER_TAGS.instructors);
+  cacheLife("minutes");
+
+  const query = buildQueryString(params);
+
+  try {
+    const res = await apiClient(
+      `/users/instructors/public${query}`,
+      { method: "GET" },
+      { includeCookies: false },
+    );
+    const json: GetPublicInstructorsResponse = await res.json();
 
     if (json.status !== "success") {
       throw new Error(json.message);

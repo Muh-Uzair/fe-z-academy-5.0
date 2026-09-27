@@ -174,6 +174,10 @@ type CoursesProps = {
   categoryItems: PagedSearchSelectItem[];
   categoryPagination: Pagination;
   categorySearch: string;
+  instructor: string;
+  instructorItems: PagedSearchSelectItem[];
+  instructorPagination: Pagination;
+  instructorSearch: string;
 };
 
 const Courses = ({
@@ -188,6 +192,10 @@ const Courses = ({
   categoryItems,
   categoryPagination,
   categorySearch,
+  instructor,
+  instructorItems,
+  instructorPagination,
+  instructorSearch,
 }: CoursesProps) => {
   const router = useRouter();
 
@@ -197,6 +205,9 @@ const Courses = ({
     category?: string;
     categorySearch?: string;
     categoryPage?: number;
+    instructor?: string;
+    instructorSearch?: string;
+    instructorPage?: number;
     level?: string;
     maxPrice?: number;
     minRating?: number | null;
@@ -207,6 +218,9 @@ const Courses = ({
     const nextCategory = next.category ?? category;
     const nextCategorySearch = next.categorySearch ?? categorySearch;
     const nextCategoryPage = next.categoryPage ?? categoryPagination.page ?? 1;
+    const nextInstructor = next.instructor ?? instructor;
+    const nextInstructorSearch = next.instructorSearch ?? instructorSearch;
+    const nextInstructorPage = next.instructorPage ?? instructorPagination.page ?? 1;
     const nextLevel = next.level ?? level;
     const nextMaxPrice = next.maxPrice ?? maxPrice;
     const nextMinRating =
@@ -221,6 +235,12 @@ const Courses = ({
       searchParams.set("categorySearch", nextCategorySearch);
     if (nextCategoryPage > 1)
       searchParams.set("categoryPage", String(nextCategoryPage));
+    if (nextInstructor && nextInstructor !== "all")
+      searchParams.set("instructor", nextInstructor);
+    if (nextInstructorSearch)
+      searchParams.set("instructorSearch", nextInstructorSearch);
+    if (nextInstructorPage > 1)
+      searchParams.set("instructorPage", String(nextInstructorPage));
     if (nextLevel && nextLevel !== "all") searchParams.set("level", nextLevel);
     if (nextPage > 1) searchParams.set("page", String(nextPage));
     if (nextMaxPrice < 1000) searchParams.set("maxPrice", String(nextMaxPrice));
@@ -239,6 +259,9 @@ const Courses = ({
       category: "all",
       categorySearch: "",
       categoryPage: 1,
+      instructor: "all",
+      instructorSearch: "",
+      instructorPage: 1,
       level: "all",
       maxPrice: 1000,
       minRating: null,
@@ -278,6 +301,27 @@ const Courses = ({
                   onPageChange={(p) => updateQuery({ categoryPage: p })}
                   placeholder="All Categories"
                   emptyMessage="No categories found."
+                />
+              </div>
+
+              <div className="w-full md:w-[220px]">
+                <PagedSearchSelect
+                  items={[
+                    { id: "all", label: "All Instructors" },
+                    ...instructorItems,
+                  ]}
+                  pagination={instructorPagination}
+                  search={instructorSearch}
+                  value={instructor}
+                  onValueChange={(val) =>
+                    updateQuery({ instructor: val, page: 1 })
+                  }
+                  onSearchChange={(val) =>
+                    updateQuery({ instructorSearch: val, instructorPage: 1 })
+                  }
+                  onPageChange={(p) => updateQuery({ instructorPage: p })}
+                  placeholder="All Instructors"
+                  emptyMessage="No instructors found."
                 />
               </div>
 
