@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { Telescope, Compass } from "lucide-react";
 import { Montserrat } from "next/font/google";
 import "@/styles/globals.css";
@@ -33,12 +32,12 @@ export default function NotFound() {
           </p>
           
           <div className="pt-6">
-            <Link
+            <a
               href="/"
               className="inline-flex items-center justify-center h-14 px-10 rounded-full bg-[oklch(0.7_0.12_183)] text-white font-bold text-sm uppercase tracking-widest hover:bg-[oklch(0.51_0.1_166)] hover:shadow-xl hover:shadow-[oklch(0.7_0.12_183)]/30 hover:-translate-y-1 transition-all duration-300"
             >
               Go To Homepage
-            </Link>
+            </a>
           </div>
         </div>
 
