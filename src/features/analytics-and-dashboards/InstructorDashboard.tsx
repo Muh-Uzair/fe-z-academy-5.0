@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useTransition } from "react";
+import { useRouter } from "next/navigation";
 import PageFlexCol from "@/components/PageFlexCol";
 import StatCard from "@/components/StatCard";
 import AppTable from "@/components/AppTable";
@@ -20,6 +21,7 @@ import {
   Star,
   Wallet,
   PieChart as PieChartIcon,
+  Loader2,
 } from "lucide-react";
 import {
   Line,
@@ -37,131 +39,20 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import type { InstructorDashboardData } from "@/response-types/dashboardResponseTypes";
 
-// Dummy Data
-const INSTRUCTOR_STATS = [
-  {
-    title: "Total Revenue",
-    value: "$14,500",
-    icon: DollarSign,
-    trend: "up" as const,
-    trendValue: "+$1,200 this month",
-    iconColor: "text-green-500",
-  },
-  {
-    title: "Admin Commission (5%)",
-    value: "$725",
-    icon: Wallet,
-    description: "Paid to platform",
-    iconColor: "text-red-500",
-  },
-  {
-    title: "Total Students",
-    value: "3,450",
-    icon: Users,
-    trend: "up" as const,
-    trendValue: "+120 this week",
-    iconColor: "text-blue-500",
-  },
-  {
-    title: "Total Courses",
-    value: "12",
-    icon: BookOpen,
-    description: "10 Live, 2 Pending",
-    iconColor: "text-purple-500",
-  },
-  {
-    title: "Average Rating",
-    value: "4.7",
-    icon: Star,
-    description: "Across all courses",
-    iconColor: "text-yellow-500",
-  },
+// Palette derived strictly from the primary tokens in globals.css
+const PRIMARY_SHADES = [
+  "var(--primary)",
+  "var(--primary-dark)",
+  "var(--primary-light)",
+  "var(--primary-very-dark)",
+  "oklch(0.6 0.11 175)",
+  "oklch(0.78 0.12 174)",
+  "oklch(0.44 0.08 168)",
+  "var(--primary-very-light)",
 ];
 
-const COURSE_PERFORMANCE = [
-  {
-    id: "c1",
-    title: "Mastering React 18",
-    enrollments: 1200,
-    rating: 4.8,
-    revenue: "$12,000",
-    completionRate: 65,
-    status: "Live",
-  },
-  {
-    id: "c2",
-    title: "Advanced Node.js Patterns",
-    enrollments: 850,
-    rating: 4.6,
-    revenue: "$8,500",
-    completionRate: 50,
-    status: "Live",
-  },
-  {
-    id: "c3",
-    title: "Fullstack Next.js",
-    enrollments: 1400,
-    rating: 4.9,
-    revenue: "$14,000",
-    completionRate: 72,
-    status: "Live",
-  },
-  {
-    id: "c4",
-    title: "GraphQL for Beginners",
-    enrollments: 0,
-    rating: 0,
-    revenue: "$0",
-    completionRate: 0,
-    status: "Pending",
-  },
-];
-
-const RECENT_REVIEWS = [
-  {
-    id: "1",
-    course: "Mastering React 18",
-    student: "Alice J.",
-    rating: 5,
-    comment: "Amazing course! Very detailed and practical.",
-    date: "2 days ago",
-  },
-  {
-    id: "2",
-    course: "Fullstack Next.js",
-    student: "Mark D.",
-    rating: 4,
-    comment: "Great content, but pace is a bit fast.",
-    date: "4 days ago",
-  },
-  {
-    id: "3",
-    course: "Advanced Node.js Patterns",
-    student: "Sarah W.",
-    rating: 5,
-    comment: "Exactly what I needed for my senior dev role.",
-    date: "1 week ago",
-  },
-];
-
-const EARNINGS_DATA = [
-  { source: "Mastering React 18", value: 12000, color: "var(--color-course1)" },
-  { source: "Advanced Node.js", value: 8500, color: "var(--color-course2)" },
-  { source: "Fullstack Next.js", value: 14000, color: "var(--color-course3)" },
-];
-const EARNINGS_CONFIG = {
-  course1: { label: "Mastering React 18", color: "var(--primary)" },
-  course2: { label: "Advanced Node.js", color: "var(--primary-light)" },
-  course3: { label: "Fullstack Next.js", color: "var(--primary-dark)" },
-} satisfies ChartConfig;
-
-const ENROLLMENTS_DATA = [
-  { week: "Week 1", enrollments: 120 },
-  { week: "Week 2", enrollments: 250 },
-  { week: "Week 3", enrollments: 180 },
-  { week: "Week 4", enrollments: 300 },
-];
 const ENROLLMENTS_CONFIG = {
   enrollments: {
     label: "Enrollments",
@@ -169,72 +60,230 @@ const ENROLLMENTS_CONFIG = {
   },
 } satisfies ChartConfig;
 
-const InstructorDashboard = () => {
+function formatCurrency(cents: number): string {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  }).format(cents / 100);
+}
+
+function formatPercentTrend(
+  changePercent: number | null,
+  period: "week" | "month" | "year"
+): { trend: "up" | "down" | "neutral"; trendValue: string } {
+  if (changePercent === null) {
+    return { trend: "neutral", trendValue: `0% vs last ${period}` };
+  }
+  const rounded = Math.round(Math.abs(changePercent) * 10) / 10;
+  if (changePercent > 0) {
+    return { trend: "up", trendValue: `${rounded}% from last ${period}` };
+  }
+  if (changePercent < 0) {
+    return { trend: "down", trendValue: `${rounded}% from last ${period}` };
+  }
+  return { trend: "neutral", trendValue: `0% vs last ${period}` };
+}
+
+function formatBucketLabel(
+  label: string,
+  period: "week" | "month" | "year"
+): string {
+  if (!label) return "";
+  try {
+    if (period === "week") {
+      const date = new Date(label + "T00:00:00");
+      if (isNaN(date.getTime())) return label;
+      return date.toLocaleDateString("en-US", { weekday: "short" });
+    }
+    if (period === "month") {
+      const parts = label.split("-");
+      return parts[1] ? `W${parts[1]}` : label;
+    }
+    if (period === "year") {
+      const [year, month] = label.split("-");
+      const date = new Date(Number(year), Number(month) - 1, 1);
+      if (isNaN(date.getTime())) return label;
+      return date.toLocaleDateString("en-US", { month: "short" });
+    }
+  } catch {
+    return label;
+  }
+  return label;
+}
+
+interface InstructorDashboardProps {
+  data: InstructorDashboardData;
+  period: "week" | "month" | "year";
+}
+
+const InstructorDashboard = ({ data, period }: InstructorDashboardProps) => {
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+
+  const handlePeriodChange = (nextPeriod: "week" | "month" | "year") => {
+    startTransition(() => {
+      router.push(`/instructor/dashboard?period=${nextPeriod}`);
+    });
+  };
+
+  const summary = data.summary;
+  const revTrend = formatPercentTrend(summary.totalRevenue.changePercent, period);
+  const commTrend = formatPercentTrend(
+    summary.totalAdminCommission.changePercent,
+    period
+  );
+  const studTrend = formatPercentTrend(
+    summary.totalStudents.changePercent,
+    period
+  );
+
+  const instructorStats = [
+    {
+      title: "Total Revenue",
+      value: formatCurrency(summary.totalRevenue.current),
+      icon: DollarSign,
+      trend: revTrend.trend,
+      trendValue: revTrend.trendValue,
+      iconColor: "text-green-500",
+    },
+    {
+      title: "Admin Commission",
+      value: formatCurrency(summary.totalAdminCommission.current),
+      icon: Wallet,
+      trend: commTrend.trend,
+      trendValue: commTrend.trendValue,
+      iconColor: "text-blue-500",
+    },
+    {
+      title: "Total Students",
+      value: summary.totalStudents.current.toLocaleString(),
+      icon: Users,
+      trend: studTrend.trend,
+      trendValue: studTrend.trendValue,
+      iconColor: "text-purple-500",
+    },
+    {
+      title: "Total Courses",
+      value: (
+        summary.totalCourses.live + summary.totalCourses.pending
+      ).toString(),
+      icon: BookOpen,
+      description: `${summary.totalCourses.live} Live, ${summary.totalCourses.pending} Pending`,
+      iconColor: "text-indigo-500",
+    },
+    {
+      title: "Average Rating",
+      value:
+        summary.averageRating > 0 ? summary.averageRating.toFixed(1) : "0.0",
+      icon: Star,
+      description: "Across all verified courses",
+      iconColor: "text-yellow-500",
+    },
+  ];
+
+  // Donut chart config and data
+  const earningsConfig: ChartConfig = {};
+  const pieData = data.revenueByCourseTrend.map((slice, index) => {
+    const key = `course_${index}`;
+    const color = PRIMARY_SHADES[index % PRIMARY_SHADES.length];
+    earningsConfig[key] = {
+      label: slice.courseTitle,
+      color,
+    };
+    return {
+      key,
+      name: slice.courseTitle,
+      value: slice.instructorRevenue / 100,
+      color,
+    };
+  });
+
+  // Enrollment trend data
+  const chartEnrollmentsData = data.enrollmentTrend.map((pt) => ({
+    label: formatBucketLabel(pt.label, period),
+    rawLabel: pt.label,
+    enrollments: pt.newEnrollments,
+  }));
+
   const courseColumns = [
     {
       key: "title",
       label: "Course Title",
-      render: (val: string, row: any) => (
+      render: (val: string, row: { isVerified: boolean }) => (
         <div>
           <div className="font-medium">{val}</div>
           <Badge
-            variant={row.status === "Live" ? "default" : "secondary"}
+            variant={row.isVerified ? "default" : "outline"}
             className={
-              row.status === "Live"
-                ? "bg-green-500/10 text-green-600 hover:bg-green-500/20 mt-1"
-                : "mt-1"
+              row.isVerified
+                ? "bg-green-500/10 text-green-600 border-green-200 hover:bg-green-500/20 mt-1"
+                : "text-amber-600 border-amber-200 bg-amber-500/10 mt-1"
             }
           >
-            {row.status}
+            {row.isVerified ? "Live" : "Pending Review"}
           </Badge>
         </div>
       ),
     },
-    { key: "enrollments", label: "Enrollments" },
     {
-      key: "rating",
+      key: "totalStudentsEnrolled",
+      label: "Enrollments",
+      render: (val: number) => <span>{val?.toLocaleString() ?? 0}</span>,
+    },
+    {
+      key: "averageRating",
       label: "Rating",
       render: (val: number) =>
         val > 0 ? (
-          <span className="text-yellow-500 font-medium">★ {val}</span>
+          <span className="text-yellow-500 font-medium">
+            ★ {val.toFixed(1)}
+          </span>
         ) : (
           <span className="text-muted-foreground">-</span>
         ),
     },
     {
-      key: "completionRate",
+      key: "avgCompletionPercent",
       label: "Avg. Completion",
-      render: (val: number) => (
-        <div className="w-[100px]">
-          <div className="text-xs text-muted-foreground mb-1">{val}%</div>
-          <Progress value={val} className="h-1.5" />
-        </div>
-      ),
+      render: (val: number) => {
+        const percent = Math.min(Math.max(val ?? 0, 0), 100);
+        return (
+          <div className="w-[100px]">
+            <div className="text-xs text-muted-foreground mb-1">
+              {percent.toFixed(1)}%
+            </div>
+            <Progress value={percent} className="h-1.5" />
+          </div>
+        );
+      },
     },
     {
-      key: "revenue",
+      key: "totalRevenueInstructor",
       label: "Revenue",
-      render: (val: string) => (
-        <span className="font-semibold text-green-600">{val}</span>
+      render: (val: number) => (
+        <span className="font-semibold text-green-600">
+          {formatCurrency(val ?? 0)}
+        </span>
       ),
     },
   ];
 
   const reviewColumns = [
-    { key: "course", label: "Course" },
-    { key: "student", label: "Student" },
+    { key: "courseTitle", label: "Course" },
+    { key: "studentName", label: "Student" },
     {
       key: "rating",
       label: "Rating",
       render: (val: number) => (
         <span className="text-yellow-500 font-medium">
-          {"★".repeat(val)}
-          {"☆".repeat(5 - val)}
+          {"★".repeat(Math.max(0, Math.min(val, 5)))}
+          {"☆".repeat(Math.max(0, 5 - Math.min(val, 5)))}
         </span>
       ),
     },
     {
-      key: "comment",
+      key: "feedback",
       label: "Review",
       render: (val: string) => (
         <span className="text-muted-foreground italic line-clamp-1 max-w-[300px]">
@@ -242,10 +291,27 @@ const InstructorDashboard = () => {
         </span>
       ),
     },
-    { key: "date", label: "Date" },
+    {
+      key: "createdAt",
+      label: "Date",
+      render: (val: string) => (
+        <span className="text-muted-foreground">
+          {new Date(val).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+          })}
+        </span>
+      ),
+    },
   ];
 
-  const [period, setPeriod] = useState("month");
+  const periodSubtitle =
+    period === "week"
+      ? "Daily breakdown over the last 7 days"
+      : period === "month"
+        ? "Weekly breakdown over the last 30 days"
+        : "Monthly breakdown over the last 12 months";
 
   return (
     <PageFlexCol>
@@ -258,101 +324,153 @@ const InstructorDashboard = () => {
             Monitor your course performance, enrollments, and earnings.
           </p>
         </div>
-        
-        <Select value={period} onValueChange={setPeriod}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Select period" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="week">This Week</SelectItem>
-            <SelectItem value="month">This Month</SelectItem>
-            <SelectItem value="year">This Year</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-        {INSTRUCTOR_STATS.map((stat, i) => (
-          <StatCard key={i} {...stat} />
-        ))}
-      </div>
-
-      <div className="grid gap-6 md:grid-cols-2">
-        <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-6 flex flex-col h-auto">
-          <div className="mb-4">
-            <h3 className="text-lg font-medium">Monthly Earnings</h3>
-            <p className="text-sm text-muted-foreground">
-              Revenue breakdown by course
-            </p>
-          </div>
-          <ChartContainer config={EARNINGS_CONFIG} className="h-[250px] w-full">
-            <PieChart>
-              <ChartTooltip content={<ChartTooltipContent />} />
-              <Pie
-                data={EARNINGS_DATA}
-                dataKey="value"
-                nameKey="source"
-                cx="50%"
-                cy="50%"
-                innerRadius={60}
-                outerRadius={80}
-                paddingAngle={5}
-              >
-                {EARNINGS_DATA.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Pie>
-            </PieChart>
-          </ChartContainer>
-        </div>
-
-        <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-6 flex flex-col h-auto">
-          <div className="mb-4">
-            <h3 className="text-lg font-medium">Enrollments Trend</h3>
-            <p className="text-sm text-muted-foreground">
-              New students over the last 4 weeks
-            </p>
-          </div>
-          <ChartContainer
-            config={ENROLLMENTS_CONFIG}
-            className="h-[250px] w-full"
+        <div className="flex items-center gap-2">
+          {isPending && (
+            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+          )}
+          <Select
+            value={period}
+            onValueChange={(val) =>
+              handlePeriodChange(val as "week" | "month" | "year")
+            }
+            disabled={isPending}
           >
-            <LineChart
-              data={ENROLLMENTS_DATA}
-              margin={{ top: 10, left: -20, right: 10, bottom: 0 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" vertical={false} />
-              <XAxis
-                dataKey="week"
-                tickLine={false}
-                axisLine={false}
-                tickMargin={8}
-              />
-              <YAxis tickLine={false} axisLine={false} />
-              <ChartTooltip content={<ChartTooltipContent />} />
-              <Line
-                type="monotone"
-                dataKey="enrollments"
-                stroke="var(--color-enrollments)"
-                strokeWidth={2}
-                dot={{ r: 4 }}
-                activeDot={{ r: 6 }}
-              />
-            </LineChart>
-          </ChartContainer>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Select period" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="week">This Week</SelectItem>
+              <SelectItem value="month">This Month</SelectItem>
+              <SelectItem value="year">This Year</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
-      <div>
-        <h2 className="text-2xl font-bold tracking-tight">
-          Course Performance
-        </h2>
-        <AppTable columns={courseColumns} data={COURSE_PERFORMANCE} />
-      </div>
+      <div
+        className={`transition-opacity duration-200 ${
+          isPending ? "opacity-60 pointer-events-none" : "opacity-100"
+        } flex flex-col gap-6`}
+      >
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+          {instructorStats.map((stat, i) => (
+            <StatCard key={i} {...stat} />
+          ))}
+        </div>
 
-      <div>
-        <h2 className="text-2xl font-bold tracking-tight">Recent Reviews</h2>
-        <AppTable columns={reviewColumns} data={RECENT_REVIEWS} />
+        <div className="grid gap-6 md:grid-cols-2">
+          <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-6 flex flex-col h-auto">
+            <div className="mb-4">
+              <h3 className="text-lg font-medium">Revenue by Course</h3>
+              <p className="text-sm text-muted-foreground">
+                Revenue breakdown across your courses for this period
+              </p>
+            </div>
+            {pieData.length === 0 ? (
+              <div className="h-[260px] flex flex-col items-center justify-center text-center text-muted-foreground text-sm">
+                <PieChartIcon className="h-10 w-10 stroke-1 mb-2 opacity-40" />
+                <p>No course revenue recorded for this period.</p>
+              </div>
+            ) : (
+              <ChartContainer
+                config={earningsConfig}
+                className="h-[260px] w-full"
+              >
+                <PieChart>
+                  <ChartTooltip
+                    content={
+                      <ChartTooltipContent
+                        formatter={(value, name) => (
+                          <div className="flex items-center justify-between gap-3 w-full">
+                            <span className="text-muted-foreground">{name}:</span>
+                            <span className="font-semibold text-foreground">
+                              {formatCurrency(Number(value) * 100)}
+                            </span>
+                          </div>
+                        )}
+                      />
+                    }
+                  />
+                  <Pie
+                    data={pieData}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={55}
+                    outerRadius={85}
+                    paddingAngle={3}
+                  >
+                    {pieData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                </PieChart>
+              </ChartContainer>
+            )}
+          </div>
+
+          <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-6 flex flex-col h-auto">
+            <div className="mb-4">
+              <h3 className="text-lg font-medium">Enrollments Trend</h3>
+              <p className="text-sm text-muted-foreground">{periodSubtitle}</p>
+            </div>
+            <ChartContainer
+              config={ENROLLMENTS_CONFIG}
+              className="h-[260px] w-full"
+            >
+              <LineChart
+                data={chartEnrollmentsData}
+                margin={{ top: 10, left: -20, right: 10, bottom: 0 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <XAxis
+                  dataKey="label"
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={8}
+                />
+                <YAxis
+                  tickLine={false}
+                  axisLine={false}
+                  allowDecimals={false}
+                />
+                <ChartTooltip content={<ChartTooltipContent />} />
+                <Line
+                  type="monotone"
+                  dataKey="enrollments"
+                  stroke="var(--color-enrollments)"
+                  strokeWidth={2}
+                  dot={{ r: 4, fill: "var(--color-enrollments)" }}
+                  activeDot={{ r: 6, fill: "var(--color-enrollments)" }}
+                />
+              </LineChart>
+            </ChartContainer>
+          </div>
+        </div>
+
+        <div>
+          <div className="mb-4">
+            <h2 className="text-2xl font-bold tracking-tight">
+              Course Performance
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Performance metrics and student completion rates for all your courses.
+            </p>
+          </div>
+          <AppTable columns={courseColumns} data={data.coursePerformance} />
+        </div>
+
+        <div>
+          <div className="mb-4">
+            <h2 className="text-2xl font-bold tracking-tight">Recent Reviews</h2>
+            <p className="text-sm text-muted-foreground">
+              Latest reviews and ratings submitted by your enrolled students.
+            </p>
+          </div>
+          <AppTable columns={reviewColumns} data={data.recentReviews} />
+        </div>
       </div>
     </PageFlexCol>
   );
