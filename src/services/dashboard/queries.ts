@@ -23,7 +23,7 @@ type GetStudentDashboardSuccessResponse = Extract<
 >;
 
 export async function getAdminDashboardQuery(
-  period?: "week" | "month" | "year"
+  period: "week" | "month" | "year"
 ): Promise<GetAdminDashboardSuccessResponse> {
   "use cache: private";
   cacheTag(DASHBOARD_TAGS.admin);
@@ -48,7 +48,7 @@ export async function getAdminDashboardQuery(
 }
 
 export async function getInstructorDashboardQuery(
-  period?: "week" | "month" | "year"
+  period: "week" | "month" | "year"
 ): Promise<GetInstructorDashboardSuccessResponse> {
   "use cache: private";
   cacheTag(DASHBOARD_TAGS.instructor);
@@ -73,7 +73,7 @@ export async function getInstructorDashboardQuery(
 }
 
 export async function getStudentDashboardQuery(
-  period?: "week" | "month" | "year" | "all"
+  period: "week" | "month" | "year"
 ): Promise<GetStudentDashboardSuccessResponse> {
   "use cache: private";
   cacheTag(DASHBOARD_TAGS.student);

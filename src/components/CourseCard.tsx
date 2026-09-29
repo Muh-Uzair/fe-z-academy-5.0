@@ -33,6 +33,16 @@ interface CourseCardProps {
 }
 
 const CourseCard = ({ course, footer = null, mode = "default" }: CourseCardProps) => {
+  const thumbnailSrc = course.thumbnailUrl || course.thumbnail;
+  const watchedPercent =
+    course.totalDurationWatchedInMinutes !== undefined &&
+    course.totalDurationInMinutes > 0
+      ? Math.min(
+          (course.totalDurationWatchedInMinutes / course.totalDurationInMinutes) * 100,
+          100
+        )
+      : 0;
+
   return (
     <div
       className={`w-full h-full rounded-2xl ${
@@ -42,13 +52,17 @@ const CourseCard = ({ course, footer = null, mode = "default" }: CourseCardProps
       {/* Image Section */}
       <div className="relative w-full overflow-hidden">
         <AspectRatio ratio={16 / 9}>
-          <Image
-            src={course.thumbnailUrl || course.thumbnail || ""}
-            alt={course.title}
-            fill
-            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            className="object-cover group-hover:scale-105 transition-transform duration-500"
-          />
+          {thumbnailSrc ? (
+            <Image
+              src={thumbnailSrc}
+              alt={course.title}
+              fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              className="object-cover group-hover:scale-105 transition-transform duration-500"
+            />
+          ) : (
+            <div className="absolute inset-0 bg-muted" />
+          )}
           {/* Overlay gradient for readability */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent pointer-events-none" />
         </AspectRatio>
@@ -112,9 +126,9 @@ const CourseCard = ({ course, footer = null, mode = "default" }: CourseCardProps
             <div className="mb-4 space-y-1.5 mt-auto">
                <div className="flex justify-between text-xs font-medium text-muted-foreground">
                  <span>{course.totalDurationWatchedInMinutes}m / {course.totalDurationInMinutes}m watched</span>
-                 <span className="text-foreground">{Math.round((course.totalDurationWatchedInMinutes / course.totalDurationInMinutes) * 100)}%</span>
+                 <span className="text-foreground">{Math.round(watchedPercent)}%</span>
                </div>
-               <Progress value={(course.totalDurationWatchedInMinutes / course.totalDurationInMinutes) * 100} className="h-1.5 bg-primary/10" />
+               <Progress value={watchedPercent} className="h-1.5 bg-primary/10" />
             </div>
           )}
 

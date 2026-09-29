@@ -6,17 +6,18 @@ Base path: `/api/v1/dashboard`
 
 ## Integration rules
 
+- Every dashboard route requires the `period` query param (`week`, `month` or `year`), e.g. `GET /api/v1/dashboard/admin?period=month`. Calling a route without it returns `400`. Use `month` as the frontend's default.
 - Every route requires an authenticated session: send the `accessToken` cookie with credentials enabled (`fetch`: `credentials: "include"`; Axios: `withCredentials: true`).
 - Success, validation, and application-error responses use `{ status, message, data }`.
 - Strict validation is used: do not send fields that are not documented for that request.
 
 ## Roles and access
 
-| Route             | Allowed caller  |
-| ----------------- | --------------- |
-| `GET /admin`      | Admin only      |
+| Route             | Allowed caller |
+| ----------------- | -------------- |
+| `GET /admin`      | Admin only     |
 | `GET /instructor` | Instructor only |
-| `GET /student`    | Student only    |
+| `GET /student`    | Student only   |
 
 ---
 
@@ -25,7 +26,6 @@ Base path: `/api/v1/dashboard`
 `GET /api/v1/dashboard/admin`
 
 Admin only. Returns all data required to render the admin dashboard in a single request:
-
 - **Summary cards** — five metrics (revenue, commission, students, instructors, courses), each with a current value, previous-period value, and a % change relative to the preceding period of the same length.
 - **Revenue trend chart** — time-bucketed `totalRevenue` and `adminCommission` over the selected period.
 - **User growth chart** — time-bucketed new students and new instructors over the selected period.
@@ -34,17 +34,19 @@ Admin only. Returns all data required to render the admin dashboard in a single 
 
 ### Query parameters
 
-| Param    | Type                          | Default   | Notes                                                      |
-| -------- | ----------------------------- | --------- | ---------------------------------------------------------- |
-| `period` | `"week" \| "month" \| "year"` | `"month"` | Controls the time window for summary cards and chart data. |
+| Param    | Type                             | Required  | Notes                                                       |
+| -------- | -------------------------------- | --------- | ----------------------------------------------------------- |
+| `period` | `"week" \| "month" \| "year"`   | **Yes**   | Controls the time window for summary cards and chart data. The backend has no default: omitting it returns `400`. The frontend should send `month` by default. |
 
 #### Period semantics
 
-| `period` | Summary window | Chart buckets          | Bucket label format | # of buckets |
-| -------- | -------------- | ---------------------- | ------------------- | ------------ |
-| `week`   | Last 7 days    | One per day            | `"YYYY-MM-DD"`      | 7            |
-| `month`  | Last 30 days   | One per ISO week       | `"YYYY-WW"`         | 5            |
-| `year`   | Last 12 months | One per calendar month | `"YYYY-MM"`         | 12           |
+| `period` | Summary window    | Chart buckets         | Bucket label format | # of buckets |
+| -------- | ----------------- | --------------------- | ------------------- | ------------ |
+| `week`   | Last 7 days       | One per day           | `"YYYY-MM-DD"`      | 7            |
+| `month`  | Last 30 days      | One per ISO week      | `"YYYY-WW"`         | 5 or 6       |
+| `year`   | Last 12 months    | One per calendar month| `"YYYY-MM"`         | 12           |
+
+All windows and bucket labels are calculated in **UTC**. The `month` window is 30 days, which can touch 5 or 6 ISO weeks (`YYYY` is the ISO week-year), so do not hard-code the bucket count — render whatever labels the API returns. The first and last weekly buckets can cover only part of a week.
 
 **Summary comparison**: Each card shows `current` (selected window) vs `previous` (the preceding window of the same length). `changePercent` is `null` when `previous === 0`.
 
@@ -140,7 +142,7 @@ All **revenue/commission** values are in **USD cents** (e.g. `5423000` = $54,230
 - `totalRevenueAdmin` is cumulative (all-time), not scoped to the selected period.
 
 #### `recentUsers`
-
+ 
 - Up to 5 users, any role, sorted by `createdAt` descending.
 - Not scoped to the selected period — always the 5 most recently joined.
 
@@ -148,7 +150,7 @@ All **revenue/commission** values are in **USD cents** (e.g. `5423000` = $54,230
 
 | HTTP status | Message                                             | When                                            |
 | ----------- | --------------------------------------------------- | ----------------------------------------------- |
-| 400         | `Validation failed`                                 | `period` is not one of `week`, `month`, `year`. |
+| 400         | `Validation failed`                                 | `period` is missing or not one of `week`, `month`, `year`. |
 | 401         | _(see auth guide `/me` 401 rows)_                   | Access-token cookie missing/invalid/expired.    |
 | 403         | `You do not have permission to perform this action` | Caller is not an admin.                         |
 
@@ -159,7 +161,6 @@ All **revenue/commission** values are in **USD cents** (e.g. `5423000` = $54,230
 `GET /api/v1/dashboard/instructor`
 
 Instructor only. Returns all data required to render the instructor dashboard in a single request:
-
 - **Summary cards** — Total Revenue (instructor share), Admin Commission, Total Students, Total Courses (live/pending), Average Rating.
 - **Revenue by course (donut chart)** — up to 8 slices, each showing the instructor's revenue for one course in the selected period.
 - **Enrollment trend (line chart)** — new enrollments per time bucket over the selected period.
@@ -168,9 +169,9 @@ Instructor only. Returns all data required to render the instructor dashboard in
 
 ### Query parameters
 
-| Param    | Type                          | Default   | Notes                                                      |
-| -------- | ----------------------------- | --------- | ---------------------------------------------------------- |
-| `period` | `"week" \| "month" \| "year"` | `"month"` | Controls the time window for summary cards and chart data. |
+| Param    | Type                            | Required  | Notes                                                      |
+| -------- | ------------------------------- | --------- | ---------------------------------------------------------- |
+| `period` | `"week" \| "month" \| "year"` | **Yes**   | Controls the time window for summary cards and chart data. No backend default; send `month` by default from the frontend. |
 
 Same period semantics as API 1 (see table above).
 
@@ -185,35 +186,15 @@ HTTP `200`
   "data": {
     "period": "month",
     "summary": {
-      "totalRevenue": {
-        "current": 1450000,
-        "previous": 1200000,
-        "changePercent": 20.8
-      },
-      "totalAdminCommission": {
-        "current": 72500,
-        "previous": 60000,
-        "changePercent": 20.8
-      },
-      "totalStudents": {
-        "current": 120,
-        "previous": 95,
-        "changePercent": 26.3
-      },
+      "totalRevenue": { "current": 1450000, "previous": 1200000, "changePercent": 20.8 },
+      "totalAdminCommission": { "current": 72500, "previous": 60000, "changePercent": 20.8 },
+      "totalStudents": { "current": 120, "previous": 95, "changePercent": 26.3 },
       "totalCourses": { "live": 10, "pending": 2 },
       "averageRating": 4.7
     },
     "revenueByCourseTrend": [
-      {
-        "courseId": "66d1...",
-        "courseTitle": "Mastering React 18",
-        "instructorRevenue": 950000
-      },
-      {
-        "courseId": "66d2...",
-        "courseTitle": "Advanced Node.js Patterns",
-        "instructorRevenue": 500000
-      }
+      { "courseId": "66d1...", "courseTitle": "Mastering React 18", "instructorRevenue": 950000 },
+      { "courseId": "66d2...", "courseTitle": "Advanced Node.js Patterns", "instructorRevenue": 500000 }
     ],
     "enrollmentTrend": [
       { "label": "2026-35", "newEnrollments": 28 },
@@ -282,7 +263,7 @@ Every bucket in the selected period is always present, even if value is `0`.
 #### `coursePerformance`
 
 - Up to 5 instructor courses (verified + pending), sorted by `totalStudentsEnrolled` descending.
-- `avgCompletionPercent` is the average `watchPercentage` across all enrollments for the course, multiplied by 100 and rounded to 1 decimal. `0` for courses with no enrollments.
+- `avgCompletionPercent` is the average `watchPercentage` (already 0–100) across all enrollments for the course, rounded to 1 decimal. `0` for courses with no enrollments.
 - `totalRevenueInstructor` is cumulative all-time, not scoped to the selected period.
 
 #### `recentReviews`
@@ -293,7 +274,7 @@ Every bucket in the selected period is always present, even if value is `0`.
 
 | HTTP status | Message                                             | When                                            |
 | ----------- | --------------------------------------------------- | ----------------------------------------------- |
-| 400         | `Validation failed`                                 | `period` is not one of `week`, `month`, `year`. |
+| 400         | `Validation failed`                                 | `period` is missing or not one of `week`, `month`, `year`. |
 | 401         | _(see auth guide `/me` 401 rows)_                   | Access-token cookie missing/invalid/expired.    |
 | 403         | `You do not have permission to perform this action` | Caller is not an instructor.                    |
 
@@ -304,16 +285,15 @@ Every bucket in the selected period is always present, even if value is `0`.
 `GET /api/v1/dashboard/student`
 
 Student only. Returns all data required to render the student dashboard in a single request:
-
 - **Summary cards** — Total Enrolled Courses, Completed Courses, Active Courses, Overall Progress (average %), and Total Watch Time. Filtered by selected period.
 - **Continue Watching** — Up to 3 most recently updated, incomplete courses with their thumbnails, instructors, and progress %. Not filtered by period (always active in-progress courses).
 - **Recent Activity** — Up to 5 most recent events derived from enrollments, course completions, and certificate issuances. Filtered by selected period.
 
 ### Query parameters
 
-| Param    | Type                                   | Default   | Notes                                                           |
-| -------- | -------------------------------------- | --------- | --------------------------------------------------------------- |
-| `period` | `"week" \| "month" \| "year" \| "all"` | `"month"` | Controls the date window for summary cards and recent activity. |
+| Param    | Type                                      | Required  | Notes                                                              |
+| -------- | ----------------------------------------- | --------- | ------------------------------------------------------------------ |
+| `period` | `"week" \| "month" \| "year"`             | **Yes**   | Controls the date window for summary cards and recent activity, using the same windows as API 1. No backend default; send `month` by default from the frontend. **Does not affect `continueWatching`.** |
 
 ### Success response
 
@@ -373,8 +353,7 @@ HTTP `200`
 ### Field notes
 
 #### `summary`
-
-- Scoped to the selected `period` (or all-time if `period=all`).
+- Scoped to the selected `period`.
 - `activeCourses` are those where `watchedCompletely` is `false`.
 - `overallProgressPercent` is the average `watchPercentage` across all **active** (non-completed) enrollments, rounded to 1 decimal (100% if all enrolled courses are completed).
 - `totalWatchTimeInMinutes` is the sum of `totalDurationWatchedInMinutes` across enrollments in the period.
@@ -388,7 +367,6 @@ HTTP `200`
 - `courseThumbnailUrl` will be a public S3 URL, or `null` if no thumbnail exists.
 
 #### `recentActivity`
-
 - Merges three types of events into a single timeline, sorted by `occurredAt` descending, taking the top 5:
   - `"enrolled"`: Sourced from `EnrollmentModel.createdAt`
   - `"completed"`: Sourced from `EnrollmentModel.watchedCompletelyAt`
@@ -396,10 +374,11 @@ HTTP `200`
 
 ### Possible errors
 
-| HTTP status | Message                                             | When                                         |
-| ----------- | --------------------------------------------------- | -------------------------------------------- |
-| 401         | _(see auth guide `/me` 401 rows)_                   | Access-token cookie missing/invalid/expired. |
-| 403         | `You do not have permission to perform this action` | Caller is not a student.                     |
+| HTTP status | Message                                             | When                                            |
+| ----------- | --------------------------------------------------- | ----------------------------------------------- |
+| 400         | `Validation failed`                                 | `period` is missing or not one of `week`, `month`, `year`. |
+| 401         | _(see auth guide `/me` 401 rows)_                   | Access-token cookie missing/invalid/expired.    |
+| 403         | `You do not have permission to perform this action` | Caller is not a student.                        |
 
 ---
 

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useTransition } from "react";
+import { useOptimistic, useTransition } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import PageFlexCol from "@/components/PageFlexCol";
@@ -32,25 +32,19 @@ import type {
 
 interface StudentDashboardProps {
   data: StudentDashboardData;
-  period?: "week" | "month" | "year" | "all";
+  period?: "week" | "month" | "year";
 }
 
 const StudentDashboard = ({ data, period }: StudentDashboardProps) => {
   const router = useRouter();
   const pathname = usePathname();
   const currentPeriod = period ?? data.period ?? "month";
-  const [selectedPeriod, setSelectedPeriod] = useState(currentPeriod);
+  const [selectedPeriod, setSelectedPeriod] = useOptimistic(currentPeriod);
   const [isPending, startTransition] = useTransition();
 
-  useEffect(() => {
-    setSelectedPeriod(currentPeriod);
-  }, [currentPeriod]);
-
-  const handlePeriodChange = (
-    nextPeriod: "week" | "month" | "year" | "all"
-  ) => {
-    setSelectedPeriod(nextPeriod);
+  const handlePeriodChange = (nextPeriod: "week" | "month" | "year") => {
     startTransition(() => {
+      setSelectedPeriod(nextPeriod);
       router.push(`${pathname}?period=${nextPeriod}`, { scroll: false });
     });
   };
@@ -62,9 +56,7 @@ const StudentDashboard = ({ data, period }: StudentDashboardProps) => {
       ? "this week"
       : currentPeriod === "month"
         ? "this month"
-        : currentPeriod === "year"
-          ? "this year"
-          : "all time";
+        : "this year";
 
   const studentStats = [
     {
@@ -144,7 +136,7 @@ const StudentDashboard = ({ data, period }: StudentDashboardProps) => {
       label: "Course",
       render: (val: string, row: StudentActivityEvent) => (
         <Link
-          href={`/course-details/${row.courseId}`}
+          href={`/course-details/${row.courseId}?role=student&source=enrolled`}
           className="font-medium hover:text-primary transition-colors"
         >
           {val}
@@ -185,7 +177,7 @@ const StudentDashboard = ({ data, period }: StudentDashboardProps) => {
           <Select
             value={selectedPeriod}
             onValueChange={(val) =>
-              handlePeriodChange(val as "week" | "month" | "year" | "all")
+              handlePeriodChange(val as "week" | "month" | "year")
             }
             disabled={isPending}
           >
@@ -196,7 +188,6 @@ const StudentDashboard = ({ data, period }: StudentDashboardProps) => {
               <SelectItem value="week">This Week</SelectItem>
               <SelectItem value="month">This Month</SelectItem>
               <SelectItem value="year">This Year</SelectItem>
-              <SelectItem value="all">All Time</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -252,7 +243,7 @@ const StudentDashboard = ({ data, period }: StudentDashboardProps) => {
                   course={{
                     _id: item.courseId,
                     title: item.courseTitle,
-                    thumbnailUrl: item.courseThumbnailUrl || "",
+                    thumbnailUrl: item.courseThumbnailUrl ?? undefined,
                     price: 0,
                     level: item.courseLevel,
                     instructor: item.instructorName,
@@ -267,7 +258,9 @@ const StudentDashboard = ({ data, period }: StudentDashboardProps) => {
                   }}
                   mode="in-progress"
                   footer={
-                    <Link href={`/course-details/${item.courseId}`}>
+                    <Link
+                      href={`/course-details/${item.courseId}?role=student&source=enrolled`}
+                    >
                       <AppButton className="w-full mt-2" leftIcon={PlayCircle}>
                         Resume Course
                       </AppButton>

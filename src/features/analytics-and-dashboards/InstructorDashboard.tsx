@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useTransition } from "react";
+import { useOptimistic, useTransition } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import PageFlexCol from "@/components/PageFlexCol";
 import StatCard from "@/components/StatCard";
@@ -42,7 +42,6 @@ import {
 import type {
   InstructorDashboardData,
   InstructorCoursePerformance,
-  InstructorRecentReview,
 } from "@/response-types/dashboardResponseTypes";
 
 // Palette derived strictly from the primary tokens in globals.css
@@ -125,16 +124,12 @@ const InstructorDashboard = ({ data, period }: InstructorDashboardProps) => {
   const router = useRouter();
   const pathname = usePathname();
   const currentPeriod = period ?? data.period;
-  const [selectedPeriod, setSelectedPeriod] = useState(currentPeriod);
+  const [selectedPeriod, setSelectedPeriod] = useOptimistic(currentPeriod);
   const [isPending, startTransition] = useTransition();
 
-  useEffect(() => {
-    setSelectedPeriod(currentPeriod);
-  }, [currentPeriod]);
-
   const handlePeriodChange = (nextPeriod: "week" | "month" | "year") => {
-    setSelectedPeriod(nextPeriod);
     startTransition(() => {
+      setSelectedPeriod(nextPeriod);
       router.push(`${pathname}?period=${nextPeriod}`, { scroll: false });
     });
   };
@@ -302,7 +297,7 @@ const InstructorDashboard = ({ data, period }: InstructorDashboardProps) => {
       label: "Review",
       render: (val: string) => (
         <span className="text-muted-foreground italic line-clamp-1 max-w-[300px]">
-          "{val}"
+          &ldquo;{val}&rdquo;
         </span>
       ),
     },
@@ -486,7 +481,7 @@ const InstructorDashboard = ({ data, period }: InstructorDashboardProps) => {
               Course Performance
             </h2>
             <p className="text-sm text-muted-foreground">
-              Top 5 courses ranked by student enrollments and completion rates.
+              Top 5 courses ranked by student enrollments. Revenue is all-time and not affected by the selected period.
             </p>
           </div>
           <AppTable columns={courseColumns} data={data.coursePerformance} />
@@ -496,7 +491,7 @@ const InstructorDashboard = ({ data, period }: InstructorDashboardProps) => {
           <div className="mb-4">
             <h2 className="text-2xl font-bold tracking-tight">Recent Reviews</h2>
             <p className="text-sm text-muted-foreground">
-              5 most recent reviews and ratings submitted by your enrolled students.
+              5 most recent reviews across all your courses, regardless of the selected period.
             </p>
           </div>
           <AppTable columns={reviewColumns} data={data.recentReviews} />

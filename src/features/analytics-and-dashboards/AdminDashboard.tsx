@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useTransition } from "react";
+import { useOptimistic, useTransition } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import PageFlexCol from "@/components/PageFlexCol";
 import StatCard from "@/components/StatCard";
@@ -36,11 +36,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import type {
-  AdminDashboardData,
-  TopCourse,
-  RecentUser,
-} from "@/response-types/dashboardResponseTypes";
+import type { AdminDashboardData } from "@/response-types/dashboardResponseTypes";
 
 const REVENUE_CONFIG = {
   revenue: {
@@ -125,16 +121,12 @@ const AdminDashboard = ({ data, period }: AdminDashboardProps) => {
   const router = useRouter();
   const pathname = usePathname();
   const currentPeriod = period ?? data.period;
-  const [selectedPeriod, setSelectedPeriod] = useState(currentPeriod);
+  const [selectedPeriod, setSelectedPeriod] = useOptimistic(currentPeriod);
   const [isPending, startTransition] = useTransition();
 
-  useEffect(() => {
-    setSelectedPeriod(currentPeriod);
-  }, [currentPeriod]);
-
   const handlePeriodChange = (nextPeriod: "week" | "month" | "year") => {
-    setSelectedPeriod(nextPeriod);
     startTransition(() => {
+      setSelectedPeriod(nextPeriod);
       router.push(`${pathname}?period=${nextPeriod}`, { scroll: false });
     });
   };
@@ -481,7 +473,7 @@ const AdminDashboard = ({ data, period }: AdminDashboardProps) => {
               Top Performing Courses
             </h2>
             <p className="text-sm text-muted-foreground">
-              Top 5 courses ranked by student enrollments and platform commission.
+              Top 5 courses ranked by student enrollments. Commission is all-time and not affected by the selected period.
             </p>
           </div>
           <AppTable columns={courseColumns} data={data.topCourses} />
@@ -491,7 +483,7 @@ const AdminDashboard = ({ data, period }: AdminDashboardProps) => {
           <div className="mb-4">
             <h2 className="text-2xl font-bold tracking-tight">Recent Users</h2>
             <p className="text-sm text-muted-foreground">
-              5 most recently joined users across all roles.
+              5 most recently joined users across all roles, regardless of the selected period.
             </p>
           </div>
           <AppTable columns={userColumns} data={data.recentUsers} />

@@ -13,10 +13,7 @@ const StudentDashboardPage = async ({
   const { period } = await searchParams;
 
   const normalizedPeriod =
-    period === "week" ||
-    period === "month" ||
-    period === "year" ||
-    period === "all"
+    period === "week" || period === "month" || period === "year"
       ? period
       : "month";
 
