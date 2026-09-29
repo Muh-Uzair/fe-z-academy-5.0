@@ -72,13 +72,17 @@ export async function getInstructorDashboardQuery(
   }
 }
 
-export async function getStudentDashboardQuery(): Promise<GetStudentDashboardSuccessResponse> {
+export async function getStudentDashboardQuery(
+  period?: "week" | "month" | "year" | "all"
+): Promise<GetStudentDashboardSuccessResponse> {
   "use cache: private";
   cacheTag(DASHBOARD_TAGS.student);
   cacheLife("minutes");
 
+  const query = buildQueryString({ period });
+
   try {
-    const res = await apiClient(`/dashboard/student`, {
+    const res = await apiClient(`/dashboard/student${query}`, {
       method: "GET",
     });
     const json: GetStudentDashboardResponse = await res.json();

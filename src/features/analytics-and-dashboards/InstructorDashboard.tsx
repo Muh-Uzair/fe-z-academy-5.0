@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useTransition } from "react";
-import { useRouter } from "next/navigation";
+import React, { useState, useEffect, useTransition } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import PageFlexCol from "@/components/PageFlexCol";
 import StatCard from "@/components/StatCard";
 import AppTable from "@/components/AppTable";
@@ -39,7 +39,11 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import type { InstructorDashboardData } from "@/response-types/dashboardResponseTypes";
+import type {
+  InstructorDashboardData,
+  InstructorCoursePerformance,
+  InstructorRecentReview,
+} from "@/response-types/dashboardResponseTypes";
 
 // Palette derived strictly from the primary tokens in globals.css
 const PRIMARY_SHADES = [
@@ -114,28 +118,39 @@ function formatBucketLabel(
 
 interface InstructorDashboardProps {
   data: InstructorDashboardData;
-  period: "week" | "month" | "year";
+  period?: "week" | "month" | "year";
 }
 
 const InstructorDashboard = ({ data, period }: InstructorDashboardProps) => {
   const router = useRouter();
+  const pathname = usePathname();
+  const currentPeriod = period ?? data.period;
+  const [selectedPeriod, setSelectedPeriod] = useState(currentPeriod);
   const [isPending, startTransition] = useTransition();
 
+  useEffect(() => {
+    setSelectedPeriod(currentPeriod);
+  }, [currentPeriod]);
+
   const handlePeriodChange = (nextPeriod: "week" | "month" | "year") => {
+    setSelectedPeriod(nextPeriod);
     startTransition(() => {
-      router.push(`/instructor/dashboard?period=${nextPeriod}`);
+      router.push(`${pathname}?period=${nextPeriod}`, { scroll: false });
     });
   };
 
   const summary = data.summary;
-  const revTrend = formatPercentTrend(summary.totalRevenue.changePercent, period);
+  const revTrend = formatPercentTrend(
+    summary.totalRevenue.changePercent,
+    currentPeriod
+  );
   const commTrend = formatPercentTrend(
     summary.totalAdminCommission.changePercent,
-    period
+    currentPeriod
   );
   const studTrend = formatPercentTrend(
     summary.totalStudents.changePercent,
-    period
+    currentPeriod
   );
 
   const instructorStats = [
@@ -169,7 +184,7 @@ const InstructorDashboard = ({ data, period }: InstructorDashboardProps) => {
         summary.totalCourses.live + summary.totalCourses.pending
       ).toString(),
       icon: BookOpen,
-      description: `${summary.totalCourses.live} Live, ${summary.totalCourses.pending} Pending`,
+      description: `${summary.totalCourses.live} Live, ${summary.totalCourses.pending} Pending Verification`,
       iconColor: "text-indigo-500",
     },
     {
@@ -201,7 +216,7 @@ const InstructorDashboard = ({ data, period }: InstructorDashboardProps) => {
 
   // Enrollment trend data
   const chartEnrollmentsData = data.enrollmentTrend.map((pt) => ({
-    label: formatBucketLabel(pt.label, period),
+    label: formatBucketLabel(pt.label, currentPeriod),
     rawLabel: pt.label,
     enrollments: pt.newEnrollments,
   }));
@@ -210,7 +225,7 @@ const InstructorDashboard = ({ data, period }: InstructorDashboardProps) => {
     {
       key: "title",
       label: "Course Title",
-      render: (val: string, row: { isVerified: boolean }) => (
+      render: (val: string, row: InstructorCoursePerformance) => (
         <div>
           <div className="font-medium">{val}</div>
           <Badge
@@ -221,7 +236,7 @@ const InstructorDashboard = ({ data, period }: InstructorDashboardProps) => {
                 : "text-amber-600 border-amber-200 bg-amber-500/10 mt-1"
             }
           >
-            {row.isVerified ? "Live" : "Pending Review"}
+            {row.isVerified ? "Live" : "Pending Verification"}
           </Badge>
         </div>
       ),
@@ -307,9 +322,9 @@ const InstructorDashboard = ({ data, period }: InstructorDashboardProps) => {
   ];
 
   const periodSubtitle =
-    period === "week"
+    currentPeriod === "week"
       ? "Daily breakdown over the last 7 days"
-      : period === "month"
+      : currentPeriod === "month"
         ? "Weekly breakdown over the last 30 days"
         : "Monthly breakdown over the last 12 months";
 
@@ -330,7 +345,7 @@ const InstructorDashboard = ({ data, period }: InstructorDashboardProps) => {
             <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
           )}
           <Select
-            value={period}
+            value={selectedPeriod}
             onValueChange={(val) =>
               handlePeriodChange(val as "week" | "month" | "year")
             }
@@ -436,7 +451,22 @@ const InstructorDashboard = ({ data, period }: InstructorDashboardProps) => {
                   axisLine={false}
                   allowDecimals={false}
                 />
-                <ChartTooltip content={<ChartTooltipContent />} />
+                <ChartTooltip
+                  content={
+                    <ChartTooltipContent
+                      formatter={(value) => (
+                        <div className="flex items-center justify-between gap-3 w-full">
+                          <span className="text-muted-foreground">
+                            New Enrollments:
+                          </span>
+                          <span className="font-semibold text-foreground">
+                            {Number(value).toLocaleString()}
+                          </span>
+                        </div>
+                      )}
+                    />
+                  }
+                />
                 <Line
                   type="monotone"
                   dataKey="enrollments"
@@ -456,7 +486,7 @@ const InstructorDashboard = ({ data, period }: InstructorDashboardProps) => {
               Course Performance
             </h2>
             <p className="text-sm text-muted-foreground">
-              Performance metrics and student completion rates for all your courses.
+              Top 5 courses ranked by student enrollments and completion rates.
             </p>
           </div>
           <AppTable columns={courseColumns} data={data.coursePerformance} />
@@ -466,7 +496,7 @@ const InstructorDashboard = ({ data, period }: InstructorDashboardProps) => {
           <div className="mb-4">
             <h2 className="text-2xl font-bold tracking-tight">Recent Reviews</h2>
             <p className="text-sm text-muted-foreground">
-              Latest reviews and ratings submitted by your enrolled students.
+              5 most recent reviews and ratings submitted by your enrolled students.
             </p>
           </div>
           <AppTable columns={reviewColumns} data={data.recentReviews} />
@@ -477,3 +507,4 @@ const InstructorDashboard = ({ data, period }: InstructorDashboardProps) => {
 };
 
 export default InstructorDashboard;
+

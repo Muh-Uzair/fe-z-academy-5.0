@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useTransition } from "react";
-import { useRouter } from "next/navigation";
+import React, { useState, useEffect, useTransition } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import PageFlexCol from "@/components/PageFlexCol";
 import StatCard from "@/components/StatCard";
 import AppTable from "@/components/AppTable";
@@ -36,7 +36,11 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import type { AdminDashboardData } from "@/response-types/dashboardResponseTypes";
+import type {
+  AdminDashboardData,
+  TopCourse,
+  RecentUser,
+} from "@/response-types/dashboardResponseTypes";
 
 const REVENUE_CONFIG = {
   revenue: {
@@ -114,34 +118,48 @@ function formatBucketLabel(
 
 interface AdminDashboardProps {
   data: AdminDashboardData;
-  period: "week" | "month" | "year";
+  period?: "week" | "month" | "year";
 }
 
 const AdminDashboard = ({ data, period }: AdminDashboardProps) => {
   const router = useRouter();
+  const pathname = usePathname();
+  const currentPeriod = period ?? data.period;
+  const [selectedPeriod, setSelectedPeriod] = useState(currentPeriod);
   const [isPending, startTransition] = useTransition();
 
+  useEffect(() => {
+    setSelectedPeriod(currentPeriod);
+  }, [currentPeriod]);
+
   const handlePeriodChange = (nextPeriod: "week" | "month" | "year") => {
+    setSelectedPeriod(nextPeriod);
     startTransition(() => {
-      router.push(`/admin/dashboard?period=${nextPeriod}`);
+      router.push(`${pathname}?period=${nextPeriod}`, { scroll: false });
     });
   };
 
   const summary = data.summary;
-  const revTrend = formatPercentTrend(summary.totalRevenue.changePercent, period);
+  const revTrend = formatPercentTrend(
+    summary.totalRevenue.changePercent,
+    currentPeriod
+  );
   const commTrend = formatPercentTrend(
     summary.totalCommission.changePercent,
-    period
+    currentPeriod
   );
   const studTrend = formatPercentTrend(
     summary.totalStudents.changePercent,
-    period
+    currentPeriod
   );
   const instTrend = formatPercentTrend(
     summary.totalInstructors.changePercent,
-    period
+    currentPeriod
   );
-  const crsTrend = formatPercentTrend(summary.totalCourses.changePercent, period);
+  const crsTrend = formatPercentTrend(
+    summary.totalCourses.changePercent,
+    currentPeriod
+  );
 
   const platformStats = [
     {
@@ -187,14 +205,14 @@ const AdminDashboard = ({ data, period }: AdminDashboardProps) => {
   ];
 
   const chartRevenueData = data.revenueTrend.map((pt) => ({
-    label: formatBucketLabel(pt.label, period),
+    label: formatBucketLabel(pt.label, currentPeriod),
     rawLabel: pt.label,
     revenue: pt.totalRevenue / 100,
     commission: pt.adminCommission / 100,
   }));
 
   const chartUserData = data.userGrowth.map((pt) => ({
-    label: formatBucketLabel(pt.label, period),
+    label: formatBucketLabel(pt.label, currentPeriod),
     rawLabel: pt.label,
     students: pt.newStudents,
     instructors: pt.newInstructors,
@@ -211,11 +229,14 @@ const AdminDashboard = ({ data, period }: AdminDashboardProps) => {
     {
       key: "averageRating",
       label: "Rating",
-      render: (val: number) => (
-        <span className="text-yellow-500 font-medium">
-          ★ {val ? val.toFixed(1) : "N/A"}
-        </span>
-      ),
+      render: (val: number) =>
+        val > 0 ? (
+          <span className="text-yellow-500 font-medium">
+            ★ {val.toFixed(1)}
+          </span>
+        ) : (
+          <span className="text-muted-foreground">-</span>
+        ),
     },
     {
       key: "totalRevenueAdmin",
@@ -261,7 +282,7 @@ const AdminDashboard = ({ data, period }: AdminDashboardProps) => {
               : "text-amber-600 border-amber-200 bg-amber-500/10"
           }
         >
-          {val ? "Verified" : "Pending"}
+          {val ? "Verified" : "Pending Verification"}
         </Badge>
       ),
     },
@@ -281,9 +302,9 @@ const AdminDashboard = ({ data, period }: AdminDashboardProps) => {
   ];
 
   const periodSubtitle =
-    period === "week"
+    currentPeriod === "week"
       ? "Daily breakdown over the last 7 days"
-      : period === "month"
+      : currentPeriod === "month"
         ? "Weekly breakdown over the last 30 days"
         : "Monthly breakdown over the last 12 months";
 
@@ -302,7 +323,7 @@ const AdminDashboard = ({ data, period }: AdminDashboardProps) => {
             <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
           )}
           <Select
-            value={period}
+            value={selectedPeriod}
             onValueChange={(val) =>
               handlePeriodChange(val as "week" | "month" | "year")
             }
@@ -359,7 +380,25 @@ const AdminDashboard = ({ data, period }: AdminDashboardProps) => {
                     `$${val >= 1000 ? `${(val / 1000).toFixed(0)}k` : val}`
                   }
                 />
-                <ChartTooltip content={<ChartTooltipContent />} />
+                <ChartTooltip
+                  content={
+                    <ChartTooltipContent
+                      formatter={(value, name) => (
+                        <div className="flex items-center justify-between gap-3 w-full">
+                          <span className="text-muted-foreground">
+                            {name === "revenue"
+                              ? "Total Revenue"
+                              : "Admin Commission"}
+                            :
+                          </span>
+                          <span className="font-semibold text-foreground">
+                            {formatCurrency(Number(value) * 100)}
+                          </span>
+                        </div>
+                      )}
+                    />
+                  }
+                />
                 <Area
                   type="monotone"
                   dataKey="revenue"
@@ -397,8 +436,30 @@ const AdminDashboard = ({ data, period }: AdminDashboardProps) => {
                   axisLine={false}
                   tickMargin={8}
                 />
-                <YAxis tickLine={false} axisLine={false} allowDecimals={false} />
-                <ChartTooltip content={<ChartTooltipContent />} />
+                <YAxis
+                  tickLine={false}
+                  axisLine={false}
+                  allowDecimals={false}
+                />
+                <ChartTooltip
+                  content={
+                    <ChartTooltipContent
+                      formatter={(value, name) => (
+                        <div className="flex items-center justify-between gap-3 w-full">
+                          <span className="text-muted-foreground">
+                            {name === "students"
+                              ? "New Students"
+                              : "New Instructors"}
+                            :
+                          </span>
+                          <span className="font-semibold text-foreground">
+                            {Number(value).toLocaleString()}
+                          </span>
+                        </div>
+                      )}
+                    />
+                  }
+                />
                 <Bar
                   dataKey="students"
                   fill="var(--color-students)"
@@ -420,7 +481,7 @@ const AdminDashboard = ({ data, period }: AdminDashboardProps) => {
               Top Performing Courses
             </h2>
             <p className="text-sm text-muted-foreground">
-              Top courses ranked by student enrollments and platform commission.
+              Top 5 courses ranked by student enrollments and platform commission.
             </p>
           </div>
           <AppTable columns={courseColumns} data={data.topCourses} />
@@ -430,7 +491,7 @@ const AdminDashboard = ({ data, period }: AdminDashboardProps) => {
           <div className="mb-4">
             <h2 className="text-2xl font-bold tracking-tight">Recent Users</h2>
             <p className="text-sm text-muted-foreground">
-              Latest students and instructors who joined the platform.
+              5 most recently joined users across all roles.
             </p>
           </div>
           <AppTable columns={userColumns} data={data.recentUsers} />
@@ -441,3 +502,4 @@ const AdminDashboard = ({ data, period }: AdminDashboardProps) => {
 };
 
 export default AdminDashboard;
+

@@ -77,14 +77,17 @@ export interface AdminDashboardData {
   userGrowth: UserGrowthPoint[];
   /** Up to 5 courses, sorted by totalStudentsEnrolled descending. */
   topCourses: TopCourse[];
-  /** Up to 10 most-recently-joined users, any role, sorted by createdAt descending. */
+  /** Up to 5 most-recently-joined users, any role, sorted by createdAt descending. */
   recentUsers: RecentUser[];
 }
 
 // ─── API 1: GET /api/v1/dashboard/admin ───────────────────────────────────────
 
 export type GetAdminDashboardResponse =
-  | SuccessApiResponse<AdminDashboardData, "Admin dashboard data fetched successfully">
+  | SuccessApiResponse<
+      AdminDashboardData,
+      "Admin dashboard data fetched successfully"
+    >
   | ApiErrorResponse;
 
 // ─── Instructor Dashboard ─────────────────────────────────────────────────────
@@ -151,14 +154,17 @@ export interface InstructorDashboardData {
   revenueByCourseTrend: CourseRevenueSlice[];
   /** Enrollment count per bucket, same length/labels as admin revenueTrend. */
   enrollmentTrend: EnrollmentTrendPoint[];
-  /** All instructor courses sorted by totalStudentsEnrolled descending. */
+  /** Up to 5 courses by this instructor, sorted by totalStudentsEnrolled descending. */
   coursePerformance: InstructorCoursePerformance[];
   /** 5 most recent reviews across all instructor's courses. */
   recentReviews: InstructorRecentReview[];
 }
 
 export type GetInstructorDashboardResponse =
-  | SuccessApiResponse<InstructorDashboardData, "Instructor dashboard data fetched successfully">
+  | SuccessApiResponse<
+      InstructorDashboardData,
+      "Instructor dashboard data fetched successfully"
+    >
   | ApiErrorResponse;
 
 // ─── Student Dashboard ────────────────────────────────────────────────────────
@@ -184,7 +190,7 @@ export interface ContinueWatchingItem {
   instructorName: string;
   totalDurationInMinutes: number;
   totalDurationWatchedInMinutes: number;
-  /** Raw fraction (0–1). Multiply by 100 to display as %. */
+  /** Watch percentage (0–100). */
   watchPercentage: number;
 }
 
@@ -200,13 +206,17 @@ export interface StudentActivityEvent {
 
 // API 3: GET /api/v1/dashboard/student
 export interface StudentDashboardData {
+  period?: "week" | "month" | "year" | "all";
   summary: StudentSummaryCards;
   /** Up to 3 most-recently-updated in-progress courses. */
   continueWatching: ContinueWatchingItem[];
-  /** Up to 10 most recent events across enrolled, completed, certificate_earned. */
+  /** Up to 5 most recent events across enrolled, completed, certificate_earned. */
   recentActivity: StudentActivityEvent[];
 }
 
 export type GetStudentDashboardResponse =
-  | SuccessApiResponse<StudentDashboardData, "Student dashboard data fetched successfully">
+  | SuccessApiResponse<
+      StudentDashboardData,
+      "Student dashboard data fetched successfully"
+    >
   | ApiErrorResponse;
