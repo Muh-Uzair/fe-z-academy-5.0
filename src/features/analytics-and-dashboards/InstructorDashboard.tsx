@@ -155,7 +155,8 @@ const InstructorDashboard = ({ data, period }: InstructorDashboardProps) => {
       icon: DollarSign,
       trend: revTrend.trend,
       trendValue: revTrend.trendValue,
-      iconColor: "text-green-500",
+      iconColor: "text-primary-dark",
+      iconBg: "bg-primary-very-light",
     },
     {
       title: "Admin Commission",
@@ -163,7 +164,8 @@ const InstructorDashboard = ({ data, period }: InstructorDashboardProps) => {
       icon: Wallet,
       trend: commTrend.trend,
       trendValue: commTrend.trendValue,
-      iconColor: "text-blue-500",
+      iconColor: "text-primary-dark",
+      iconBg: "bg-primary-very-light",
     },
     {
       title: "Total Students",
@@ -171,7 +173,8 @@ const InstructorDashboard = ({ data, period }: InstructorDashboardProps) => {
       icon: Users,
       trend: studTrend.trend,
       trendValue: studTrend.trendValue,
-      iconColor: "text-purple-500",
+      iconColor: "text-primary-dark",
+      iconBg: "bg-primary-very-light",
     },
     {
       title: "Total Courses",
@@ -180,7 +183,8 @@ const InstructorDashboard = ({ data, period }: InstructorDashboardProps) => {
       ).toString(),
       icon: BookOpen,
       description: `${summary.totalCourses.live} Live, ${summary.totalCourses.pending} Pending Verification`,
-      iconColor: "text-indigo-500",
+      iconColor: "text-primary-dark",
+      iconBg: "bg-primary-very-light",
     },
     {
       title: "Average Rating",
@@ -188,7 +192,8 @@ const InstructorDashboard = ({ data, period }: InstructorDashboardProps) => {
         summary.averageRating > 0 ? summary.averageRating.toFixed(1) : "0.0",
       icon: Star,
       description: "Across all verified courses",
-      iconColor: "text-yellow-500",
+      iconColor: "text-primary-dark",
+      iconBg: "bg-primary-very-light",
     },
   ];
 

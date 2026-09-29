@@ -64,7 +64,8 @@ const StudentDashboard = ({ data, period }: StudentDashboardProps) => {
       value: summary.totalEnrolledCourses.toString(),
       icon: BookOpen,
       description: `${summary.activeCourses} active, ${summary.completedCourses} completed`,
-      iconColor: "text-blue-500",
+      iconColor: "text-primary-dark",
+      iconBg: "bg-primary-very-light",
     },
     {
       title: "Completed Courses",
@@ -77,14 +78,16 @@ const StudentDashboard = ({ data, period }: StudentDashboardProps) => {
             )
           : 0
       }% completion rate`,
-      iconColor: "text-green-500",
+      iconColor: "text-primary-dark",
+      iconBg: "bg-primary-very-light",
     },
     {
       title: "Overall Progress",
       value: `${summary.overallProgressPercent.toFixed(1)}%`,
       icon: TrendingUp,
       description: "Across active courses",
-      iconColor: "text-purple-500",
+      iconColor: "text-primary-dark",
+      iconBg: "bg-primary-very-light",
     },
     {
       title: "Total Watch Time",
@@ -93,7 +96,8 @@ const StudentDashboard = ({ data, period }: StudentDashboardProps) => {
       }m`,
       icon: Clock,
       description: `${summary.totalWatchTimeInMinutes.toLocaleString()} minutes total (${periodLabel})`,
-      iconColor: "text-orange-500",
+      iconColor: "text-primary-dark",
+      iconBg: "bg-primary-very-light",
     },
   ];
 

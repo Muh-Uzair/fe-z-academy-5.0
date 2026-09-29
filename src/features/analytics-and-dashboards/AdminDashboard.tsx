@@ -160,7 +160,8 @@ const AdminDashboard = ({ data, period }: AdminDashboardProps) => {
       icon: DollarSign,
       trend: revTrend.trend,
       trendValue: revTrend.trendValue,
-      iconColor: "text-green-500",
+      iconColor: "text-primary-dark",
+      iconBg: "bg-primary-very-light",
     },
     {
       title: "Admin Commission",
@@ -168,7 +169,8 @@ const AdminDashboard = ({ data, period }: AdminDashboardProps) => {
       icon: TrendingUp,
       trend: commTrend.trend,
       trendValue: commTrend.trendValue,
-      iconColor: "text-blue-500",
+      iconColor: "text-primary-dark",
+      iconBg: "bg-primary-very-light",
     },
     {
       title: "Total Students",
@@ -176,7 +178,8 @@ const AdminDashboard = ({ data, period }: AdminDashboardProps) => {
       icon: Users,
       trend: studTrend.trend,
       trendValue: studTrend.trendValue,
-      iconColor: "text-purple-500",
+      iconColor: "text-primary-dark",
+      iconBg: "bg-primary-very-light",
     },
     {
       title: "Total Instructors",
@@ -184,7 +187,8 @@ const AdminDashboard = ({ data, period }: AdminDashboardProps) => {
       icon: GraduationCap,
       trend: instTrend.trend,
       trendValue: instTrend.trendValue,
-      iconColor: "text-orange-500",
+      iconColor: "text-primary-dark",
+      iconBg: "bg-primary-very-light",
     },
     {
       title: "Total Courses",
@@ -192,7 +196,8 @@ const AdminDashboard = ({ data, period }: AdminDashboardProps) => {
       icon: BookOpen,
       trend: crsTrend.trend,
       trendValue: crsTrend.trendValue,
-      iconColor: "text-indigo-500",
+      iconColor: "text-primary-dark",
+      iconBg: "bg-primary-very-light",
     },
   ];
 
