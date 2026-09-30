@@ -1,7 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { PlayCircle, Clock } from "lucide-react";
+import { useState } from "react";
+import { PlayCircle, Clock, Award } from "lucide-react";
 
 import AppButton from "@/components/AppButton";
 import { Card } from "@/components/ui/card";
@@ -11,9 +12,15 @@ import { AspectRatio } from "@/components/ui/aspect-ratio";
 import PageFlexCol from "@/components/PageFlexCol";
 import PageHeader from "@/components/PageHeader";
 import AppCourseCardsGridLayout from "@/components/AppCourseCardsGridLayout";
+import useClientAction from "@/hooks/useClientAction";
+import { issueCourseCertificateAction } from "@/services/course/actions";
+import CertificateDialog from "./CertificateDialog";
 import type { Enrollment } from "@/response-types/enrollmentResponseTypes";
 import type { Pagination } from "@/response-types/userResponseTypes";
-import type { CourseListItem } from "@/response-types/courseResponseTypes";
+import type {
+  CourseListItem,
+  IssueCourseCertificateResponseData,
+} from "@/response-types/courseResponseTypes";
 
 type ContinueWatchingCourse = {
   course: CourseListItem;
@@ -26,11 +33,38 @@ type ContinueWatchingProps = {
 };
 
 const ContinueWatching = ({ courses, pagination }: ContinueWatchingProps) => {
+  const [activeCourseId, setActiveCourseId] = useState<string | null>(null);
+  const [certificateData, setCertificateData] =
+    useState<IssueCourseCertificateResponseData | null>(null);
+  const [isCertificateOpen, setIsCertificateOpen] = useState(false);
+
+  const { run: runIssueCertificate, isLoading: isIssuingCertificate } =
+    useClientAction();
+
   const heroCourse =
     courses.find(({ enrollment }) => enrollment.mostRecentlySeen) ?? courses[0];
   const otherCourses = courses.filter((item) => item !== heroCourse);
   const courseHref = (courseId: string) =>
     `/course-details/${courseId}?role=student&source=enrolled`;
+
+  const handleGetCertificate = async (courseId: string) => {
+    setActiveCourseId(courseId);
+    const response = await runIssueCertificate(() =>
+      issueCourseCertificateAction(courseId),
+    );
+    console.log("Certificate action result:", response);
+
+    if (response) {
+      const data =
+        (response as { data?: IssueCourseCertificateResponseData }).data ??
+        (response as unknown as IssueCourseCertificateResponseData);
+
+      if (data && data.certificateId) {
+        setCertificateData(data);
+        setIsCertificateOpen(true);
+      }
+    }
+  };
 
   return (
     <PageFlexCol>
@@ -109,12 +143,29 @@ const ContinueWatching = ({ courses, pagination }: ContinueWatchingProps) => {
                       {heroCourse.course.totalDurationInMinutes}m watched
                     </span>
 
-                    <AppButton
-                      href={courseHref(heroCourse.course._id)}
-                      leftIcon={PlayCircle}
-                    >
-                      Resume Course
-                    </AppButton>
+                    <div className="flex items-center gap-2">
+                      {heroCourse.enrollment.watchedCompletely && (
+                        <AppButton
+                          leftIcon={Award}
+                          isLoading={
+                            isIssuingCertificate &&
+                            activeCourseId === heroCourse.course._id
+                          }
+                          className="bg-amber-400 text-black hover:bg-amber-400/90 dark:bg-amber-400 dark:text-black dark:hover:bg-amber-400/90 font-semibold shadow-sm border border-amber-400"
+                          onClick={() =>
+                            handleGetCertificate(heroCourse.course._id)
+                          }
+                        >
+                          Get Certificate
+                        </AppButton>
+                      )}
+                      <AppButton
+                        href={courseHref(heroCourse.course._id)}
+                        leftIcon={PlayCircle}
+                      >
+                        Resume Course
+                      </AppButton>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -138,13 +189,39 @@ const ContinueWatching = ({ courses, pagination }: ContinueWatchingProps) => {
             }))}
             mode="in-progress"
             renderFooter={(course) => (
-              <AppButton href={courseHref(course._id)}>Resume</AppButton>
+              <div className="flex items-center gap-2">
+                {course.watchedCompletely && (
+                  <AppButton
+                    leftIcon={Award}
+                    isLoading={
+                      isIssuingCertificate && activeCourseId === course._id
+                    }
+                    className="flex-1 bg-amber-400 text-black hover:bg-amber-400/90 dark:bg-amber-400 dark:text-black dark:hover:bg-amber-400/90 font-semibold shadow-sm border border-amber-400"
+                    onClick={() => handleGetCertificate(course._id)}
+                  >
+                    Get Certificate
+                  </AppButton>
+                )}
+                <AppButton
+                  href={courseHref(course._id)}
+                  className={course.watchedCompletely ? "flex-1" : "w-full"}
+                >
+                  Resume
+                </AppButton>
+              </div>
             )}
             pagination={true}
             paginationMeta={pagination}
           />
         </section>
       )}
+
+      {/* Certificate Lightbox Dialog */}
+      <CertificateDialog
+        open={isCertificateOpen}
+        onOpenChange={setIsCertificateOpen}
+        certificateData={certificateData}
+      />
     </PageFlexCol>
   );
 };

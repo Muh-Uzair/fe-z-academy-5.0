@@ -7,8 +7,11 @@ import type { Pagination as PaginationMeta } from "@/response-types/userResponse
 import type { CourseListItem } from "@/response-types/courseResponseTypes";
 
 // Extend CourseListItem to allow the optional totalDurationWatchedInMinutes
-// field used by the "in-progress" mode (student continue-watching).
-type Course = CourseListItem & { totalDurationWatchedInMinutes?: number };
+// and watchedCompletely fields used by the "in-progress" mode (student continue-watching).
+type Course = CourseListItem & {
+  totalDurationWatchedInMinutes?: number;
+  watchedCompletely?: boolean;
+};
 
 interface AppCourseCardsGridLayoutProps {
   courses: Course[];

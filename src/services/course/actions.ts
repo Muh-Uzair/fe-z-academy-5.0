@@ -14,6 +14,7 @@ import type {
   UpdateCourseVerificationResponse,
   CreateCoursePaymentIntentResponse,
   RequestCourseRefundResponse,
+  IssueCourseCertificateResponse,
 } from "@/response-types/courseResponseTypes";
 import { CourseLevel } from "@/response-types/courseResponseTypes";
 
@@ -249,4 +250,19 @@ export async function requestCourseRefundAction(
   }
 
   return json;
+}
+
+/**
+ * Student only. Generates or retrieves the certificate of completion for an
+ * enrolled course where the student has completed the course (watched >= 95%).
+ * Uncached action that requests fresh certificate data directly from the server.
+ */
+export async function issueCourseCertificateAction(
+  id: string,
+): Promise<IssueCourseCertificateResponse> {
+  const res = await apiClient(`/courses/${id}/issue-certificate`, {
+    method: "GET",
+  });
+
+  return res.json();
 }
