@@ -2,7 +2,7 @@ import { Spinner } from "@/components/ui/spinner";
 
 const AppLoadingScreen = () => {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
+    <div className="flex min-h-screen items-center justify-center bg-transparent">
       <Spinner className="size-6 text-primary" />
     </div>
   );
