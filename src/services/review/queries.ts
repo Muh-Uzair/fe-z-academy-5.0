@@ -10,13 +10,24 @@ import type {
   GetReviewsByCourseIdResponse,
 } from "@/response-types/reviewResponseTypes";
 
-
 // Each query below throws on a non-success response instead of returning it,
 // so the resolved type only ever needs to describe the success shape.
-type GetReviewsSuccessResponse = Extract<GetReviewsResponse, { status: "success" }>;
-type GetReviewDetailsSuccessResponse = Extract<GetReviewDetailsResponse, { status: "success" }>;
-type GetReviewsByCourseIdStudentSuccessResponse = Extract<GetReviewsByCourseIdStudentResponse, { status: "success" }>;
-type GetReviewsByCourseIdSuccessResponse = Extract<GetReviewsByCourseIdResponse, { status: "success" }>;
+type GetReviewsSuccessResponse = Extract<
+  GetReviewsResponse,
+  { status: "success" }
+>;
+type GetReviewDetailsSuccessResponse = Extract<
+  GetReviewDetailsResponse,
+  { status: "success" }
+>;
+type GetReviewsByCourseIdStudentSuccessResponse = Extract<
+  GetReviewsByCourseIdStudentResponse,
+  { status: "success" }
+>;
+type GetReviewsByCourseIdSuccessResponse = Extract<
+  GetReviewsByCourseIdResponse,
+  { status: "success" }
+>;
 
 type GetReviewsParams = {
   course?: string;

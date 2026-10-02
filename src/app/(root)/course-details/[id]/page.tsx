@@ -9,7 +9,7 @@ import {
 import { getCategoriesQuery } from "@/services/category/queries";
 import { getEnrollmentsQuery } from "@/services/enrollment/queries";
 import type { CourseRefundEligibility } from "@/response-types/courseResponseTypes";
-import { getReviewsByCourseIdQuery } from "@/services/review/queries";
+import { getReviewByCourseIdAsStudentQuery } from "@/services/review/queries";
 
 type CourseDetailsPageProps = {
   params: Promise<{ id: string }>;
@@ -51,14 +51,13 @@ const UnifiedCourseDetailsPage = async ({
 
   // Only an enrolled student can leave a review — check whether they already
   // have one so the "Add review" action can be swapped for "Already Reviewed".
-  // getReviewByCourseAndStudentQuery throws on its 404 ("no review yet"), so
-  // that's the "not reviewed" case rather than an unexpected failure.
+  // The API returns { review: null } when the student has not yet reviewed.
   const isEnrolledStudent = viewerRole === "student" && source === "enrolled";
   let hasReviewed = false;
   if (isEnrolledStudent) {
     try {
-      await getReviewsByCourseIdQuery(id);
-      hasReviewed = true;
+      const reviewResponse = await getReviewByCourseIdAsStudentQuery(id);
+      hasReviewed = Boolean(reviewResponse.data.review);
     } catch {
       hasReviewed = false;
     }

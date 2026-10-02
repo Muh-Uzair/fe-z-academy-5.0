@@ -107,8 +107,6 @@ const CourseDetails = ({
   enrollmentId = null,
   resumePositionInSeconds = 0,
 }: CourseDetailsProps) => {
-  console.log("Course Details:==========================", course);
-
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -475,8 +473,7 @@ const CourseDetails = ({
                   <div
                     className={cn(
                       "flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between",
-                      courseVerificationState !== "rejected" &&
-                        "border-b pb-6",
+                      courseVerificationState !== "rejected" && "border-b pb-6",
                     )}
                   >
                     <div>
@@ -547,14 +544,12 @@ const CourseDetails = ({
             <AlertDialogTitle>Request Refund</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to request a refund for &quot;
-              {course.title}&quot;? This will cancel your enrollment and
-              cannot be undone.
+              {course.title}&quot;? This will cancel your enrollment and cannot
+              be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isRefunding}>
-              Cancel
-            </AlertDialogCancel>
+            <AlertDialogCancel disabled={isRefunding}>Cancel</AlertDialogCancel>
             <AlertDialogAction
               variant="destructive"
               disabled={isRefunding}
