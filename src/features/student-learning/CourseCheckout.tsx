@@ -32,11 +32,15 @@ import AppCourseCardsGridLayout from "@/components/AppCourseCardsGridLayout";
 import { getStripe } from "@/lib/stripeClient";
 import { createCoursePaymentIntentAction } from "@/services/course/actions";
 import type { PublicCourseListItem } from "@/response-types/courseResponseTypes";
+import type { SavedCard } from "@/response-types/cardResponseTypes";
 import { formatCourseLevel } from "@/features/course-management/courseHelpers";
+import { CreditCard, CheckCircle2, ShieldCheck } from "lucide-react";
+import { cn } from "@/utils/cn";
 
 type CourseCheckoutProps = {
   course: PublicCourseListItem;
   similarCourses: PublicCourseListItem[];
+  savedCards?: SavedCard[];
 };
 
 const CARD_ELEMENT_OPTIONS = {
@@ -50,7 +54,13 @@ const CARD_ELEMENT_OPTIONS = {
   },
 };
 
-const PaymentForm = ({ course }: { course: PublicCourseListItem }) => {
+const PaymentForm = ({
+  course,
+  savedCards = [],
+}: {
+  course: PublicCourseListItem;
+  savedCards?: SavedCard[];
+}) => {
   const stripe = useStripe();
   const elements = useElements();
   const router = useRouter();
@@ -63,6 +73,15 @@ const PaymentForm = ({ course }: { course: PublicCourseListItem }) => {
   const [cardError, setCardError] = useState<string | null>(null);
   const [isConfirming, setIsConfirming] = useState(false);
   const [isSuccessOpen, setIsSuccessOpen] = useState(false);
+
+  // Payment mode: "saved" (if saved cards exist) or "new"
+  const [paymentMode, setPaymentMode] = useState<"saved" | "new">(
+    savedCards.length > 0 ? "saved" : "new",
+  );
+  const defaultCard = savedCards.find((c) => c.isDefault) || savedCards[0];
+  const [selectedCardId, setSelectedCardId] = useState<string>(
+    defaultCard?.id || "",
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -106,20 +125,36 @@ const PaymentForm = ({ course }: { course: PublicCourseListItem }) => {
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
-    if (!stripe || !elements || !clientSecret) return;
-
-    const cardNumberElement = elements.getElement(CardNumberElement);
-    if (!cardNumberElement) return;
+    if (!stripe || !clientSecret) return;
 
     setIsConfirming(true);
     setCardError(null);
 
-    const result = await stripe.confirmCardPayment(clientSecret, {
-      payment_method: {
-        card: cardNumberElement,
-        billing_details: { name: nameOnCard },
-      },
-    });
+    let result;
+
+    if (paymentMode === "saved" && selectedCardId) {
+      result = await stripe.confirmCardPayment(clientSecret, {
+        payment_method: selectedCardId,
+      });
+    } else {
+      if (!elements) {
+        setIsConfirming(false);
+        return;
+      }
+
+      const cardNumberElement = elements.getElement(CardNumberElement);
+      if (!cardNumberElement) {
+        setIsConfirming(false);
+        return;
+      }
+
+      result = await stripe.confirmCardPayment(clientSecret, {
+        payment_method: {
+          card: cardNumberElement,
+          billing_details: { name: nameOnCard },
+        },
+      });
+    }
 
     setIsConfirming(false);
 
@@ -137,7 +172,13 @@ const PaymentForm = ({ course }: { course: PublicCourseListItem }) => {
   };
 
   const isFormDisabled =
-    isFetchingIntent || !!intentError || isConfirming || !stripe || !elements;
+    isFetchingIntent ||
+    !!intentError ||
+    isConfirming ||
+    !stripe ||
+    (paymentMode === "new" && !elements);
+
+  const selectedCard = savedCards.find((c) => c.id === selectedCardId);
 
   return (
     <>
@@ -200,56 +241,153 @@ const PaymentForm = ({ course }: { course: PublicCourseListItem }) => {
                 </p>
               ) : null}
 
+              {/* Toggle Payment Mode if saved cards exist */}
+              {savedCards.length > 0 && (
+                <div className="mb-5 flex rounded-lg border bg-muted/30 p-1">
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMode("saved")}
+                    className={cn(
+                      "flex-1 py-2 text-xs font-semibold rounded-md transition-all flex items-center justify-center gap-1.5",
+                      paymentMode === "saved"
+                        ? "bg-background text-foreground shadow-xs"
+                        : "text-muted-foreground hover:text-foreground",
+                    )}
+                  >
+                    <CreditCard className="h-3.5 w-3.5" />
+                    Saved Cards ({savedCards.length})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMode("new")}
+                    className={cn(
+                      "flex-1 py-2 text-xs font-semibold rounded-md transition-all flex items-center justify-center gap-1.5",
+                      paymentMode === "new"
+                        ? "bg-background text-foreground shadow-xs"
+                        : "text-muted-foreground hover:text-foreground",
+                    )}
+                  >
+                    New Card
+                  </button>
+                </div>
+              )}
+
               <form onSubmit={handleSubmit} className="space-y-5">
-                <div className="space-y-2">
-                  <Label htmlFor="nameOnCard">Name on Card</Label>
-                  <Input
-                    id="nameOnCard"
-                    placeholder="John Doe"
-                    value={nameOnCard}
-                    onChange={(event) => setNameOnCard(event.target.value)}
-                    className="h-11"
-                    required
-                    disabled={isFormDisabled}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Card Number</Label>
-                  <div className="rounded-md border px-3 py-3">
-                    <CardNumberElement
-                      options={{
-                        ...CARD_ELEMENT_OPTIONS,
-                        disabled: isFormDisabled,
-                      }}
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Expiry Date</Label>
-                    <div className="rounded-md border px-3 py-3">
-                      <CardExpiryElement
-                        options={{
-                          ...CARD_ELEMENT_OPTIONS,
-                          disabled: isFormDisabled,
-                        }}
-                      />
+                {paymentMode === "saved" && savedCards.length > 0 ? (
+                  <div className="space-y-3">
+                    <Label className="text-xs text-muted-foreground">
+                      Select Payment Card
+                    </Label>
+                    <div className="space-y-2">
+                      {savedCards.map((card) => {
+                        const isSelected = card.id === selectedCardId;
+                        return (
+                          <div
+                            key={card.id}
+                            onClick={() => setSelectedCardId(card.id)}
+                            className={cn(
+                              "flex items-center justify-between p-3.5 rounded-xl border cursor-pointer transition-all",
+                              isSelected
+                                ? "border-primary bg-primary/5 ring-1 ring-primary shadow-xs"
+                                : "hover:border-border/80 bg-background",
+                            )}
+                          >
+                            <div className="flex items-center gap-3">
+                              <div
+                                className={cn(
+                                  "h-4 w-4 rounded-full border flex items-center justify-center transition-colors",
+                                  isSelected
+                                    ? "border-primary bg-primary text-primary-foreground"
+                                    : "border-muted-foreground/40",
+                                )}
+                              >
+                                {isSelected && (
+                                  <div className="h-1.5 w-1.5 rounded-full bg-white" />
+                                )}
+                              </div>
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <span className="font-semibold text-sm capitalize">
+                                    {card.brand}
+                                  </span>
+                                  <span className="font-mono text-sm text-muted-foreground">
+                                    •••• {card.last4}
+                                  </span>
+                                  {card.isDefault && (
+                                    <Badge
+                                      variant="outline"
+                                      className="text-[10px] text-emerald-600 dark:text-emerald-400 border-emerald-500/30 px-1.5 py-0"
+                                    >
+                                      Default
+                                    </Badge>
+                                  )}
+                                </div>
+                                <p className="text-xs text-muted-foreground mt-0.5">
+                                  Expires {card.expMonth}/{card.expYear}
+                                </p>
+                              </div>
+                            </div>
+                            <CreditCard className="h-5 w-5 text-muted-foreground/60" />
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label>CVC</Label>
-                    <div className="rounded-md border px-3 py-3">
-                      <CardCvcElement
-                        options={{
-                          ...CARD_ELEMENT_OPTIONS,
-                          disabled: isFormDisabled,
-                        }}
+                ) : (
+                  <>
+                    <div className="space-y-2">
+                      <Label htmlFor="nameOnCard">Name on Card</Label>
+                      <Input
+                        id="nameOnCard"
+                        placeholder="John Doe"
+                        value={nameOnCard}
+                        onChange={(event) =>
+                          setNameOnCard(event.target.value)
+                        }
+                        className="h-11"
+                        required={paymentMode === "new"}
+                        disabled={isFormDisabled}
                       />
                     </div>
-                  </div>
-                </div>
+
+                    <div className="space-y-2">
+                      <Label>Card Number</Label>
+                      <div className="rounded-md border px-3 py-3">
+                        <CardNumberElement
+                          options={{
+                            ...CARD_ELEMENT_OPTIONS,
+                            disabled: isFormDisabled,
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>Expiry Date</Label>
+                        <div className="rounded-md border px-3 py-3">
+                          <CardExpiryElement
+                            options={{
+                              ...CARD_ELEMENT_OPTIONS,
+                              disabled: isFormDisabled,
+                            }}
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>CVC</Label>
+                        <div className="rounded-md border px-3 py-3">
+                          <CardCvcElement
+                            options={{
+                              ...CARD_ELEMENT_OPTIONS,
+                              disabled: isFormDisabled,
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
 
                 {cardError ? (
                   <p className="text-sm text-destructive">{cardError}</p>
@@ -259,17 +397,23 @@ const PaymentForm = ({ course }: { course: PublicCourseListItem }) => {
                   type="submit"
                   className="w-full h-12 text-md mt-6"
                   size="lg"
-                  disabled={isFormDisabled || !nameOnCard.trim()}
+                  disabled={
+                    isFormDisabled ||
+                    (paymentMode === "new" && !nameOnCard.trim()) ||
+                    (paymentMode === "saved" && !selectedCardId)
+                  }
                   isLoading={isConfirming}
                 >
-                  Buy Now &bull; ${course.price}
+                  {paymentMode === "saved" && selectedCard
+                    ? `Pay $${course.price} with •••• ${selectedCard.last4}`
+                    : `Buy Now • $${course.price}`}
                 </AppButton>
               </form>
 
               <div className="mt-6 text-center">
-                <p className="text-xs text-muted-foreground bg-muted/50 p-3 rounded-lg border border-dashed">
-                  Payments are processed securely by Stripe. Your card details
-                  never touch our servers.
+                <p className="text-xs text-muted-foreground bg-muted/50 p-3 rounded-lg border border-dashed flex items-center justify-center gap-1.5">
+                  <ShieldCheck className="h-4 w-4 text-emerald-600 shrink-0" />
+                  Payments processed securely via Stripe with 256-bit encryption.
                 </p>
               </div>
             </>
@@ -280,7 +424,11 @@ const PaymentForm = ({ course }: { course: PublicCourseListItem }) => {
   );
 };
 
-const CourseCheckout = ({ course, similarCourses }: CourseCheckoutProps) => {
+const CourseCheckout = ({
+  course,
+  similarCourses,
+  savedCards,
+}: CourseCheckoutProps) => {
   const stripePromise = useMemo(() => getStripe(), []);
   const router = useRouter();
 
@@ -360,7 +508,7 @@ const CourseCheckout = ({ course, similarCourses }: CourseCheckoutProps) => {
         {/* Right Column: Checkout Form */}
         <div className="lg:col-span-2">
           <Elements stripe={stripePromise}>
-            <PaymentForm course={course} />
+            <PaymentForm course={course} savedCards={savedCards} />
           </Elements>
         </div>
       </div>

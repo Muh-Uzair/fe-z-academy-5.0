@@ -22,6 +22,7 @@ import {
   Users,
   LogOut,
   User,
+  CreditCard,
 } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -229,6 +230,11 @@ const navigationByRole: Record<AppRole, NavigationItem[]> = {
       title: "Transactions",
       href: "/student/transactions",
       icon: Wallet,
+    },
+    {
+      title: "Cards",
+      href: "/student/cards",
+      icon: CreditCard,
     },
     {
       title: "Chat",

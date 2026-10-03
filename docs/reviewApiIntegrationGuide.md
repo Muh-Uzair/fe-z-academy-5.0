@@ -12,17 +12,18 @@ Base path: `/api/v1/reviews`
 - Requests under `/api` are limited to 100 per IP per hour.
 - A student may leave exactly one review per course, and only for a course they are enrolled in.
 - Creating, updating (rating change), or deleting a review recalculates that course's `averageRating`/`totalReviews` (see the [course guide](./courseApiIntegrationGuide.md)) — re-fetch the course if you're displaying those fields alongside a review action.
+- If a student's course purchase is refunded, any review submitted by that student for the refunded course is automatically deleted and the course's `averageRating`/`totalReviews` are recalculated.
 
 ## Roles and access
 
-| Route                   | Allowed caller                                                |
-| ----------------------- | ------------------------------------------------------------- |
-| `POST /`                | Student only                                                  |
-| `GET /`                 | Public (no auth required)                                     |
-| `GET /course/:courseId` | Student, Instructor, Admin                                    |
-| `GET /:id`              | Public (no auth required)                                     |
-| `PATCH /:id`            | Student only, and only the review's own author                |
-| `DELETE /:id`           | Any authenticated user — the review's own author, or an Admin |
+| Route | Allowed caller |
+| --- | --- |
+| `POST /` | Student only |
+| `GET /` | Public (no auth required) |
+| `GET /course/:courseId` | Student, Instructor, Admin |
+| `GET /:id` | Public (no auth required) |
+| `PATCH /:id` | Student only, and only the review's own author |
+| `DELETE /:id` | Any authenticated user — the review's own author, or an Admin |
 
 A caller with the wrong role receives `403 You do not have permission to perform this action`. A missing/invalid/expired `accessToken` cookie receives the same `401` errors documented for `/auth/me`.
 
@@ -106,11 +107,11 @@ Student only. `instructor` is derived server-side from the course, not sent by t
 }
 ```
 
-| Field      | Rules                                      |
-| ---------- | ------------------------------------------ |
-| `course`   | Required, non-empty string (Course `_id`). |
-| `rating`   | Required, integer between 1 and 5.         |
-| `feedback` | Required, trimmed, 10–1000 characters.     |
+| Field | Rules |
+| --- | --- |
+| `course` | Required, non-empty string (Course `_id`). |
+| `rating` | Required, integer between 1 and 5. |
+| `feedback` | Required, trimmed, 10–1000 characters. |
 
 ### Success response
 
@@ -121,23 +122,21 @@ HTTP `201`
   "status": "success",
   "message": "Review created successfully",
   "data": {
-    "review": {
-      /* plain review document, see above */
-    }
+    "review": { /* plain review document, see above */ }
   }
 }
 ```
 
 ### Possible errors
 
-| HTTP status | Message                                             | When                                                                |
-| ----------- | --------------------------------------------------- | ------------------------------------------------------------------- |
-| 400         | `Validation failed`                                 | A field is missing, out of range, or an undocumented field is sent. |
-| 401         | _(see auth guide `/me` 401 rows)_                   | Access-token cookie missing/invalid/expired.                        |
-| 403         | `You do not have permission to perform this action` | Caller is not a student.                                            |
-| 403         | `You must be enrolled in this course to review it`  | Student is not enrolled in the course.                              |
-| 400         | `You have already reviewed this course`             | Student already left a review for this course.                      |
-| 404         | `Course not found`                                  | No course exists with that `id`.                                    |
+| HTTP status | Message | When |
+| --- | --- | --- |
+| 400 | `Validation failed` | A field is missing, out of range, or an undocumented field is sent. |
+| 401 | *(see auth guide `/me` 401 rows)* | Access-token cookie missing/invalid/expired. |
+| 403 | `You do not have permission to perform this action` | Caller is not a student. |
+| 403 | `You must be enrolled in this course to review it` | Student is not enrolled in the course. |
+| 400 | `You have already reviewed this course` | Student already left a review for this course. |
+| 404 | `Course not found` | No course exists with that `id`. |
 
 ## API 2 — List reviews
 
@@ -147,18 +146,18 @@ Public. Returns a paginated, sortable, searchable, filterable list of reviews.
 
 ### Query parameters
 
-| Param        | Type              | Default     | Notes                                       |
-| ------------ | ----------------- | ----------- | ------------------------------------------- |
-| `course`     | string            | —           | Filter by course `_id`.                     |
-| `instructor` | string            | —           | Filter by instructor `_id`.                 |
-| `reviewBy`   | string            | —           | Filter by the reviewing student's `_id`.    |
-| `rating`     | number (1–5)      | —           | Filter by exact rating.                     |
-| `search`     | string            | —           | Case-insensitive search against `feedback`. |
-| `projection` | string            | —           | Comma-separated Mongo field projection.     |
-| `page`       | number (≥1)       | `1`         |                                             |
-| `limit`      | number (≥1)       | `10`        |                                             |
-| `sortBy`     | string            | `createdAt` |                                             |
-| `sortOrder`  | `"asc" \| "desc"` | `desc`      |                                             |
+| Param | Type | Default | Notes |
+| --- | --- | --- | --- |
+| `course` | string | — | Filter by course `_id`. |
+| `instructor` | string | — | Filter by instructor `_id`. |
+| `reviewBy` | string | — | Filter by the reviewing student's `_id`. |
+| `rating` | number (1–5) | — | Filter by exact rating. |
+| `search` | string | — | Case-insensitive search against `feedback`. |
+| `projection` | string | — | Comma-separated Mongo field projection. |
+| `page` | number (≥1) | `1` | |
+| `limit` | number (≥1) | `10` | |
+| `sortBy` | string | `createdAt` | |
+| `sortOrder` | `"asc" \| "desc"` | `desc` | |
 
 All params are optional and sent as query-string values (strings); `page`/`limit`/`rating` are coerced to numbers server-side.
 
@@ -171,9 +170,7 @@ HTTP `200`
   "status": "success",
   "message": "Reviews fetched successfully",
   "data": {
-    "reviews": [
-      /* joined review shape, see above */
-    ],
+    "reviews": [ /* joined review shape, see above */ ],
     "pagination": {
       "page": 1,
       "limit": 10,
@@ -188,9 +185,9 @@ HTTP `200`
 
 ### Possible errors
 
-| HTTP status | Message             | When                                            |
-| ----------- | ------------------- | ----------------------------------------------- |
-| 400         | `Validation failed` | An invalid or undocumented query param is sent. |
+| HTTP status | Message | When |
+| --- | --- | --- |
+| 400 | `Validation failed` | An invalid or undocumented query param is sent. |
 
 ## API 3b — Get reviews for a course
 
@@ -204,21 +201,21 @@ Behavior differs by role:
 
 ### URL params
 
-| Param      | Rules                                      |
-| ---------- | ------------------------------------------ |
+| Param | Rules |
+| --- | --- |
 | `courseId` | Required, non-empty string (Course `_id`). |
 
 ### Query parameters (Admin and Instructor only — ignored for Student)
 
-| Param        | Type              | Default     | Notes                                       |
-| ------------ | ----------------- | ----------- | ------------------------------------------- |
-| `rating`     | number (1–5)      | —           | Filter by exact rating.                     |
-| `search`     | string            | —           | Case-insensitive search against `feedback`. |
-| `projection` | string            | —           | Comma-separated Mongo field projection.     |
-| `page`       | number (≥1)       | `1`         |                                             |
-| `limit`      | number (≥1)       | `10`        |                                             |
-| `sortBy`     | string            | `createdAt` |                                             |
-| `sortOrder`  | `"asc" \| "desc"` | `desc`      |                                             |
+| Param | Type | Default | Notes |
+| --- | --- | --- | --- |
+| `rating` | number (1–5) | — | Filter by exact rating. |
+| `search` | string | — | Case-insensitive search against `feedback`. |
+| `projection` | string | — | Comma-separated Mongo field projection. |
+| `page` | number (≥1) | `1` | |
+| `limit` | number (≥1) | `10` | |
+| `sortBy` | string | `createdAt` | |
+| `sortOrder` | `"asc" \| "desc"` | `desc` | |
 
 ### Success response — Student
 
@@ -231,9 +228,7 @@ If the student has reviewed this course:
   "status": "success",
   "message": "Review details fetched successfully",
   "data": {
-    "review": {
-      /* joined review shape, see above */
-    }
+    "review": { /* joined review shape, see above */ }
   }
 }
 ```
@@ -259,9 +254,7 @@ HTTP `200`
   "status": "success",
   "message": "Reviews fetched successfully",
   "data": {
-    "reviews": [
-      /* joined review shape, see above */
-    ],
+    "reviews": [ /* joined review shape, see above */ ],
     "pagination": {
       "page": 1,
       "limit": 10,
@@ -276,13 +269,14 @@ HTTP `200`
 
 ### Possible errors
 
-| HTTP status | Message                                                      | When                                                     |
-| ----------- | ------------------------------------------------------------ | -------------------------------------------------------- |
-| 400         | `Validation failed`                                          | An invalid or undocumented query param is sent.          |
-| 401         | _(see auth guide `/me` 401 rows)_                            | Access-token cookie missing/invalid/expired.             |
-| 403         | `You do not have permission to perform this action`          | Caller is not a student, instructor, or admin.           |
-| 403         | `You do not have permission to view reviews for this course` | Instructor is not the owner of this course.              |
-| 404         | `Course not found`                                           | Instructor case — no course exists with that `courseId`. |
+| HTTP status | Message | When |
+| --- | --- | --- |
+| 400 | `Validation failed` | An invalid or undocumented query param is sent. |
+| 401 | *(see auth guide `/me` 401 rows)* | Access-token cookie missing/invalid/expired. |
+| 403 | `You do not have permission to perform this action` | Caller is not a student, instructor, or admin. |
+| 403 | `You do not have permission to view reviews for this course` | Instructor is not the owner of this course. |
+| 404 | `Course not found` | Instructor case — no course exists with that `courseId`. |
+
 
 ## API 3 — Get review details
 
@@ -292,9 +286,9 @@ Public. Fetches a single review by id, with references joined.
 
 ### URL params
 
-| Param | Rules                                     |
-| ----- | ----------------------------------------- |
-| `id`  | Required, non-empty string (Mongo `_id`). |
+| Param | Rules |
+| --- | --- |
+| `id` | Required, non-empty string (Mongo `_id`). |
 
 ### Success response
 
@@ -305,18 +299,16 @@ HTTP `200`
   "status": "success",
   "message": "Review details fetched successfully",
   "data": {
-    "review": {
-      /* joined review shape, see above */
-    }
+    "review": { /* joined review shape, see above */ }
   }
 }
 ```
 
 ### Possible errors
 
-| HTTP status | Message            | When                             |
-| ----------- | ------------------ | -------------------------------- |
-| 404         | `Review not found` | No review exists with that `id`. |
+| HTTP status | Message | When |
+| --- | --- | --- |
+| 404 | `Review not found` | No review exists with that `id`. |
 
 ## API 4 — Update review
 
@@ -326,9 +318,9 @@ Student only, and only the review's own author. All fields are optional, but at 
 
 ### URL params
 
-| Param | Rules                       |
-| ----- | --------------------------- |
-| `id`  | Required, non-empty string. |
+| Param | Rules |
+| --- | --- |
+| `id` | Required, non-empty string. |
 
 ### Request body
 
@@ -339,9 +331,9 @@ Student only, and only the review's own author. All fields are optional, but at 
 }
 ```
 
-| Field      | Rules                                  |
-| ---------- | -------------------------------------- |
-| `rating`   | Optional, integer between 1 and 5.     |
+| Field | Rules |
+| --- | --- |
+| `rating` | Optional, integer between 1 and 5. |
 | `feedback` | Optional, trimmed, 10–1000 characters. |
 
 ### Success response
@@ -353,22 +345,20 @@ HTTP `200`
   "status": "success",
   "message": "Review updated successfully",
   "data": {
-    "review": {
-      /* plain review document, see above */
-    }
+    "review": { /* plain review document, see above */ }
   }
 }
 ```
 
 ### Possible errors
 
-| HTTP status | Message                                             | When                                                                            |
-| ----------- | --------------------------------------------------- | ------------------------------------------------------------------------------- |
-| 400         | `Validation failed`                                 | Body is empty, a field fails its shape rules, or an undocumented field is sent. |
-| 401         | _(see auth guide `/me` 401 rows)_                   | Access-token cookie missing/invalid/expired.                                    |
-| 403         | `You do not have permission to perform this action` | Caller is not a student.                                                        |
-| 403         | `You do not have permission to modify this review`  | Caller is a student but not this review's author.                               |
-| 404         | `Review not found`                                  | No review exists with that `id`.                                                |
+| HTTP status | Message | When |
+| --- | --- | --- |
+| 400 | `Validation failed` | Body is empty, a field fails its shape rules, or an undocumented field is sent. |
+| 401 | *(see auth guide `/me` 401 rows)* | Access-token cookie missing/invalid/expired. |
+| 403 | `You do not have permission to perform this action` | Caller is not a student. |
+| 403 | `You do not have permission to modify this review` | Caller is a student but not this review's author. |
+| 404 | `Review not found` | No review exists with that `id`. |
 
 ## API 5 — Delete review
 
@@ -378,9 +368,9 @@ Open to any authenticated role — the review's own author, or an Admin. There i
 
 ### URL params
 
-| Param | Rules                       |
-| ----- | --------------------------- |
-| `id`  | Required, non-empty string. |
+| Param | Rules |
+| --- | --- |
+| `id` | Required, non-empty string. |
 
 ### Success response
 
@@ -396,11 +386,11 @@ HTTP `200`
 
 ### Possible errors
 
-| HTTP status | Message                                            | When                                                |
-| ----------- | -------------------------------------------------- | --------------------------------------------------- |
-| 401         | _(see auth guide `/me` 401 rows)_                  | Access-token cookie missing/invalid/expired.        |
-| 403         | `You do not have permission to delete this review` | Caller is neither the review's author nor an Admin. |
-| 404         | `Review not found`                                 | No review exists with that `id`.                    |
+| HTTP status | Message | When |
+| --- | --- | --- |
+| 401 | *(see auth guide `/me` 401 rows)* | Access-token cookie missing/invalid/expired. |
+| 403 | `You do not have permission to delete this review` | Caller is neither the review's author nor an Admin. |
+| 404 | `Review not found` | No review exists with that `id`. |
 
 ## Frontend types
 

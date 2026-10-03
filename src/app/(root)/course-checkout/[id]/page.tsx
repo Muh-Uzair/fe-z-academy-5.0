@@ -3,6 +3,8 @@ import {
   getPublicCourseDetailsQuery,
   getPublicCoursesQuery,
 } from "@/services/course/queries";
+import { getSavedCardsQuery } from "@/services/cards/queries";
+import type { SavedCard } from "@/response-types/cardResponseTypes";
 
 type CourseCheckoutPageProps = {
   params: Promise<{ id: string }>;
@@ -11,7 +13,11 @@ type CourseCheckoutPageProps = {
 const CourseCheckoutPage = async ({ params }: CourseCheckoutPageProps) => {
   const { id } = await params;
 
-  const courseResponse = await getPublicCourseDetailsQuery(id);
+  const [courseResponse, savedCardsResponse] = await Promise.all([
+    getPublicCourseDetailsQuery(id),
+    getSavedCardsQuery().catch(() => null),
+  ]);
+
   const course = courseResponse.data.course;
 
   const similarCoursesResponse = await getPublicCoursesQuery({
@@ -23,7 +29,16 @@ const CourseCheckoutPage = async ({ params }: CourseCheckoutPageProps) => {
     (similarCourse) => similarCourse._id !== course._id,
   );
 
-  return <CourseCheckout course={course} similarCourses={similarCourses} />;
+  const savedCards: SavedCard[] = savedCardsResponse?.data.cards ?? [];
+
+  return (
+    <CourseCheckout
+      course={course}
+      similarCourses={similarCourses}
+      savedCards={savedCards}
+    />
+  );
 };
 
 export default CourseCheckoutPage;
+
