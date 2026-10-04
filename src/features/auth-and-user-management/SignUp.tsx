@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import {
   Card,
   CardContent,
@@ -22,7 +23,7 @@ const SignUp = () => {
             Choose how you want to create your account.
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-6">
           <Tabs defaultValue="student" className="w-full gap-5">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="student">Student Sign Up</TabsTrigger>
@@ -37,6 +38,16 @@ const SignUp = () => {
               <SignUpInstructor />
             </TabsContent>
           </Tabs>
+
+          <p className="text-center text-sm text-muted-foreground">
+            Already have an account?{" "}
+            <Link
+              href="/signin"
+              className="font-medium text-primary underline-offset-4 hover:underline"
+            >
+              Sign In
+            </Link>
+          </p>
         </CardContent>
       </Card>
     </div>

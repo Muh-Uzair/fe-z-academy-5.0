@@ -193,6 +193,16 @@ const SignIn = ({ email = "" }: SignInProps) => {
                   Continue with Google
                 </AppButton>
               </div>
+
+              <p className="text-center text-sm text-muted-foreground">
+                Don&apos;t have an account?{" "}
+                <Link
+                  href="/signup"
+                  className="font-medium text-primary underline-offset-4 hover:underline"
+                >
+                  Sign Up
+                </Link>
+              </p>
             </form>
           </Form>
         </CardContent>
