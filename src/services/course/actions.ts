@@ -5,6 +5,9 @@ import { updateTag } from "next/cache";
 import { COURSE_TAGS } from "./tags";
 import { STAT_TAGS } from "@/services/stat/tags";
 import { DASHBOARD_TAGS } from "@/services/dashboard/tags";
+import { TRANSACTION_TAGS } from "@/services/transaction/tags";
+import { ENROLLMENT_TAGS } from "@/services/enrollment/tags";
+import { REVIEW_TAGS } from "@/services/review/tags";
 import type {
   UploadCourseThumbnailResponse,
   UploadCourseVideoResponse,
@@ -225,11 +228,9 @@ export async function createCoursePaymentIntentAction(
  * Student only. Refund window is 7 days from the payment date, and is
  * blocked once the student has watched more than 30% of the course. A
  * duplicate/double-click request for the same course is rejected outright
- * with "A refund for this course is already being processed". The
- * transaction is claimed (paymentStatus -> "refund_processing") immediately
- * on success, so the eligibility check is invalidated — but enrollment
- * removal itself happens asynchronously via a Stripe webhook, so no
- * course/enrollment tag is invalidated here.
+ * with "A refund for this course is already being processed". On success,
+ * invalidates refund eligibility, courses list, course details, completion
+ * status, transactions, enrollments, reviews, and platform stats/dashboards.
  */
 export async function requestCourseRefundAction(
   id: string,
@@ -241,8 +242,25 @@ export async function requestCourseRefundAction(
   const json: RequestCourseRefundResponse = await res.json();
 
   if (json.status === "success") {
+    // 1. Course tags
     updateTag(COURSE_TAGS.refundEligibility(id));
-    // totalStudents stat may change when a refund removes enrollment
+    updateTag(COURSE_TAGS.courses);
+    updateTag(COURSE_TAGS.courseDetails(id));
+    updateTag(COURSE_TAGS.completionStatus(id));
+    updateTag(COURSE_TAGS.trendingCourses);
+    updateTag(COURSE_TAGS.featuredCourses);
+    updateTag(COURSE_TAGS.publicCourseDetails(id));
+
+    // 2. Transaction status changed to "refund_processing"
+    updateTag(TRANSACTION_TAGS.transactions);
+
+    // 3. Enrollment & review cleanup
+    updateTag(ENROLLMENT_TAGS.enrollments);
+    updateTag(REVIEW_TAGS.reviewByCourse(id));
+    updateTag(REVIEW_TAGS.reviewsByCourse(id));
+    updateTag(REVIEW_TAGS.reviews);
+
+    // 4. Platform stats & dashboards
     updateTag(STAT_TAGS.platformStats);
     updateTag(DASHBOARD_TAGS.admin);
     updateTag(DASHBOARD_TAGS.instructor);

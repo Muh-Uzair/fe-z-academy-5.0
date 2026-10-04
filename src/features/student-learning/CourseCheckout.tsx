@@ -166,7 +166,7 @@ const PaymentForm = ({
     if (result.paymentIntent?.status === "succeeded") {
       setIsSuccessOpen(true);
       setTimeout(() => {
-        router.push("/student/my-learning/enrolled-courses");
+        window.location.replace("/student/my-learning/enrolled-courses");
       }, 5000);
     }
   };

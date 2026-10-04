@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Star, Users, Trash2, Loader2, Pencil } from "lucide-react";
+import { Star, Users, Trash2, Pencil } from "lucide-react";
 import AppButton from "@/components/AppButton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
@@ -15,8 +15,8 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import useClientAction from "@/hooks/useClientAction";
 import CourseCard from "@/components/CourseCard";
 import EditReviewDialog from "./EditReviewDialog";
 import AddReviewDialog from "@/features/course-management/AddReviewDialog";
@@ -52,13 +52,12 @@ const StarRating = ({ rating }: { rating: number }) => (
 type ReviewCardProps = {
   review: Review;
   canDelete?: boolean;
-  isDeleting?: boolean;
   onDelete?: () => void;
   canEdit?: boolean;
   onEdit?: () => void;
 };
 
-const ReviewCard = ({ review, canDelete, isDeleting, onDelete, canEdit, onEdit }: ReviewCardProps) => (
+const ReviewCard = ({ review, canDelete, onDelete, canEdit, onEdit }: ReviewCardProps) => (
   <Card className="border-border/50 shadow-sm transition-shadow hover:shadow-md">
     <CardContent className="p-5">
       <div className="flex gap-4">
@@ -100,35 +99,14 @@ const ReviewCard = ({ review, canDelete, isDeleting, onDelete, canEdit, onEdit }
                 )}
                 
                 {canDelete && (
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <button
-                        disabled={isDeleting}
-                        className="text-destructive hover:text-destructive/80 disabled:opacity-50 transition-colors p-1 cursor-pointer"
-                        title="Delete Review"
-                      >
-                        {isDeleting ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <Trash2 className="h-4 w-4" />
-                        )}
-                      </button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Delete Review?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Are you sure you want to delete your review? This action cannot be undone.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction variant="destructive" onClick={onDelete}>
-                          Delete
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
+                  <button
+                    type="button"
+                    onClick={onDelete}
+                    className="text-destructive hover:text-destructive/80 transition-colors p-1 cursor-pointer"
+                    title="Delete Review"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
                 )}
               </div>
             </div>
@@ -151,14 +129,18 @@ const ViewCourseReviews = ({
   isEnrolled,
 }: ViewCourseReviewsProps) => {
   const router = useRouter();
-  const [isPending, startTransition] = useTransition();
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const { run: runDeleteAction, isLoading: isDeleting } = useClientAction();
 
-  const handleDeleteReview = async () => {
+  const handleConfirmDeleteReview = async () => {
     if (!studentReview) return;
-    startTransition(async () => {
-      await deleteReviewAction(studentReview._id);
-    });
+    const response = await runDeleteAction(() =>
+      deleteReviewAction(studentReview._id),
+    );
+    if (response?.status === "success") {
+      setIsDeleteDialogOpen(false);
+    }
   };
 
   const updateQuery = (page: number) => {
@@ -245,8 +227,7 @@ const ViewCourseReviews = ({
                   <ReviewCard
                     review={studentReview}
                     canDelete={true}
-                    isDeleting={isPending}
-                    onDelete={handleDeleteReview}
+                    onDelete={() => setIsDeleteDialogOpen(true)}
                     canEdit={true}
                     onEdit={() => setIsEditOpen(true)}
                   />
@@ -339,6 +320,34 @@ const ViewCourseReviews = ({
           )}
         </div>
       </div>
+
+      <AlertDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Review</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete your review? This action cannot be
+              undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              disabled={isDeleting}
+              onClick={(event) => {
+                event.preventDefault();
+                handleConfirmDeleteReview();
+              }}
+            >
+              {isDeleting ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
