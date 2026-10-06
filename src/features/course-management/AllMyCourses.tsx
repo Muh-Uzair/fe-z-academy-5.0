@@ -1,6 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Trash2 } from "lucide-react";
 
 import AppSearchBar from "@/components/AppSearchBar";
 import AppTable from "@/components/AppTable";
@@ -10,12 +12,24 @@ import TableImage from "@/components/TableImage";
 import { Badge } from "@/components/ui/badge";
 import AppButton from "@/components/AppButton";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import useClientAction from "@/hooks/useClientAction";
+import { deleteCourseAction } from "@/services/course/actions";
 import type {
   CourseListItem,
   CourseCategorySummary,
@@ -44,6 +58,20 @@ const AllMyCourses = ({
   status,
 }: AllMyCoursesProps) => {
   const router = useRouter();
+  const [courseToDelete, setCourseToDelete] = useState<CourseListItem | null>(
+    null,
+  );
+  const { run: runDeleteAction, isLoading: isDeleting } = useClientAction();
+
+  const handleConfirmDeleteCourse = async () => {
+    if (!courseToDelete) return;
+    const response = await runDeleteAction(() =>
+      deleteCourseAction(courseToDelete._id),
+    );
+    if (response?.status === "success") {
+      setCourseToDelete(null);
+    }
+  };
 
   const updateQuery = (next: {
     search?: string;
@@ -160,9 +188,22 @@ const AllMyCourses = ({
             key: "action",
             label: "Action",
             render: (_: unknown, row: CourseListItem) => (
-              <AppButton href={`/course-details/${row._id}?role=instructor`}>
-                View Details
-              </AppButton>
+              <div className="flex items-center gap-2">
+                <AppButton href={`/course-details/${row._id}?role=instructor`}>
+                  View Details
+                </AppButton>
+                <AppButton
+                  type="button"
+                  variant="destructive"
+                  size="icon"
+                  className="size-10"
+                  onClick={() => setCourseToDelete(row)}
+                  title="Delete Course"
+                  aria-label="Delete Course"
+                >
+                  <Trash2 className="size-4" />
+                </AppButton>
+              </div>
             ),
           },
         ]}
@@ -170,6 +211,39 @@ const AllMyCourses = ({
         paginationMeta={pagination}
         onPageChange={(page) => updateQuery({ page })}
       />
+
+      <AlertDialog
+        open={!!courseToDelete}
+        onOpenChange={(open) => {
+          if (!open) {
+            setCourseToDelete(null);
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Course</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete &quot;{courseToDelete?.title}&quot;?
+              This action cannot be undone and will permanently remove the course
+              and its media.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              disabled={isDeleting}
+              onClick={(event) => {
+                event.preventDefault();
+                handleConfirmDeleteCourse();
+              }}
+            >
+              {isDeleting ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </PageFlexCol>
   );
 };
