@@ -4,7 +4,7 @@ import { apiClient } from "@/lib/apiClient";
 import { updateTag } from "next/cache";
 import { COURSE_TAGS } from "./tags";
 import { STAT_TAGS } from "@/services/stat/tags";
-import { DASHBOARD_TAGS } from "@/services/dashboard/tags";
+
 import { TRANSACTION_TAGS } from "@/services/transaction/tags";
 import { ENROLLMENT_TAGS } from "@/services/enrollment/tags";
 import { REVIEW_TAGS } from "@/services/review/tags";
@@ -87,8 +87,6 @@ export async function createCourseAction(data: {
     updateTag(COURSE_TAGS.courses);
     updateTag(COURSE_TAGS.featuredCourses);
     updateTag(COURSE_TAGS.trendingCourses);
-    updateTag(DASHBOARD_TAGS.admin);
-    updateTag(DASHBOARD_TAGS.instructor);
   }
 
   return json;
@@ -127,9 +125,6 @@ export async function updateCourseAction(
     updateTag(COURSE_TAGS.featuredCourses);
     updateTag(COURSE_TAGS.trendingCourses);
     updateTag(COURSE_TAGS.courseDetails(id));
-    updateTag(DASHBOARD_TAGS.admin);
-    updateTag(DASHBOARD_TAGS.instructor);
-    updateTag(DASHBOARD_TAGS.student);
   }
 
   return json;
@@ -155,9 +150,6 @@ export async function deleteCourseAction(
     updateTag(COURSE_TAGS.courseDetails(id));
     // totalCourses stat changes when a verified course is deleted
     updateTag(STAT_TAGS.platformStats);
-    updateTag(DASHBOARD_TAGS.admin);
-    updateTag(DASHBOARD_TAGS.instructor);
-    updateTag(DASHBOARD_TAGS.student);
   }
 
   return json;
@@ -189,8 +181,6 @@ export async function updateCourseVerificationAction(
     updateTag(COURSE_TAGS.courseDetails(id));
     // totalCourses stat changes when a course is verified or unverified
     updateTag(STAT_TAGS.platformStats);
-    updateTag(DASHBOARD_TAGS.admin);
-    updateTag(DASHBOARD_TAGS.instructor);
   }
 
   return json;
@@ -216,9 +206,6 @@ export async function createCoursePaymentIntentAction(
     updateTag(COURSE_TAGS.courseDetails(id));
     // totalStudents stat may change when a student enrolls
     updateTag(STAT_TAGS.platformStats);
-    updateTag(DASHBOARD_TAGS.admin);
-    updateTag(DASHBOARD_TAGS.instructor);
-    updateTag(DASHBOARD_TAGS.student);
   }
 
   return json;
@@ -262,9 +249,6 @@ export async function requestCourseRefundAction(
 
     // 4. Platform stats & dashboards
     updateTag(STAT_TAGS.platformStats);
-    updateTag(DASHBOARD_TAGS.admin);
-    updateTag(DASHBOARD_TAGS.instructor);
-    updateTag(DASHBOARD_TAGS.student);
   }
 
   return json;

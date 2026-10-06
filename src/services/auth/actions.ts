@@ -6,7 +6,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { parseSetCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { AUTH_TAGS } from "./tags";
-import { DASHBOARD_TAGS } from "@/services/dashboard/tags";
+
 import type {
   SignupResponse,
   VerifyOtpResponse,
@@ -57,10 +57,6 @@ export async function signupAction(
 
   const json: SignupResponse = await res.json();
 
-  if (json.status === "success") {
-    updateTag(DASHBOARD_TAGS.admin);
-  }
-
   return json;
 }
 
@@ -74,10 +70,6 @@ export async function verifyOtpAction(data: {
   });
 
   const json: VerifyOtpResponse = await res.json();
-
-  if (json.status === "success") {
-    updateTag(DASHBOARD_TAGS.admin);
-  }
 
   return json;
 }
