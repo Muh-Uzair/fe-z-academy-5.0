@@ -60,10 +60,14 @@ const EditReviewDialog = ({
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     const response = await runUpdateReview(() =>
-      updateReviewAction(review._id, {
-        rating: values.rating,
-        feedback: values.feedback,
-      })
+      updateReviewAction(
+        review._id,
+        {
+          rating: values.rating,
+          feedback: values.feedback,
+        },
+        review.courseDetails?._id,
+      )
     );
 
     if (response?.status === "success") {

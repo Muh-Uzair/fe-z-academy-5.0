@@ -136,7 +136,7 @@ const ViewCourseReviews = ({
   const handleConfirmDeleteReview = async () => {
     if (!studentReview) return;
     const response = await runDeleteAction(() =>
-      deleteReviewAction(studentReview._id),
+      deleteReviewAction(studentReview._id, course._id),
     );
     if (response?.status === "success") {
       setIsDeleteDialogOpen(false);

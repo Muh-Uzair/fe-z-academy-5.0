@@ -4,6 +4,7 @@ import { apiClient } from "@/lib/apiClient";
 import { updateTag } from "next/cache";
 import { COURSE_TAGS } from "./tags";
 import { STAT_TAGS } from "@/services/stat/tags";
+import { CATEGORY_TAGS } from "@/services/category/tags";
 
 import { TRANSACTION_TAGS } from "@/services/transaction/tags";
 import { ENROLLMENT_TAGS } from "@/services/enrollment/tags";
@@ -87,6 +88,8 @@ export async function createCourseAction(data: {
     updateTag(COURSE_TAGS.courses);
     updateTag(COURSE_TAGS.featuredCourses);
     updateTag(COURSE_TAGS.trendingCourses);
+    // Course added to category
+    updateTag(CATEGORY_TAGS.topCategories);
   }
 
   return json;
@@ -122,9 +125,14 @@ export async function updateCourseAction(
 
   if (json.status === "success") {
     updateTag(COURSE_TAGS.courses);
+    updateTag(COURSE_TAGS.publicCourses);
     updateTag(COURSE_TAGS.featuredCourses);
     updateTag(COURSE_TAGS.trendingCourses);
     updateTag(COURSE_TAGS.courseDetails(id));
+    updateTag(COURSE_TAGS.publicCourseDetails(id));
+    if (data.category) {
+      updateTag(CATEGORY_TAGS.topCategories);
+    }
   }
 
   return json;
@@ -145,11 +153,15 @@ export async function deleteCourseAction(
 
   if (json.status === "success") {
     updateTag(COURSE_TAGS.courses);
+    updateTag(COURSE_TAGS.publicCourses);
     updateTag(COURSE_TAGS.featuredCourses);
     updateTag(COURSE_TAGS.trendingCourses);
     updateTag(COURSE_TAGS.courseDetails(id));
+    updateTag(COURSE_TAGS.publicCourseDetails(id));
     // totalCourses stat changes when a verified course is deleted
     updateTag(STAT_TAGS.platformStats);
+    // category course count changes when a course is deleted
+    updateTag(CATEGORY_TAGS.topCategories);
   }
 
   return json;
@@ -176,11 +188,15 @@ export async function updateCourseVerificationAction(
 
   if (json.status === "success") {
     updateTag(COURSE_TAGS.courses);
+    updateTag(COURSE_TAGS.publicCourses);
     updateTag(COURSE_TAGS.featuredCourses);
     updateTag(COURSE_TAGS.trendingCourses);
     updateTag(COURSE_TAGS.courseDetails(id));
+    updateTag(COURSE_TAGS.publicCourseDetails(id));
     // totalCourses stat changes when a course is verified or unverified
     updateTag(STAT_TAGS.platformStats);
+    // verified courses count determines top categories
+    updateTag(CATEGORY_TAGS.topCategories);
   }
 
   return json;

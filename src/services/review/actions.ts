@@ -3,6 +3,7 @@
 import { apiClient } from "@/lib/apiClient";
 import { updateTag } from "next/cache";
 import { REVIEW_TAGS } from "./tags";
+import { COURSE_TAGS } from "@/services/course/tags";
 import type {
   CreateReviewResponse,
   UpdateReviewResponse,
@@ -27,9 +28,17 @@ export async function createReviewAction(data: {
   const json: CreateReviewResponse = await res.json();
 
   if (json.status === "success") {
+    // 1. Invalidate review tags
     updateTag(REVIEW_TAGS.reviews);
     updateTag(REVIEW_TAGS.reviewByCourse(data.course));
     updateTag(REVIEW_TAGS.reviewsByCourse(data.course));
+
+    // 2. Invalidate course tags affected by rating and total reviews
+    updateTag(COURSE_TAGS.courseDetails(data.course));
+    updateTag(COURSE_TAGS.publicCourseDetails(data.course));
+    updateTag(COURSE_TAGS.courses);
+    updateTag(COURSE_TAGS.publicCourses);
+    updateTag(COURSE_TAGS.featuredCourses);
   }
 
   return json;
@@ -45,6 +54,7 @@ export async function updateReviewAction(
     rating?: number;
     feedback?: string;
   },
+  courseId?: string,
 ): Promise<UpdateReviewResponse> {
   const res = await apiClient(`/reviews/${id}`, {
     method: "PATCH",
@@ -54,8 +64,24 @@ export async function updateReviewAction(
   const json: UpdateReviewResponse = await res.json();
 
   if (json.status === "success") {
+    const targetCourseId = courseId || json.data?.review?.course;
+
+    // 1. Invalidate review tags
     updateTag(REVIEW_TAGS.reviews);
     updateTag(REVIEW_TAGS.reviewDetails(id));
+    if (targetCourseId) {
+      updateTag(REVIEW_TAGS.reviewByCourse(targetCourseId));
+      updateTag(REVIEW_TAGS.reviewsByCourse(targetCourseId));
+    }
+
+    // 2. Invalidate course tags affected by rating changes
+    if (targetCourseId) {
+      updateTag(COURSE_TAGS.courseDetails(targetCourseId));
+      updateTag(COURSE_TAGS.publicCourseDetails(targetCourseId));
+    }
+    updateTag(COURSE_TAGS.courses);
+    updateTag(COURSE_TAGS.publicCourses);
+    updateTag(COURSE_TAGS.featuredCourses);
   }
 
   return json;
@@ -66,6 +92,7 @@ export async function updateReviewAction(
  */
 export async function deleteReviewAction(
   id: string,
+  courseId?: string,
 ): Promise<DeleteReviewResponse> {
   const res = await apiClient(`/reviews/${id}`, {
     method: "DELETE",
@@ -74,8 +101,22 @@ export async function deleteReviewAction(
   const json: DeleteReviewResponse = await res.json();
 
   if (json.status === "success") {
+    // 1. Invalidate review tags
     updateTag(REVIEW_TAGS.reviews);
     updateTag(REVIEW_TAGS.reviewDetails(id));
+    if (courseId) {
+      updateTag(REVIEW_TAGS.reviewByCourse(courseId));
+      updateTag(REVIEW_TAGS.reviewsByCourse(courseId));
+    }
+
+    // 2. Invalidate course tags affected by rating and total reviews removal
+    if (courseId) {
+      updateTag(COURSE_TAGS.courseDetails(courseId));
+      updateTag(COURSE_TAGS.publicCourseDetails(courseId));
+    }
+    updateTag(COURSE_TAGS.courses);
+    updateTag(COURSE_TAGS.publicCourses);
+    updateTag(COURSE_TAGS.featuredCourses);
   }
 
   return json;
