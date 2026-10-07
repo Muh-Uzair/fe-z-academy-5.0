@@ -5,6 +5,7 @@ import { updateTag } from "next/cache";
 import { COURSE_TAGS } from "./tags";
 import { STAT_TAGS } from "@/services/stat/tags";
 import { CATEGORY_TAGS } from "@/services/category/tags";
+import { DASHBOARD_TAGS } from "@/services/dashboard/tags";
 
 import { TRANSACTION_TAGS } from "@/services/transaction/tags";
 import { ENROLLMENT_TAGS } from "@/services/enrollment/tags";
@@ -90,6 +91,8 @@ export async function createCourseAction(data: {
     updateTag(COURSE_TAGS.trendingCourses);
     // Course added to category
     updateTag(CATEGORY_TAGS.topCategories);
+    // Updates instructor totalCourses stat
+    updateTag(DASHBOARD_TAGS.instructor);
   }
 
   return json;
@@ -133,6 +136,9 @@ export async function updateCourseAction(
     if (data.category) {
       updateTag(CATEGORY_TAGS.topCategories);
     }
+    // Course title/price updates in dashboards
+    updateTag(DASHBOARD_TAGS.admin);
+    updateTag(DASHBOARD_TAGS.instructor);
   }
 
   return json;
@@ -162,6 +168,10 @@ export async function deleteCourseAction(
     updateTag(STAT_TAGS.platformStats);
     // category course count changes when a course is deleted
     updateTag(CATEGORY_TAGS.topCategories);
+    // Dashboards cleanup
+    updateTag(DASHBOARD_TAGS.admin);
+    updateTag(DASHBOARD_TAGS.instructor);
+    updateTag(DASHBOARD_TAGS.student);
   }
 
   return json;
@@ -197,6 +207,9 @@ export async function updateCourseVerificationAction(
     updateTag(STAT_TAGS.platformStats);
     // verified courses count determines top categories
     updateTag(CATEGORY_TAGS.topCategories);
+    // Admin & Instructor dashboards course counts & verification updates
+    updateTag(DASHBOARD_TAGS.admin);
+    updateTag(DASHBOARD_TAGS.instructor);
   }
 
   return json;
@@ -266,6 +279,9 @@ export async function requestCourseRefundAction(
 
     // 4. Platform stats & dashboards
     updateTag(STAT_TAGS.platformStats);
+    updateTag(DASHBOARD_TAGS.admin);
+    updateTag(DASHBOARD_TAGS.instructor);
+    updateTag(DASHBOARD_TAGS.student);
   }
 
   return json;

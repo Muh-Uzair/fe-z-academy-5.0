@@ -4,6 +4,7 @@ import { apiClient } from "@/lib/apiClient";
 import { updateTag } from "next/cache";
 import { USER_TAGS } from "./tags";
 import { AUTH_TAGS } from "../auth/tags";
+import { DASHBOARD_TAGS } from "../dashboard/tags";
 import type {
   GetInstructorOnboardingLinkResponse,
   UpdateUserVerificationResponse,
@@ -31,11 +32,12 @@ export async function updateUserVerificationAction(
 
   const json: UpdateUserVerificationResponse = await res.json();
 
-  // Verification status changed — refresh the instructors list and this
-  // user's own detail view.
+  // Verification status changed — refresh the instructors list, this
+  // user's own detail view, and the admin dashboard recent users.
   if (json.status === "success") {
     updateTag(USER_TAGS.instructors);
     updateTag(USER_TAGS.userDetails(id));
+    updateTag(DASHBOARD_TAGS.admin);
   }
 
   return json;
@@ -59,11 +61,14 @@ export async function updateProfileAction(data: {
 
   const json: UpdateProfileResponse = await res.json();
 
-  // Profile fields overlap with the cached current-user session data —
-  // invalidate it so the next getMeQuery() call reflects the update.
+  // Profile fields overlap with the cached current-user session data and dashboards —
+  // invalidate them so the next getMeQuery() and dashboard calls reflect the update.
   if (json.status === "success") {
     updateTag(AUTH_TAGS.currentUser);
     updateTag(USER_TAGS.profile);
+    updateTag(DASHBOARD_TAGS.admin);
+    updateTag(DASHBOARD_TAGS.instructor);
+    updateTag(DASHBOARD_TAGS.student);
   }
 
   return json;

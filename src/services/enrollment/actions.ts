@@ -6,6 +6,7 @@ import { ENROLLMENT_TAGS } from "./tags";
 import { COURSE_TAGS } from "@/services/course/tags";
 import { TRANSACTION_TAGS } from "@/services/transaction/tags";
 import { STAT_TAGS } from "@/services/stat/tags";
+import { DASHBOARD_TAGS } from "@/services/dashboard/tags";
 import type {
   UpdateEnrollmentProgressRequestBody,
   UpdateEnrollmentProgressResponse,
@@ -40,6 +41,10 @@ export async function updateEnrollmentProgressAction(
       updateTag(COURSE_TAGS.refundEligibility(targetCourseId));
       updateTag(COURSE_TAGS.completionStatus(targetCourseId));
     }
+
+    // 3. Invalidate student progress and instructor avgCompletion in dashboards
+    updateTag(DASHBOARD_TAGS.student);
+    updateTag(DASHBOARD_TAGS.instructor);
   }
 
   return json;
@@ -73,6 +78,11 @@ export async function revalidateEnrollmentAfterPaymentAction(
 
   // 4. Invalidate platform stats
   updateTag(STAT_TAGS.platformStats);
+
+  // 5. Invalidate all dashboards (new revenue, enrollments, transaction)
+  updateTag(DASHBOARD_TAGS.admin);
+  updateTag(DASHBOARD_TAGS.instructor);
+  updateTag(DASHBOARD_TAGS.student);
 
   return {
     status: "success",
