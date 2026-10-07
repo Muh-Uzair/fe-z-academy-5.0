@@ -1,11 +1,7 @@
 // This file is intentionally framework-independent. Copy it directly into a
 // frontend project; it has no backend imports and represents JSON values only.
 
-import {
-  AuthUser,
-  SuccessApiResponse,
-  ApiErrorResponse,
-} from "./authResponseTypes";
+import { AuthUser, SuccessApiResponse, ApiErrorResponse } from "./authResponseTypes";
 
 // Public user shape returned by the user-management endpoints.
 // Instructor details may additionally include stripeOnboardingComplete.
@@ -50,8 +46,11 @@ export type GetPublicInstructorsResponse =
     >
   | ApiErrorResponse;
 
-// API 2: GET /api/v1/users/students
+// API 3: GET /api/v1/users/students
 // Response: { status, message, data: { students, pagination } }
+// Allowed callers: Admin or Instructor.
+// - Admin: Returns all registered users with role: "student" (even if not enrolled in any course).
+// - Instructor: Returns only students enrolled in at least one of their own courses.
 export interface GetStudentsResponseData {
   students: UserDetails[];
   pagination: Pagination;
@@ -122,10 +121,7 @@ export interface UpdateProfileResponseData {
 }
 
 export type UpdateProfileResponse =
-  | SuccessApiResponse<
-      UpdateProfileResponseData,
-      "Profile updated successfully"
-    >
+  | SuccessApiResponse<UpdateProfileResponseData, "Profile updated successfully">
   | ApiErrorResponse;
 
 // API 8: POST /api/v1/users/profile/upload-avatar
@@ -137,8 +133,5 @@ export interface UploadAvatarResponseData {
 }
 
 export type UploadAvatarResponse =
-  | SuccessApiResponse<
-      UploadAvatarResponseData,
-      "Avatar upload URL generated successfully"
-    >
+  | SuccessApiResponse<UploadAvatarResponseData, "Avatar upload URL generated successfully">
   | ApiErrorResponse;

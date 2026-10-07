@@ -96,14 +96,14 @@ Public (No auth required). Returns a paginated, filterable, searchable list of v
 
 ### Query parameters
 
-| Param        | Type              | Default     | Notes                                                           |
-| ------------ | ----------------- | ----------- | --------------------------------------------------------------- |
-| `search`     | string            | —           | Case-insensitive search across `fullName` and `email`.          |
-| `projection` | string            | —           | Comma-separated Mongo field projection (e.g. `fullName,email`). |
-| `page`       | number (≥1)       | `1`         |                                                                 |
-| `limit`      | number (≥1)       | `10`        |                                                                 |
-| `sortBy`     | string            | `createdAt` |                                                                 |
-| `sortOrder`  | `"asc" \| "desc"` | `desc`      |                                                                 |
+| Param        | Type                | Default     | Notes                                                           |
+| ------------ | ------------------- | ----------- | --------------------------------------------------------------- |
+| `search`     | string              | —           | Case-insensitive search across `fullName` and `email`.          |
+| `projection` | string              | —           | Comma-separated Mongo field projection (e.g. `fullName,email`). |
+| `page`       | number (≥1)         | `1`         |                                                                 |
+| `limit`      | number (≥1)         | `10`        |                                                                 |
+| `sortBy`     | string              | `createdAt` |                                                                 |
+| `sortOrder`  | `"asc" \| "desc"`   | `desc`      |                                                                 |
 
 All params are optional and sent as query-string values (strings); `page`/`limit` are coerced to numbers server-side.
 
@@ -141,15 +141,17 @@ By default (no `projection` sent), each instructor object contains only public f
 
 ### Possible errors
 
-| HTTP status | Message             | When                                            |
-| ----------- | ------------------- | ----------------------------------------------- |
-| 400         | `Validation failed` | An invalid or undocumented query param is sent. |
+| HTTP status | Message                                             | When                                                    |
+| ----------- | --------------------------------------------------- | ------------------------------------------------------- |
+| 400         | `Validation failed`                                 | An invalid or undocumented query param is sent.         |
 
 ## API 3 — List students
 
 `GET /api/v1/users/students`
 
-Admin or Instructor. Returns a paginated, searchable list of student accounts, scoped by the caller's role: an admin sees every student; an instructor sees only students enrolled in at least one of their own courses (distinct — a student enrolled in several of the instructor's courses appears once).
+Admin or Instructor. Returns a paginated, searchable list of student accounts, scoped by the caller's role:
+- **Admin**: Sees all registered student accounts on the platform (`role: "student"`), regardless of whether they have enrolled in any courses.
+- **Instructor**: Sees only students enrolled in at least one course taught by the requesting instructor (distinct — a student enrolled in several courses of this instructor appears once).
 
 ### Query parameters
 
@@ -260,12 +262,12 @@ HTTP `200`
 
 ### Possible errors
 
-| HTTP status | Message                                                                                                            | When                                                                                                                                        |
-| ----------- | ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| 400         | `Validation failed`                                                                                                | `id` is missing or `role` is not one of the allowed values.                                                                                 |
-| 401         | _(see auth guide `/me` 401 rows)_                                                                                  | Access-token cookie missing/invalid/expired.                                                                                                |
+| HTTP status | Message                                             | When                                                        |
+| ----------- | --------------------------------------------------- | ----------------------------------------------------------- |
+| 400         | `Validation failed`                                 | `id` is missing or `role` is not one of the allowed values. |
+| 401         | _(see auth guide `/me` 401 rows)_                   | Access-token cookie missing/invalid/expired.                |
 | 403         | `You do not have permission to perform this action`<br>`You do not have permission to view this student's details` | Caller is not an admin, student, or instructor, or an instructor requests a student who is not enrolled in one of the instructor's courses. |
-| 404         | `<role> not found`                                                                                                 | No user exists with that `id` and `role` combination.                                                                                       |
+| 404         | `<role> not found`                                  | No user exists with that `id` and `role` combination.       |
 
 ## API 5 — Approve or reject a user's verification
 
@@ -411,10 +413,10 @@ HTTP `200`
 
 ### Possible errors
 
-| HTTP status | Message                           | When                                           |
-| ----------- | --------------------------------- | ---------------------------------------------- |
-| 401         | _(see auth guide `/me` 401 rows)_ | Access-token cookie missing/invalid/expired.   |
-| 404         | `User not found`                  | The signed-in user's account no longer exists. |
+| HTTP status | Message                                             | When                                                 |
+| ----------- | --------------------------------------------------- | ---------------------------------------------------- |
+| 401         | _(see auth guide `/me` 401 rows)_                   | Access-token cookie missing/invalid/expired.         |
+| 404         | `User not found`                                    | The signed-in user's account no longer exists.       |
 
 ## API 8 — Update own profile
 
@@ -506,9 +508,9 @@ Available to any authenticated user (student, instructor, or admin). Generates a
 }
 ```
 
-| Field      | Rules                                                                                                       |
-| ---------- | ----------------------------------------------------------------------------------------------------------- |
-| `fileName` | Required, non-empty string.                                                                                 |
+| Field      | Rules                                                    |
+| ---------- | -------------------------------------------------------- |
+| `fileName` | Required, non-empty string.                              |
 | `fileType` | Required. Must be exactly `"image/jpeg"` or `"image/png"`. Any other value returns `400 Validation failed`. |
 
 ### Success response
@@ -541,11 +543,11 @@ After a successful `204 No Content` response from S3, send `data.key` as `avatar
 
 ### Possible errors
 
-| HTTP status | Message                            | When                                                                                     |
-| ----------- | ---------------------------------- | ---------------------------------------------------------------------------------------- |
-| 400         | `Validation failed`                | Body is missing `fileName`/`fileType`, or `fileType` is not `image/jpeg` or `image/png`. |
-| 401         | _(see auth guide `/me` 401 rows)_  | Access-token cookie missing/invalid/expired.                                             |
-| 500         | `Failed to generate S3 upload URL` | AWS credentials/permissions are misconfigured.                                           |
+| HTTP status | Message                                             | When                                                                       |
+| ----------- | --------------------------------------------------- | -------------------------------------------------------------------------- |
+| 400         | `Validation failed`                                 | Body is missing `fileName`/`fileType`, or `fileType` is not `image/jpeg` or `image/png`. |
+| 401         | _(see auth guide `/me` 401 rows)_                   | Access-token cookie missing/invalid/expired.                               |
+| 500         | `Failed to generate S3 upload URL`                  | AWS credentials/permissions are misconfigured.                             |
 
 ## Frontend types
 
