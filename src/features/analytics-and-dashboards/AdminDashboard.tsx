@@ -51,10 +51,11 @@ const AdminDashboard = ({ data, period }: AdminDashboardProps) => {
     setIsMounted(true);
   }, []);
 
-  const updatePeriod = (newPeriod: DashboardPeriod) => {
+  const updateQuery = (next: { period?: DashboardPeriod }) => {
+    const nextPeriod = next.period ?? period;
     const params = new URLSearchParams();
-    if (newPeriod !== "month") {
-      params.set("period", newPeriod);
+    if (nextPeriod !== "month") {
+      params.set("period", nextPeriod);
     }
     const query = params.toString();
     router.push(`/admin/dashboard${query ? `?${query}` : ""}`);
@@ -118,7 +119,9 @@ const AdminDashboard = ({ data, period }: AdminDashboardProps) => {
         pageHeaderRightSection={
           <Select
             value={period}
-            onValueChange={(val: DashboardPeriod) => updatePeriod(val)}
+            onValueChange={(val: DashboardPeriod) =>
+              updateQuery({ period: val })
+            }
           >
             <SelectTrigger className="w-[160px] bg-white">
               <SelectValue placeholder="Select period" />
