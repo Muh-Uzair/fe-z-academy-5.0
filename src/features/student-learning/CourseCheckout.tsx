@@ -31,6 +31,7 @@ import AppCourseCardsGridLayout from "@/components/AppCourseCardsGridLayout";
 
 import { getStripe } from "@/lib/stripeClient";
 import { createCoursePaymentIntentAction } from "@/services/course/actions";
+import { revalidateEnrollmentAfterPaymentAction } from "@/services/enrollment/actions";
 import type { PublicCourseListItem } from "@/response-types/courseResponseTypes";
 import type { SavedCard } from "@/response-types/cardResponseTypes";
 import { formatCourseLevel } from "@/features/course-management/courseHelpers";
@@ -165,6 +166,7 @@ const PaymentForm = ({
 
     if (result.paymentIntent?.status === "succeeded") {
       setIsSuccessOpen(true);
+      await revalidateEnrollmentAfterPaymentAction(course._id);
       setTimeout(() => {
         window.location.replace("/student/my-learning/enrolled-courses");
       }, 5000);
@@ -227,6 +229,16 @@ const PaymentForm = ({
                 You are now enrolled in &quot;{course.title}&quot;. Redirecting
                 to your courses...
               </p>
+              <AppButton
+                className="mt-2"
+                onClick={() =>
+                  window.location.replace(
+                    "/student/my-learning/enrolled-courses",
+                  )
+                }
+              >
+                Go to My Courses
+              </AppButton>
             </div>
           ) : (
             <>

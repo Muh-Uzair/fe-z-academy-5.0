@@ -3,6 +3,9 @@
 import { apiClient } from "@/lib/apiClient";
 import { updateTag } from "next/cache";
 import { ENROLLMENT_TAGS } from "./tags";
+import { COURSE_TAGS } from "@/services/course/tags";
+import { TRANSACTION_TAGS } from "@/services/transaction/tags";
+import { STAT_TAGS } from "@/services/stat/tags";
 import type {
   UpdateEnrollmentProgressRequestBody,
   UpdateEnrollmentProgressResponse,
@@ -17,6 +20,7 @@ import type {
 export async function updateEnrollmentProgressAction(
   id: string,
   data: UpdateEnrollmentProgressRequestBody,
+  courseId?: string,
 ): Promise<UpdateEnrollmentProgressResponse> {
   const res = await apiClient(`/enrollments/${id}/progress`, {
     method: "PATCH",
@@ -26,9 +30,52 @@ export async function updateEnrollmentProgressAction(
   const json: UpdateEnrollmentProgressResponse = await res.json();
 
   if (json.status === "success") {
+    // 1. Invalidate enrollment tags
     updateTag(ENROLLMENT_TAGS.enrollments);
     updateTag(ENROLLMENT_TAGS.enrollmentDetails(id));
+
+    // 2. Invalidate course refund eligibility and completion status
+    const targetCourseId = courseId || json.data?.enrollment?.course;
+    if (targetCourseId) {
+      updateTag(COURSE_TAGS.refundEligibility(targetCourseId));
+      updateTag(COURSE_TAGS.completionStatus(targetCourseId));
+    }
   }
 
   return json;
+}
+
+/**
+ * Student only. Invalidates enrollments, transactions, course access, and
+ * platform stats cache tags after a successful Stripe payment on the client.
+ */
+export async function revalidateEnrollmentAfterPaymentAction(
+  courseId?: string,
+): Promise<{
+  status: "success";
+  message: string;
+}> {
+  // 1. Invalidate enrollment tags so /enrolled-courses displays the new course
+  updateTag(ENROLLMENT_TAGS.enrollments);
+
+  // 2. Invalidate transaction tags so transactions list shows the new purchase
+  updateTag(TRANSACTION_TAGS.transactions);
+
+  // 3. Invalidate student courses and course details
+  updateTag(COURSE_TAGS.courses);
+  updateTag(COURSE_TAGS.publicCourses);
+  if (courseId) {
+    updateTag(COURSE_TAGS.courseDetails(courseId));
+    updateTag(COURSE_TAGS.publicCourseDetails(courseId));
+    updateTag(COURSE_TAGS.completionStatus(courseId));
+    updateTag(COURSE_TAGS.refundEligibility(courseId));
+  }
+
+  // 4. Invalidate platform stats
+  updateTag(STAT_TAGS.platformStats);
+
+  return {
+    status: "success",
+    message: "Enrollments and transactions revalidated successfully",
+  };
 }

@@ -248,6 +248,7 @@ export async function requestCourseRefundAction(
     // 1. Course tags
     updateTag(COURSE_TAGS.refundEligibility(id));
     updateTag(COURSE_TAGS.courses);
+    updateTag(COURSE_TAGS.publicCourses);
     updateTag(COURSE_TAGS.courseDetails(id));
     updateTag(COURSE_TAGS.completionStatus(id));
     updateTag(COURSE_TAGS.trendingCourses);

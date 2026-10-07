@@ -448,9 +448,13 @@ const CourseDetails = ({
                   source === "enrolled" &&
                   enrollmentId
                     ? (currentTime) =>
-                        updateEnrollmentProgressAction(enrollmentId, {
-                          lastPositionInSeconds: Math.floor(currentTime),
-                        })
+                        updateEnrollmentProgressAction(
+                          enrollmentId,
+                          {
+                            lastPositionInSeconds: Math.floor(currentTime),
+                          },
+                          course._id,
+                        )
                     : undefined
                 }
                 initialVideoPosition={resumePositionInSeconds}

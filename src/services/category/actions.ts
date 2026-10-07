@@ -3,6 +3,7 @@
 import { apiClient } from "@/lib/apiClient";
 import { updateTag } from "next/cache";
 import { CATEGORY_TAGS } from "./tags";
+import { COURSE_TAGS } from "@/services/course/tags";
 import type {
   UploadCategoryImageResponse,
   CreateCategoryResponse,
@@ -73,9 +74,14 @@ export async function updateCategoryAction(
   const json: UpdateCategoryResponse = await res.json();
 
   if (json.status === "success") {
+    // 1. Invalidate category tags
     updateTag(CATEGORY_TAGS.categories);
     updateTag(CATEGORY_TAGS.topCategories);
     updateTag(CATEGORY_TAGS.categoryDetails(id));
+
+    // 2. Invalidate course tags (courses embed categoryDetails { name, description })
+    updateTag(COURSE_TAGS.courses);
+    updateTag(COURSE_TAGS.publicCourses);
   }
 
   return json;
