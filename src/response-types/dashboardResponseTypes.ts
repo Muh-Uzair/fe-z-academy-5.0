@@ -24,7 +24,7 @@ export interface AdminDashboardStats {
   totalStudents: number;
   // New instructors registered in the period
   totalInstructors: number;
-  // New verified courses created in the period
+  // New courses created in the period, regardless of verification status
   totalCourses: number;
 }
 
@@ -62,7 +62,10 @@ export interface AdminDashboardData {
 // API: GET /api/v1/dashboard/admin?period=week|month|year
 // Response: { status, message, data: AdminDashboardData }
 export type GetAdminDashboardResponse =
-  | SuccessApiResponse<AdminDashboardData, "Admin dashboard fetched successfully">
+  | SuccessApiResponse<
+      AdminDashboardData,
+      "Admin dashboard fetched successfully"
+    >
   | ApiErrorResponse;
 
 // ─── Instructor Dashboard ─────────────────────────────────────────────────────
@@ -209,5 +212,3 @@ export type GetStudentDashboardResponse =
       "Student dashboard fetched successfully"
     >
   | ApiErrorResponse;
-
-
