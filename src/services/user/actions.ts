@@ -5,6 +5,10 @@ import { updateTag } from "next/cache";
 import { USER_TAGS } from "./tags";
 import { AUTH_TAGS } from "../auth/tags";
 import { DASHBOARD_TAGS } from "../dashboard/tags";
+import { ENROLLMENT_TAGS } from "@/services/enrollment/tags";
+import { TRANSACTION_TAGS } from "@/services/transaction/tags";
+import { REVIEW_TAGS } from "@/services/review/tags";
+import { COURSE_TAGS } from "@/services/course/tags";
 import type {
   GetInstructorOnboardingLinkResponse,
   UpdateUserVerificationResponse,
@@ -68,7 +72,9 @@ export async function updateProfileAction(data: {
 
   const json: UpdateProfileResponse = await res.json();
 
-  // Profile fields overlap with cached user details, role lists, and dashboards.
+  // Profile fields overlap with cached user details, role lists, dashboards,
+  // and every resource that embeds user summaries (enrollments, transactions,
+  // reviews embed studentDetails / instructorDetails / reviewByDetails).
   if (json.status === "success") {
     const user = json.data.user;
     updateTag(AUTH_TAGS.currentUser);
@@ -76,8 +82,23 @@ export async function updateProfileAction(data: {
     updateTag(USER_TAGS.userDetails(user._id));
     if (user.role === "student") {
       updateTag(USER_TAGS.students);
+      // Enrollments embed studentDetails; transactions embed studentDetails.
+      updateTag(ENROLLMENT_TAGS.enrollments);
+      updateTag(TRANSACTION_TAGS.transactions);
+      // Reviews embed reviewByDetails (student).
+      updateTag(REVIEW_TAGS.reviews);
     } else if (user.role === "instructor") {
       updateTag(USER_TAGS.instructors);
+      // Enrollments embed instructorDetails; transactions embed instructorDetails.
+      updateTag(ENROLLMENT_TAGS.enrollments);
+      updateTag(TRANSACTION_TAGS.transactions);
+      // Reviews embed instructorDetails.
+      updateTag(REVIEW_TAGS.reviews);
+      // Course list/detail embed instructorDetails.
+      updateTag(COURSE_TAGS.courses);
+      updateTag(COURSE_TAGS.publicCourses);
+      updateTag(COURSE_TAGS.featuredCourses);
+      updateTag(COURSE_TAGS.trendingCourses);
     }
     updateTag(DASHBOARD_TAGS.admin);
     updateTag(DASHBOARD_TAGS.instructor);

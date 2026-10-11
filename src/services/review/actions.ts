@@ -5,6 +5,8 @@ import { updateTag } from "next/cache";
 import { REVIEW_TAGS } from "./tags";
 import { COURSE_TAGS } from "@/services/course/tags";
 import { DASHBOARD_TAGS } from "@/services/dashboard/tags";
+import { ENROLLMENT_TAGS } from "@/services/enrollment/tags";
+import { TRANSACTION_TAGS } from "@/services/transaction/tags";
 import type {
   CreateReviewResponse,
   UpdateReviewResponse,
@@ -40,8 +42,14 @@ export async function createReviewAction(data: {
     updateTag(COURSE_TAGS.courses);
     updateTag(COURSE_TAGS.publicCourses);
     updateTag(COURSE_TAGS.featuredCourses);
+    updateTag(COURSE_TAGS.trendingCourses);
 
-    // 3. Invalidate dashboards (reviews list and course ratings)
+    // 3. Enrollments and transactions embed courseDetails which includes
+    // averageRating and totalReviews — bust those caches too.
+    updateTag(ENROLLMENT_TAGS.enrollments);
+    updateTag(TRANSACTION_TAGS.transactions);
+
+    // 4. Invalidate dashboards (reviews list and course ratings)
     updateTag(DASHBOARD_TAGS.admin);
     updateTag(DASHBOARD_TAGS.instructor);
     updateTag(DASHBOARD_TAGS.student);
@@ -88,8 +96,13 @@ export async function updateReviewAction(
     updateTag(COURSE_TAGS.courses);
     updateTag(COURSE_TAGS.publicCourses);
     updateTag(COURSE_TAGS.featuredCourses);
+    updateTag(COURSE_TAGS.trendingCourses);
 
-    // 3. Invalidate dashboards
+    // 3. Enrollments and transactions embed courseDetails (averageRating, totalReviews).
+    updateTag(ENROLLMENT_TAGS.enrollments);
+    updateTag(TRANSACTION_TAGS.transactions);
+
+    // 4. Invalidate dashboards
     updateTag(DASHBOARD_TAGS.admin);
     updateTag(DASHBOARD_TAGS.instructor);
     updateTag(DASHBOARD_TAGS.student);
@@ -128,8 +141,13 @@ export async function deleteReviewAction(
     updateTag(COURSE_TAGS.courses);
     updateTag(COURSE_TAGS.publicCourses);
     updateTag(COURSE_TAGS.featuredCourses);
+    updateTag(COURSE_TAGS.trendingCourses);
 
-    // 3. Invalidate dashboards
+    // 3. Enrollments and transactions embed courseDetails (averageRating, totalReviews).
+    updateTag(ENROLLMENT_TAGS.enrollments);
+    updateTag(TRANSACTION_TAGS.transactions);
+
+    // 4. Invalidate dashboards
     updateTag(DASHBOARD_TAGS.admin);
     updateTag(DASHBOARD_TAGS.instructor);
     updateTag(DASHBOARD_TAGS.student);

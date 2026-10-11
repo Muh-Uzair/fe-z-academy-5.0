@@ -5,10 +5,10 @@ import { updateTag } from "next/cache";
 import { ENROLLMENT_TAGS } from "./tags";
 import { COURSE_TAGS } from "@/services/course/tags";
 import { TRANSACTION_TAGS } from "@/services/transaction/tags";
+import { REVIEW_TAGS } from "@/services/review/tags";
 import { STAT_TAGS } from "@/services/stat/tags";
 import { DASHBOARD_TAGS } from "@/services/dashboard/tags";
 import { USER_TAGS } from "@/services/user/tags";
-import { REVIEW_TAGS } from "@/services/review/tags";
 import type {
   UpdateEnrollmentProgressRequestBody,
   UpdateEnrollmentProgressResponse,
@@ -55,47 +55,9 @@ export async function updateEnrollmentProgressAction(
 }
 
 /**
- * Called after the Stripe charge.refunded webhook has been processed by the
- * backend. At that point the enrollment is removed, the student's review for
- * the course is deleted, course stats (totalStudentsEnrolled, averageRating,
- * totalReviews) are decremented, and the transaction flips to "refunded".
- * Invalidate everything that was intentionally deferred from
- * requestCourseRefundAction.
+ * Student only. Invalidates enrollments, transactions, course access, and
+ * platform stats cache tags after a successful Stripe payment on the client.
  */
-export async function revalidateAfterRefundWebhookAction(
-  courseId: string,
-): Promise<{ status: "success"; message: string }> {
-  // 1. Enrollment removed
-  updateTag(ENROLLMENT_TAGS.enrollments);
-  updateTag(USER_TAGS.instructors);
-  updateTag(USER_TAGS.students);
-
-  // 2. Transaction flipped to "refunded"
-  updateTag(TRANSACTION_TAGS.transactions);
-
-  // 3. Course stats decremented (totalStudentsEnrolled, averageRating, totalReviews)
-  updateTag(COURSE_TAGS.courses);
-  updateTag(COURSE_TAGS.publicCourses);
-  updateTag(COURSE_TAGS.featuredCourses);
-  updateTag(COURSE_TAGS.trendingCourses);
-  updateTag(COURSE_TAGS.courseDetails(courseId));
-  updateTag(COURSE_TAGS.publicCourseDetails(courseId));
-  updateTag(COURSE_TAGS.completionStatus(courseId));
-
-  // 4. Review deleted — course rating recalculated
-  updateTag(REVIEW_TAGS.reviews);
-  updateTag(REVIEW_TAGS.reviewByCourse(courseId));
-  updateTag(REVIEW_TAGS.reviewsByCourse(courseId));
-
-  // 5. Platform stats and all dashboards
-  updateTag(STAT_TAGS.platformStats);
-  updateTag(DASHBOARD_TAGS.admin);
-  updateTag(DASHBOARD_TAGS.instructor);
-  updateTag(DASHBOARD_TAGS.student);
-
-  return { status: "success", message: "Refund webhook revalidation complete" };
-}
-
 export async function revalidateEnrollmentAfterPaymentAction(
   courseId?: string,
 ): Promise<{
@@ -110,7 +72,10 @@ export async function revalidateEnrollmentAfterPaymentAction(
   // 2. Invalidate transaction tags so transactions list shows the new purchase
   updateTag(TRANSACTION_TAGS.transactions);
 
-  // 3. Invalidate student courses and course details
+  // 3a. Reviews embed courseDetails.totalStudentsEnrolled — bust stale summaries.
+  updateTag(REVIEW_TAGS.reviews);
+
+  // 4. Invalidate student courses and course details
   updateTag(COURSE_TAGS.courses);
   updateTag(COURSE_TAGS.publicCourses);
   updateTag(COURSE_TAGS.trendingCourses);
@@ -121,10 +86,10 @@ export async function revalidateEnrollmentAfterPaymentAction(
     updateTag(COURSE_TAGS.refundEligibility(courseId));
   }
 
-  // 4. Invalidate platform stats
+  // 5. Invalidate platform stats
   updateTag(STAT_TAGS.platformStats);
 
-  // 5. Invalidate all dashboards (new revenue, enrollments, transaction)
+  // 6. Invalidate all dashboards (new revenue, enrollments, transaction)
   updateTag(DASHBOARD_TAGS.admin);
   updateTag(DASHBOARD_TAGS.instructor);
   updateTag(DASHBOARD_TAGS.student);

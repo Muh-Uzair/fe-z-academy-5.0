@@ -4,6 +4,8 @@ import { apiClient } from "@/lib/apiClient";
 import { updateTag } from "next/cache";
 import { CATEGORY_TAGS } from "./tags";
 import { COURSE_TAGS } from "@/services/course/tags";
+import { ENROLLMENT_TAGS } from "@/services/enrollment/tags";
+import { TRANSACTION_TAGS } from "@/services/transaction/tags";
 import type {
   UploadCategoryImageResponse,
   CreateCategoryResponse,
@@ -87,6 +89,11 @@ export async function updateCategoryAction(
     updateTag(COURSE_TAGS.publicCourses);
     updateTag(COURSE_TAGS.featuredCourses);
     updateTag(COURSE_TAGS.trendingCourses);
+
+    // 3. Enrollments and transactions embed courseDetails which embeds category
+    // name — bust those caches so the joined summaries stay consistent.
+    updateTag(ENROLLMENT_TAGS.enrollments);
+    updateTag(TRANSACTION_TAGS.transactions);
   }
 
   return json;
