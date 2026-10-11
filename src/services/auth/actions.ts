@@ -7,6 +7,7 @@ import { redirect } from "next/navigation";
 import { parseSetCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { AUTH_TAGS } from "./tags";
 import { DASHBOARD_TAGS } from "@/services/dashboard/tags";
+import { USER_TAGS } from "@/services/user/tags";
 
 import type {
   SignupResponse,
@@ -61,6 +62,9 @@ export async function signupAction(
   if (json.status === "success") {
     // New user registered — updates admin totalStudents, totalInstructors, userGrowth, recentUsers
     updateTag(DASHBOARD_TAGS.admin);
+    updateTag(
+      data.role === "student" ? USER_TAGS.students : USER_TAGS.instructors,
+    );
   }
 
   return json;
@@ -80,6 +84,7 @@ export async function verifyOtpAction(data: {
   if (json.status === "success") {
     // Account verified — updates admin recentUsers isVerified status
     updateTag(DASHBOARD_TAGS.admin);
+    updateTag(USER_TAGS.students);
   }
 
   return json;

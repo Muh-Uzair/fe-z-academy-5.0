@@ -10,6 +10,7 @@ import { DASHBOARD_TAGS } from "@/services/dashboard/tags";
 import { TRANSACTION_TAGS } from "@/services/transaction/tags";
 import { ENROLLMENT_TAGS } from "@/services/enrollment/tags";
 import { REVIEW_TAGS } from "@/services/review/tags";
+import { USER_TAGS } from "@/services/user/tags";
 import type {
   UploadCourseThumbnailResponse,
   UploadCourseVideoResponse,
@@ -91,7 +92,8 @@ export async function createCourseAction(data: {
     updateTag(COURSE_TAGS.trendingCourses);
     // Course added to category
     updateTag(CATEGORY_TAGS.topCategories);
-    // Updates instructor totalCourses stat
+    // Course totals appear in admin and instructor dashboards.
+    updateTag(DASHBOARD_TAGS.admin);
     updateTag(DASHBOARD_TAGS.instructor);
   }
 
@@ -233,6 +235,7 @@ export async function createCoursePaymentIntentAction(
   if (json.status === "success") {
     updateTag(COURSE_TAGS.courses);
     updateTag(COURSE_TAGS.courseDetails(id));
+    updateTag(TRANSACTION_TAGS.transactions);
     // totalStudents stat may change when a student enrolls
     updateTag(STAT_TAGS.platformStats);
   }
@@ -273,6 +276,8 @@ export async function requestCourseRefundAction(
 
     // 3. Enrollment & review cleanup
     updateTag(ENROLLMENT_TAGS.enrollments);
+    updateTag(USER_TAGS.instructors);
+    updateTag(USER_TAGS.students);
     updateTag(REVIEW_TAGS.reviewByCourse(id));
     updateTag(REVIEW_TAGS.reviewsByCourse(id));
     updateTag(REVIEW_TAGS.reviews);

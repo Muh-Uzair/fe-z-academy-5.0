@@ -7,6 +7,7 @@ import { COURSE_TAGS } from "@/services/course/tags";
 import { TRANSACTION_TAGS } from "@/services/transaction/tags";
 import { STAT_TAGS } from "@/services/stat/tags";
 import { DASHBOARD_TAGS } from "@/services/dashboard/tags";
+import { USER_TAGS } from "@/services/user/tags";
 import type {
   UpdateEnrollmentProgressRequestBody,
   UpdateEnrollmentProgressResponse,
@@ -62,6 +63,8 @@ export async function revalidateEnrollmentAfterPaymentAction(
 }> {
   // 1. Invalidate enrollment tags so /enrolled-courses displays the new course
   updateTag(ENROLLMENT_TAGS.enrollments);
+  updateTag(USER_TAGS.instructors);
+  updateTag(USER_TAGS.students);
 
   // 2. Invalidate transaction tags so transactions list shows the new purchase
   updateTag(TRANSACTION_TAGS.transactions);
@@ -69,6 +72,7 @@ export async function revalidateEnrollmentAfterPaymentAction(
   // 3. Invalidate student courses and course details
   updateTag(COURSE_TAGS.courses);
   updateTag(COURSE_TAGS.publicCourses);
+  updateTag(COURSE_TAGS.trendingCourses);
   if (courseId) {
     updateTag(COURSE_TAGS.courseDetails(courseId));
     updateTag(COURSE_TAGS.publicCourseDetails(courseId));

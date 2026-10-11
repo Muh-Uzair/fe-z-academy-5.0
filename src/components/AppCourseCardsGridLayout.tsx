@@ -8,7 +8,8 @@ import type { CourseListItem } from "@/response-types/courseResponseTypes";
 
 // Extend CourseListItem to allow the optional totalDurationWatchedInMinutes
 // and watchedCompletely fields used by the "in-progress" mode (student continue-watching).
-type Course = CourseListItem & {
+type Course = Omit<CourseListItem, "videoUrl"> & {
+  videoUrl?: string;
   totalDurationWatchedInMinutes?: number;
   watchedCompletely?: boolean;
 };

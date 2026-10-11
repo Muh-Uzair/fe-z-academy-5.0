@@ -32,10 +32,17 @@ export async function updateUserVerificationAction(
 
   const json: UpdateUserVerificationResponse = await res.json();
 
-  // Verification status changed — refresh the instructors list, this
-  // user's own detail view, and the admin dashboard recent users.
+  // Verification status changed — refresh the corresponding user list,
+  // this user's detail view, and the admin dashboard recent users.
   if (json.status === "success") {
-    updateTag(USER_TAGS.instructors);
+    if (role === "student") {
+      updateTag(USER_TAGS.students);
+    } else if (role === "instructor") {
+      updateTag(USER_TAGS.instructors);
+    } else {
+      updateTag(USER_TAGS.students);
+      updateTag(USER_TAGS.instructors);
+    }
     updateTag(USER_TAGS.userDetails(id));
     updateTag(DASHBOARD_TAGS.admin);
   }
@@ -61,11 +68,17 @@ export async function updateProfileAction(data: {
 
   const json: UpdateProfileResponse = await res.json();
 
-  // Profile fields overlap with the cached current-user session data and dashboards —
-  // invalidate them so the next getMeQuery() and dashboard calls reflect the update.
+  // Profile fields overlap with cached user details, role lists, and dashboards.
   if (json.status === "success") {
+    const user = json.data.user;
     updateTag(AUTH_TAGS.currentUser);
     updateTag(USER_TAGS.profile);
+    updateTag(USER_TAGS.userDetails(user._id));
+    if (user.role === "student") {
+      updateTag(USER_TAGS.students);
+    } else if (user.role === "instructor") {
+      updateTag(USER_TAGS.instructors);
+    }
     updateTag(DASHBOARD_TAGS.admin);
     updateTag(DASHBOARD_TAGS.instructor);
     updateTag(DASHBOARD_TAGS.student);

@@ -35,7 +35,7 @@ import { revalidateEnrollmentAfterPaymentAction } from "@/services/enrollment/ac
 import type { PublicCourseListItem } from "@/response-types/courseResponseTypes";
 import type { SavedCard } from "@/response-types/cardResponseTypes";
 import { formatCourseLevel } from "@/features/course-management/courseHelpers";
-import { CreditCard, CheckCircle2, ShieldCheck } from "lucide-react";
+import { CreditCard, ShieldCheck } from "lucide-react";
 import { cn } from "@/utils/cn";
 
 type CourseCheckoutProps = {
@@ -353,9 +353,7 @@ const PaymentForm = ({
                         id="nameOnCard"
                         placeholder="John Doe"
                         value={nameOnCard}
-                        onChange={(event) =>
-                          setNameOnCard(event.target.value)
-                        }
+                        onChange={(event) => setNameOnCard(event.target.value)}
                         className="h-11"
                         required={paymentMode === "new"}
                         disabled={isFormDisabled}
@@ -425,7 +423,8 @@ const PaymentForm = ({
               <div className="mt-6 text-center">
                 <p className="text-xs text-muted-foreground bg-muted/50 p-3 rounded-lg border border-dashed flex items-center justify-center gap-1.5">
                   <ShieldCheck className="h-4 w-4 text-emerald-600 shrink-0" />
-                  Payments processed securely via Stripe with 256-bit encryption.
+                  Payments processed securely via Stripe with 256-bit
+                  encryption.
                 </p>
               </div>
             </>
@@ -443,8 +442,6 @@ const CourseCheckout = ({
 }: CourseCheckoutProps) => {
   const stripePromise = useMemo(() => getStripe(), []);
   const router = useRouter();
-
-  const similarCoursesGrid = similarCourses as any;
 
   return (
     <div className="container mx-auto py-10 px-4 space-y-12 max-w-6xl">
@@ -537,9 +534,9 @@ const CourseCheckout = ({
           </p>
         </div>
 
-        {similarCoursesGrid.length > 0 ? (
+        {similarCourses.length > 0 ? (
           <AppCourseCardsGridLayout
-            courses={similarCoursesGrid}
+            courses={similarCourses}
             renderFooter={(similarCourse) => (
               <AppButton
                 className="w-full"
