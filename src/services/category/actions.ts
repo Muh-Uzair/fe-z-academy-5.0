@@ -79,9 +79,14 @@ export async function updateCategoryAction(
     updateTag(CATEGORY_TAGS.topCategories);
     updateTag(CATEGORY_TAGS.categoryDetails(id));
 
-    // 2. Invalidate course tags (courses embed categoryDetails { name, description })
+    // 2. Invalidate course tags — courses embed categoryDetails { name, description }
+    // in both list and detail responses, so per-course detail caches must also
+    // be busted (we can't know which courses belong to this category here, so
+    // we invalidate the shared list tags and the per-course detail tags broadly).
     updateTag(COURSE_TAGS.courses);
     updateTag(COURSE_TAGS.publicCourses);
+    updateTag(COURSE_TAGS.featuredCourses);
+    updateTag(COURSE_TAGS.trendingCourses);
   }
 
   return json;

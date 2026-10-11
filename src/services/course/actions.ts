@@ -8,9 +8,6 @@ import { CATEGORY_TAGS } from "@/services/category/tags";
 import { DASHBOARD_TAGS } from "@/services/dashboard/tags";
 
 import { TRANSACTION_TAGS } from "@/services/transaction/tags";
-import { ENROLLMENT_TAGS } from "@/services/enrollment/tags";
-import { REVIEW_TAGS } from "@/services/review/tags";
-import { USER_TAGS } from "@/services/user/tags";
 import type {
   UploadCourseThumbnailResponse,
   UploadCourseVideoResponse,
@@ -232,13 +229,11 @@ export async function createCoursePaymentIntentAction(
 
   const json: CreateCoursePaymentIntentResponse = await res.json();
 
-  if (json.status === "success") {
-    updateTag(COURSE_TAGS.courses);
-    updateTag(COURSE_TAGS.courseDetails(id));
-    updateTag(TRANSACTION_TAGS.transactions);
-    // totalStudents stat may change when a student enrolls
-    updateTag(STAT_TAGS.platformStats);
-  }
+  // No cache invalidation here — creating a PaymentIntent does not change any
+  // data. Enrollment, transaction, and course stats are only updated after the
+  // Stripe payment_intent.succeeded webhook fires. Call
+  // revalidateEnrollmentAfterPaymentAction (enrollment/actions.ts) once the
+  // client-side payment confirmation succeeds.
 
   return json;
 }
@@ -261,32 +256,18 @@ export async function requestCourseRefundAction(
   const json: RequestCourseRefundResponse = await res.json();
 
   if (json.status === "success") {
-    // 1. Course tags
-    updateTag(COURSE_TAGS.refundEligibility(id));
-    updateTag(COURSE_TAGS.courses);
-    updateTag(COURSE_TAGS.publicCourses);
-    updateTag(COURSE_TAGS.courseDetails(id));
-    updateTag(COURSE_TAGS.completionStatus(id));
-    updateTag(COURSE_TAGS.trendingCourses);
-    updateTag(COURSE_TAGS.featuredCourses);
-    updateTag(COURSE_TAGS.publicCourseDetails(id));
-
-    // 2. Transaction status changed to "refund_processing"
+    // The backend sets the transaction to "refund_processing" synchronously,
+    // so the transaction list is stale immediately.
     updateTag(TRANSACTION_TAGS.transactions);
 
-    // 3. Enrollment & review cleanup
-    updateTag(ENROLLMENT_TAGS.enrollments);
-    updateTag(USER_TAGS.instructors);
-    updateTag(USER_TAGS.students);
-    updateTag(REVIEW_TAGS.reviewByCourse(id));
-    updateTag(REVIEW_TAGS.reviewsByCourse(id));
-    updateTag(REVIEW_TAGS.reviews);
+    // Refund eligibility is now gone — invalidate so the UI hides the button.
+    updateTag(COURSE_TAGS.refundEligibility(id));
 
-    // 4. Platform stats & dashboards
-    updateTag(STAT_TAGS.platformStats);
-    updateTag(DASHBOARD_TAGS.admin);
-    updateTag(DASHBOARD_TAGS.instructor);
-    updateTag(DASHBOARD_TAGS.student);
+    // Enrollment removal, review cleanup, course stat decrements
+    // (totalStudentsEnrolled, averageRating, totalReviews), and the final
+    // transaction status flip to "refunded" all happen asynchronously via the
+    // Stripe charge.refunded webhook. Call revalidateAfterRefundWebhookAction
+    // from the webhook handler once those changes have landed.
   }
 
   return json;
