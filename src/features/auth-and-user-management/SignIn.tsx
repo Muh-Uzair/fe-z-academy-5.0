@@ -26,7 +26,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
 import { signinAction } from "@/services/auth/actions";
 import useClientAction from "@/hooks/useClientAction";
 
@@ -75,10 +74,6 @@ const SignIn = ({ email = "" }: SignInProps) => {
 
       router.push(dashboardRoutes[user.role]);
     }
-  };
-
-  const handleContinueWithGoogle = () => {
-    console.log("continuing with google");
   };
 
   return (
@@ -174,25 +169,6 @@ const SignIn = ({ email = "" }: SignInProps) => {
               >
                 Sign In
               </AppButton>
-
-              <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <Separator className="flex-1" />
-                  <span className="text-sm text-muted-foreground">
-                    Continue with Google
-                  </span>
-                  <Separator className="flex-1" />
-                </div>
-
-                <AppButton
-                  type="button"
-                  variant="outline"
-                  className="w-full"
-                  onClick={handleContinueWithGoogle}
-                >
-                  Continue with Google
-                </AppButton>
-              </div>
 
               <p className="text-center text-sm text-muted-foreground">
                 Don&apos;t have an account?{" "}

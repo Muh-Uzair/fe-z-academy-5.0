@@ -18,7 +18,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { signupAction } from "@/services/auth/actions";
 import useClientAction from "@/hooks/useClientAction";
@@ -72,10 +71,6 @@ const SignUpInstructor = () => {
       const params = new URLSearchParams({ email: values.email });
       router.push(`/signin?${params.toString()}`);
     }
-  };
-
-  const handleContinueWithGoogle = () => {
-    console.log("instructor continuing with google");
   };
 
   return (
@@ -240,25 +235,6 @@ const SignUpInstructor = () => {
           >
             Sign Up
           </AppButton>
-
-          <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <Separator className="flex-1" />
-              <span className="text-sm text-muted-foreground">
-                Continue with Google
-              </span>
-              <Separator className="flex-1" />
-            </div>
-
-            <AppButton
-              type="button"
-              variant="outline"
-              className="w-full"
-              onClick={handleContinueWithGoogle}
-            >
-              Continue with Google
-            </AppButton>
-          </div>
         </fieldset>
       </form>
     </Form>

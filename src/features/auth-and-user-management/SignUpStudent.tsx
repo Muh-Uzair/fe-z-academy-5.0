@@ -17,7 +17,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
 import { signupAction } from "@/services/auth/actions";
@@ -70,10 +69,6 @@ const SignUpStudent = () => {
 
       router.push(`/verify-otp?${params.toString()}`);
     }
-  };
-
-  const handleContinueWithGoogle = () => {
-    console.log("student continuing with google");
   };
 
   return (
@@ -216,25 +211,6 @@ const SignUpStudent = () => {
           >
             Sign Up
           </AppButton>
-
-          <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <Separator className="flex-1" />
-              <span className="text-sm text-muted-foreground">
-                Continue with Google
-              </span>
-              <Separator className="flex-1" />
-            </div>
-
-            <AppButton
-              type="button"
-              variant="outline"
-              className="w-full"
-              onClick={handleContinueWithGoogle}
-            >
-              Continue with Google
-            </AppButton>
-          </div>
         </fieldset>
       </form>
     </Form>
