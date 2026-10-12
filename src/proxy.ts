@@ -1,13 +1,57 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
+const ROLES = ["admin", "instructor", "student"] as const;
+type Role = (typeof ROLES)[number];
+
+// Reads the role from the JWT payload WITHOUT verifying the signature. It is
+// only used to send users to their own workspace; the backend still verifies
+// the token on every API call and the role layouts re-check the verified
+// /auth/me user. Returns null if the role can't be read, so nothing is blocked.
+function getRoleFromToken(token: string | undefined): Role | null {
+  if (!token) return null;
+
+  try {
+    const payload = token.split(".")[1];
+    const json = atob(payload.replace(/-/g, "+").replace(/_/g, "/"));
+    const { role } = JSON.parse(json);
+
+    return ROLES.includes(role) ? role : null;
+  } catch {
+    return null;
+  }
+}
+
+// If the user is inside another role's workspace (e.g. an admin on
+// /instructor/*), returns their own dashboard URL; otherwise null.
+function getOwnDashboardUrl(request: NextRequest, role: Role | null) {
+  if (!role) return null;
+
+  const { pathname } = request.nextUrl;
+  const inOtherWorkspace = ROLES.some(
+    (other) =>
+      other !== role &&
+      (pathname === `/${other}` || pathname.startsWith(`/${other}/`)),
+  );
+
+  return inOtherWorkspace ? new URL(`/${role}/dashboard`, request.url) : null;
+}
+
 export async function proxy(request: NextRequest) {
   const accessToken = request.cookies.get("accessToken")?.value;
   const refreshToken = request.cookies.get("refreshToken")?.value;
 
-  // 1. If we have an access token, everything is fine. Proceed normally.
+  // 1. If we have an access token, the session is fine. Only make sure the
+  // user is in their own workspace, then proceed normally.
   if (accessToken) {
-    return NextResponse.next();
+    const dashboardUrl = getOwnDashboardUrl(
+      request,
+      getRoleFromToken(accessToken),
+    );
+
+    return dashboardUrl
+      ? NextResponse.redirect(dashboardUrl)
+      : NextResponse.next();
   }
 
   // 2. If we don't have an access token and no refresh token, kick them to sign in.
@@ -66,12 +110,20 @@ export async function proxy(request: NextRequest) {
     // Inject it into the request headers BEFORE sending to Server Components
     requestHeaders.set("Cookie", newCookieHeader);
 
-    // Prepare the downstream response with the updated request headers
-    const response = NextResponse.next({
-      request: {
-        headers: requestHeaders,
-      },
-    });
+    // Prepare the downstream response with the updated request headers, or
+    // redirect to the user's own dashboard if they are in another workspace.
+    // The rotated cookies below are set on either response.
+    const dashboardUrl = getOwnDashboardUrl(
+      request,
+      getRoleFromToken(requestCookies.get("accessToken")),
+    );
+    const response = dashboardUrl
+      ? NextResponse.redirect(dashboardUrl)
+      : NextResponse.next({
+          request: {
+            headers: requestHeaders,
+          },
+        });
 
     // Finally, set the Set-Cookie headers on the response so the browser saves them
     for (const setCookieStr of setCookieHeaders) {
