@@ -219,10 +219,10 @@ export async function updateCourseVerificationAction(
     updateTag(COURSE_TAGS.trendingCourses);
     updateTag(COURSE_TAGS.courseDetails(id));
     updateTag(COURSE_TAGS.publicCourseDetails(id));
-    // totalCourses stat changes when a course is verified or unverified
+    // totalCourses stat counts verified courses only, so it changes here.
+    // topCategories counts all courses regardless of verification, so it
+    // doesn't.
     updateTag(STAT_TAGS.platformStats);
-    // verified courses count determines top categories
-    updateTag(CATEGORY_TAGS.topCategories);
     // Enrollments and transactions embed courseDetails (isVerified, verificationRejectionReason).
     updateTag(ENROLLMENT_TAGS.enrollments);
     updateTag(TRANSACTION_TAGS.transactions);
@@ -254,9 +254,16 @@ export async function createCoursePaymentIntentAction(
 
   const json: CreateCoursePaymentIntentResponse = await res.json();
 
-  // No cache invalidation here — creating a PaymentIntent does not change any
-  // data. Enrollment, transaction, and course stats are only updated after the
-  // Stripe payment_intent.succeeded webhook fires. Call
+  if (json.status === "success") {
+    // The backend records a pending transaction when the PaymentIntent is
+    // created, and it appears in the transactions lists and in the student
+    // dashboard's recentTransactions.
+    updateTag(TRANSACTION_TAGS.transactions);
+    updateTag(DASHBOARD_TAGS.student);
+  }
+
+  // Enrollment and course stats are only updated after the Stripe
+  // payment_intent.succeeded webhook fires. Call
   // revalidateEnrollmentAfterPaymentAction (enrollment/actions.ts) once the
   // client-side payment confirmation succeeds.
 
