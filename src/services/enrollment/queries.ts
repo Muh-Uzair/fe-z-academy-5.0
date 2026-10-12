@@ -64,6 +64,9 @@ export async function getEnrollmentDetailsQuery(
 ): Promise<GetEnrollmentDetailsSuccessResponse> {
   "use cache: private";
   cacheTag(ENROLLMENT_TAGS.enrollmentDetails(id));
+  // Also tagged with the list tag so actions that can't know this id (payment,
+  // refund, course edit) still expire it.
+  cacheTag(ENROLLMENT_TAGS.enrollments);
   cacheLife("minutes");
 
   try {

@@ -87,9 +87,9 @@ export async function createCourseAction(data: {
   const json: CreateCourseResponse = await res.json();
 
   if (json.status === "success") {
+    // New courses start unverified, so the public, featured and trending
+    // lists don't change — only the role-scoped course lists do.
     updateTag(COURSE_TAGS.courses);
-    updateTag(COURSE_TAGS.featuredCourses);
-    updateTag(COURSE_TAGS.trendingCourses);
     // Course added to category
     updateTag(CATEGORY_TAGS.topCategories);
     // Course totals appear in admin and instructor dashboards.
@@ -179,14 +179,12 @@ export async function deleteCourseAction(
     updateTag(STAT_TAGS.platformStats);
     // category course count changes when a course is deleted
     updateTag(CATEGORY_TAGS.topCategories);
-    // Enrollments and transactions embed courseDetails — bust stale summaries.
-    updateTag(ENROLLMENT_TAGS.enrollments);
+    // Deleting is blocked while students are enrolled, so no enrollment or
+    // review of this course can exist — but past (refunded) transactions still
+    // embed courseDetails.
     updateTag(TRANSACTION_TAGS.transactions);
-    // Reviews embed courseDetails — bust stale summaries.
-    updateTag(REVIEW_TAGS.reviews);
-    updateTag(REVIEW_TAGS.reviewByCourse(id));
-    updateTag(REVIEW_TAGS.reviewsByCourse(id));
-    // Dashboards cleanup
+    // Admin/instructor totalCourses, and the student's recent transactions
+    // (courseTitle) change.
     updateTag(DASHBOARD_TAGS.admin);
     updateTag(DASHBOARD_TAGS.instructor);
     updateTag(DASHBOARD_TAGS.student);
@@ -232,10 +230,10 @@ export async function updateCourseVerificationAction(
     updateTag(REVIEW_TAGS.reviews);
     updateTag(REVIEW_TAGS.reviewByCourse(id));
     updateTag(REVIEW_TAGS.reviewsByCourse(id));
-    // Student dashboard continueWatching embeds course verification state.
-    updateTag(DASHBOARD_TAGS.admin);
+    // Only the instructor dashboard shows a course's verification state
+    // (coursePerformance.isVerified). The admin dashboard counts courses
+    // regardless of verification, and the student dashboard doesn't show it.
     updateTag(DASHBOARD_TAGS.instructor);
-    updateTag(DASHBOARD_TAGS.student);
   }
 
   return json;
@@ -332,5 +330,13 @@ export async function issueCourseCertificateAction(
     method: "GET",
   });
 
-  return res.json();
+  const json: IssueCourseCertificateResponse = await res.json();
+
+  if (json.status === "success") {
+    // Enrollments carry certificateIssued/certificateIssuedAt and every
+    // enrollments page filters on it.
+    updateTag(ENROLLMENT_TAGS.enrollments);
+  }
+
+  return json;
 }

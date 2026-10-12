@@ -18,7 +18,7 @@ export async function getMeQuery(
 ): Promise<GetMeSuccessResponse | null> {
   "use cache: private";
   cacheTag(AUTH_TAGS.currentUser);
-  cacheLife("hours");
+  cacheLife("minutes");
 
   const res = await apiClient("/auth/me", {
     method: "GET",

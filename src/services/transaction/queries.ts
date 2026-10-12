@@ -81,6 +81,9 @@ export async function getTransactionDetailsQuery(
 ): Promise<GetTransactionDetailsSuccessResponse> {
   "use cache: private";
   cacheTag(TRANSACTION_TAGS.transactionDetails(id));
+  // Also tagged with the list tag so actions that can't know this id (refund,
+  // course edit, profile update) still expire it.
+  cacheTag(TRANSACTION_TAGS.transactions);
   cacheLife("minutes");
 
   try {

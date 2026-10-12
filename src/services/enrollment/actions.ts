@@ -9,6 +9,7 @@ import { REVIEW_TAGS } from "@/services/review/tags";
 import { STAT_TAGS } from "@/services/stat/tags";
 import { DASHBOARD_TAGS } from "@/services/dashboard/tags";
 import { USER_TAGS } from "@/services/user/tags";
+import { CARD_TAGS } from "@/services/cards/tags";
 import type {
   UpdateEnrollmentProgressRequestBody,
   UpdateEnrollmentProgressResponse,
@@ -45,10 +46,10 @@ export async function updateEnrollmentProgressAction(
     }
 
     // 3. Invalidate student progress and instructor avgCompletion in dashboards.
-    // Admin dashboard topPerformingCourses also reflects enrollment activity.
+    // The admin dashboard doesn't show watch progress (its top courses rank by
+    // enrollments, rating and commission), so it is not affected.
     updateTag(DASHBOARD_TAGS.student);
     updateTag(DASHBOARD_TAGS.instructor);
-    updateTag(DASHBOARD_TAGS.admin);
   }
 
   return json;
@@ -78,6 +79,7 @@ export async function revalidateEnrollmentAfterPaymentAction(
   // 4. Invalidate student courses and course details
   updateTag(COURSE_TAGS.courses);
   updateTag(COURSE_TAGS.publicCourses);
+  updateTag(COURSE_TAGS.featuredCourses);
   updateTag(COURSE_TAGS.trendingCourses);
   if (courseId) {
     updateTag(COURSE_TAGS.courseDetails(courseId));
@@ -93,6 +95,10 @@ export async function revalidateEnrollmentAfterPaymentAction(
   updateTag(DASHBOARD_TAGS.admin);
   updateTag(DASHBOARD_TAGS.instructor);
   updateTag(DASHBOARD_TAGS.student);
+
+  // 7. The cards guide says a student's saved cards also come from completed
+  // checkouts, so a new purchase can add a card to the list.
+  updateTag(CARD_TAGS.cards);
 
   return {
     status: "success",

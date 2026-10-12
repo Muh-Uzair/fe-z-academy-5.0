@@ -87,6 +87,10 @@ export async function updateProfileAction(data: {
       updateTag(TRANSACTION_TAGS.transactions);
       // Reviews embed reviewByDetails (student).
       updateTag(REVIEW_TAGS.reviews);
+      // Admin recentUsers; instructor recentReviews (studentName/avatar). The
+      // student dashboard doesn't show the student's own profile.
+      updateTag(DASHBOARD_TAGS.admin);
+      updateTag(DASHBOARD_TAGS.instructor);
     } else if (user.role === "instructor") {
       updateTag(USER_TAGS.instructors);
       // Enrollments embed instructorDetails; transactions embed instructorDetails.
@@ -99,10 +103,15 @@ export async function updateProfileAction(data: {
       updateTag(COURSE_TAGS.publicCourses);
       updateTag(COURSE_TAGS.featuredCourses);
       updateTag(COURSE_TAGS.trendingCourses);
+      // Admin recentUsers and top courses (instructorName); student dashboard
+      // (instructorName/avatar). The instructor dashboard doesn't show the
+      // instructor's own profile.
+      updateTag(DASHBOARD_TAGS.admin);
+      updateTag(DASHBOARD_TAGS.student);
+    } else {
+      // Admins only appear in the admin dashboard's recentUsers.
+      updateTag(DASHBOARD_TAGS.admin);
     }
-    updateTag(DASHBOARD_TAGS.admin);
-    updateTag(DASHBOARD_TAGS.instructor);
-    updateTag(DASHBOARD_TAGS.student);
   }
 
   return json;

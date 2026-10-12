@@ -88,22 +88,28 @@ export async function updateReviewAction(
       updateTag(REVIEW_TAGS.reviewsByCourse(targetCourseId));
     }
 
-    // 2. Invalidate course tags affected by rating changes
-    if (targetCourseId) {
-      updateTag(COURSE_TAGS.courseDetails(targetCourseId));
-      updateTag(COURSE_TAGS.publicCourseDetails(targetCourseId));
+    // 2. Only a rating change recalculates the course's averageRating (which
+    // course lists/details, enrollments, transactions and the admin dashboard's
+    // top courses show). A feedback-only edit leaves all of them unchanged.
+    if (data.rating !== undefined) {
+      if (targetCourseId) {
+        updateTag(COURSE_TAGS.courseDetails(targetCourseId));
+        updateTag(COURSE_TAGS.publicCourseDetails(targetCourseId));
+      }
+      updateTag(COURSE_TAGS.courses);
+      updateTag(COURSE_TAGS.publicCourses);
+      updateTag(COURSE_TAGS.featuredCourses);
+      updateTag(COURSE_TAGS.trendingCourses);
+
+      // Enrollments and transactions embed courseDetails (averageRating).
+      updateTag(ENROLLMENT_TAGS.enrollments);
+      updateTag(TRANSACTION_TAGS.transactions);
+
+      updateTag(DASHBOARD_TAGS.admin);
     }
-    updateTag(COURSE_TAGS.courses);
-    updateTag(COURSE_TAGS.publicCourses);
-    updateTag(COURSE_TAGS.featuredCourses);
-    updateTag(COURSE_TAGS.trendingCourses);
 
-    // 3. Enrollments and transactions embed courseDetails (averageRating, totalReviews).
-    updateTag(ENROLLMENT_TAGS.enrollments);
-    updateTag(TRANSACTION_TAGS.transactions);
-
-    // 4. Invalidate dashboards
-    updateTag(DASHBOARD_TAGS.admin);
+    // 3. Instructor and student dashboards list the review text itself
+    // (recentReviews), so they change for any edit.
     updateTag(DASHBOARD_TAGS.instructor);
     updateTag(DASHBOARD_TAGS.student);
   }

@@ -129,6 +129,9 @@ export async function getReviewByCourseIdAsStudentQuery(
 ): Promise<GetReviewsByCourseIdStudentSuccessResponse> {
   "use cache: private";
   cacheTag(REVIEW_TAGS.reviewByCourse(courseId));
+  // Also tagged with the list tag so actions that can't know this course id
+  // (e.g. a profile update) still expire it.
+  cacheTag(REVIEW_TAGS.reviews);
   cacheLife("minutes");
 
   try {
@@ -159,6 +162,9 @@ export async function getReviewsByCourseIdQuery(
 ): Promise<GetReviewsByCourseIdSuccessResponse> {
   "use cache: private";
   cacheTag(REVIEW_TAGS.reviewsByCourse(courseId));
+  // Also tagged with the list tag so actions that can't know this course id
+  // (e.g. a profile update) still expire it.
+  cacheTag(REVIEW_TAGS.reviews);
   cacheLife("minutes");
 
   const query = buildQueryString(params);

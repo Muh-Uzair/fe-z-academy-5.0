@@ -141,6 +141,9 @@ export async function getCourseDetailsQuery(
 ): Promise<GetCourseDetailsSuccessResponse> {
   "use cache: private";
   cacheTag(COURSE_TAGS.courseDetails(id));
+  // Also tagged with the list tag so actions that can't know this id (e.g. an
+  // instructor profile update) still expire it.
+  cacheTag(COURSE_TAGS.courses);
   cacheLife("minutes");
 
   try {
@@ -327,6 +330,9 @@ export async function getPublicCourseDetailsQuery(
 ): Promise<GetPublicCourseDetailsSuccessResponse> {
   "use cache";
   cacheTag(COURSE_TAGS.publicCourseDetails(id));
+  // Also tagged with the list tag so actions that can't know this id (e.g. an
+  // instructor profile update) still expire it.
+  cacheTag(COURSE_TAGS.publicCourses);
   cacheLife("minutes");
 
   try {
