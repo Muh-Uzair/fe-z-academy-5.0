@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { GraduationCap, Briefcase, Mail, User } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import AppButton from "@/components/AppButton";
+import type { AuthUser } from "@/response-types/authResponseTypes";
 import type {
   UserDetails,
   Pagination as PaginationMeta,
@@ -16,6 +17,7 @@ import type {
 import type { CourseListItem } from "@/response-types/courseResponseTypes";
 
 interface UserProfileProps {
+  currentUser: AuthUser;
   user: UserDetails;
   courses: CourseListItem[];
   pagination: PaginationMeta | null;
@@ -24,6 +26,7 @@ interface UserProfileProps {
 }
 
 const UserProfile = ({
+  currentUser,
   user,
   courses,
   pagination,
@@ -31,7 +34,6 @@ const UserProfile = ({
   role,
 }: UserProfileProps) => {
   const router = useRouter();
-  const currentUser = JSON.parse(localStorage.getItem("currentUser")!);
 
   const updateQuery = (next: { search?: string; page?: number }) => {
     const nextSearch = next.search ?? search;
@@ -135,7 +137,7 @@ const UserProfile = ({
           renderFooter={(course) => (
             <AppButton
               href={
-                currentUser?.role === "student"
+                currentUser.role === "student"
                   ? `/course-details/${course._id}?role=student&source=browse`
                   : `/course-details/${course._id}`
               }

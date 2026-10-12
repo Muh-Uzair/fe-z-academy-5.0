@@ -10,8 +10,8 @@ http://localhost:8000
 
 ## Roles and access
 
-| Route | Allowed caller |
-| --- | --- |
+| Route   | Allowed caller             |
+| ------- | -------------------------- |
 | `GET /` | No authentication required |
 
 ## API 1 — Get platform stats

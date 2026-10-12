@@ -20,12 +20,12 @@ Base path: `/api/v1/cards`
 
 ## Roles and access
 
-| Route | Allowed caller | Visibility |
-| :--- | :--- | :--- |
-| `GET /` | Student only | List the calling student's saved cards. |
-| `POST /setup-intent` | Student only | Creates a Stripe SetupIntent for securely saving a card via Stripe Elements. |
-| `PATCH /:id/default` | Student only | Sets the specified card as the student's default payment method. |
-| `DELETE /:id` | Student only | Removes/detaches the specified card from the student's account. |
+| Route                | Allowed caller | Visibility                                                                   |
+| :------------------- | :------------- | :--------------------------------------------------------------------------- |
+| `GET /`              | Student only   | List the calling student's saved cards.                                      |
+| `POST /setup-intent` | Student only   | Creates a Stripe SetupIntent for securely saving a card via Stripe Elements. |
+| `PATCH /:id/default` | Student only   | Sets the specified card as the student's default payment method.             |
+| `DELETE /:id`        | Student only   | Removes/detaches the specified card from the student's account.              |
 
 A caller who is not authenticated receives `401`. A caller with a role other than `student` (e.g. `instructor`, `admin`) receives `403`.
 
@@ -50,18 +50,18 @@ Each card object returned by `GET /api/v1/cards`:
 }
 ```
 
-| Field | Type | Description |
-| :--- | :--- | :--- |
-| `id` | `string` | The Stripe PaymentMethod ID (starts with `pm_`). Use this ID for default and delete endpoints. |
-| `brand` | `string` | Brand identifier (`"visa"`, `"mastercard"`, `"amex"`, `"discover"`, `"jcb"`, etc.). |
-| `last4` | `string` | Last 4 digits of the card number. |
-| `expMonth` | `number` | Expiration month (1–12). |
-| `expYear` | `number` | Four-digit expiration year (e.g. 2028). |
-| `isDefault` | `boolean` | `true` if this card is currently the primary default card. |
-| `cardholderName` | `string \| null` | Name on the card collected during setup. |
-| `funding` | `string \| null` | Card funding type (`"credit"`, `"debit"`, `"prepaid"`, or `null`). |
-| `country` | `string \| null` | Two-letter country code of the issuing bank. |
-| `createdAt` | `string` | ISO 8601 timestamp when the card was attached. |
+| Field            | Type             | Description                                                                                    |
+| :--------------- | :--------------- | :--------------------------------------------------------------------------------------------- |
+| `id`             | `string`         | The Stripe PaymentMethod ID (starts with `pm_`). Use this ID for default and delete endpoints. |
+| `brand`          | `string`         | Brand identifier (`"visa"`, `"mastercard"`, `"amex"`, `"discover"`, `"jcb"`, etc.).            |
+| `last4`          | `string`         | Last 4 digits of the card number.                                                              |
+| `expMonth`       | `number`         | Expiration month (1–12).                                                                       |
+| `expYear`        | `number`         | Four-digit expiration year (e.g. 2028).                                                        |
+| `isDefault`      | `boolean`        | `true` if this card is currently the primary default card.                                     |
+| `cardholderName` | `string \| null` | Name on the card collected during setup.                                                       |
+| `funding`        | `string \| null` | Card funding type (`"credit"`, `"debit"`, `"prepaid"`, or `null`).                             |
+| `country`        | `string \| null` | Two-letter country code of the issuing bank.                                                   |
+| `createdAt`      | `string`         | ISO 8601 timestamp when the card was attached.                                                 |
 
 ---
 
@@ -104,10 +104,10 @@ HTTP `200`
 
 ### Possible errors
 
-| HTTP status | Message | When |
-| :--- | :--- | :--- |
-| `401` | Unauthorized | Missing or expired auth token. |
-| `403` | `You do not have permission to perform this action` | Caller is not a student. |
+| HTTP status | Message                                             | When                           |
+| :---------- | :-------------------------------------------------- | :----------------------------- |
+| `401`       | Unauthorized                                        | Missing or expired auth token. |
+| `403`       | `You do not have permission to perform this action` | Caller is not a student.       |
 
 ---
 
@@ -171,9 +171,9 @@ Sets the specified card as the student's primary/default payment method.
 
 ### URL params
 
-| Param | Type | Description |
-| :--- | :--- | :--- |
-| `id` | `string` | The Stripe payment method ID (e.g. `pm_1PqABC...`). |
+| Param | Type     | Description                                         |
+| :---- | :------- | :-------------------------------------------------- |
+| `id`  | `string` | The Stripe payment method ID (e.g. `pm_1PqABC...`). |
 
 ### Request
 
@@ -193,11 +193,11 @@ HTTP `200`
 
 ### Possible errors
 
-| HTTP status | Message | When |
-| :--- | :--- | :--- |
-| `400` | `Card id is required` | Param missing or empty. |
-| `403` | `You do not have permission to modify this card` | The payment method does not belong to the calling student. |
-| `404` | `Payment card not found` | The card ID does not exist in Stripe. |
+| HTTP status | Message                                          | When                                                       |
+| :---------- | :----------------------------------------------- | :--------------------------------------------------------- |
+| `400`       | `Card id is required`                            | Param missing or empty.                                    |
+| `403`       | `You do not have permission to modify this card` | The payment method does not belong to the calling student. |
+| `404`       | `Payment card not found`                         | The card ID does not exist in Stripe.                      |
 
 ---
 
@@ -209,9 +209,9 @@ Removes/detaches the card from the student's Stripe customer account. If this ca
 
 ### URL params
 
-| Param | Type | Description |
-| :--- | :--- | :--- |
-| `id` | `string` | The Stripe payment method ID (e.g. `pm_1PqABC...`). |
+| Param | Type     | Description                                         |
+| :---- | :------- | :-------------------------------------------------- |
+| `id`  | `string` | The Stripe payment method ID (e.g. `pm_1PqABC...`). |
 
 ### Request
 
@@ -231,17 +231,18 @@ HTTP `200`
 
 ### Possible errors
 
-| HTTP status | Message | When |
-| :--- | :--- | :--- |
-| `400` | `Card id is required` | Param missing or empty. |
-| `403` | `You do not have permission to delete this card` | The payment method does not belong to the calling student. |
-| `404` | `Payment card not found` | The card ID does not exist in Stripe. |
+| HTTP status | Message                                          | When                                                       |
+| :---------- | :----------------------------------------------- | :--------------------------------------------------------- |
+| `400`       | `Card id is required`                            | Param missing or empty.                                    |
+| `403`       | `You do not have permission to delete this card` | The payment method does not belong to the calling student. |
+| `404`       | `Payment card not found`                         | The card ID does not exist in Stripe.                      |
 
 ---
 
 ## Frontend Types
 
 Copy [`src/response-types/cardResponseTypes.ts`](../src/response-types/cardResponseTypes.ts) directly into your frontend project. It exports:
+
 - `SavedCard`
 - `GetSavedCardsResponseData`
 - `GetSavedCardsResponse`

@@ -1,5 +1,6 @@
 import UserProfile from "@/features/auth-and-user-management/UserProfile";
 import { getUserDetailsQuery } from "@/services/user/queries";
+import { getMeQuery } from "@/services/auth/queries";
 import {
   getInstructorCoursesQuery,
   getStudentCoursesQuery,
@@ -26,7 +27,10 @@ const UserProfilePage = async ({
       ? role
       : "student";
 
-  const userRes = await getUserDetailsQuery(id, queryRole).catch(() => null);
+  const [meResponse, userRes] = await Promise.all([
+    getMeQuery(),
+    getUserDetailsQuery(id, queryRole).catch(() => null),
+  ]);
 
   if (!userRes || userRes.status !== "success") {
     notFound();
@@ -63,6 +67,7 @@ const UserProfilePage = async ({
 
   return (
     <UserProfile
+      currentUser={meResponse!.data.user}
       user={user}
       courses={courses}
       pagination={pagination}

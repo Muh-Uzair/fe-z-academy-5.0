@@ -1,10 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 
 import AppButton from "@/components/AppButton";
-import AppLoadingScreen from "@/components/AppLoadingScreen";
 import PageFlexCol from "@/components/PageFlexCol";
 import PageHeader from "@/components/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,7 +23,6 @@ import type {
 } from "@/response-types/courseResponseTypes";
 import { getVideoDurationInMinutes } from "@/features/course-management/courseHelpers";
 import { getInstructorOnboardingLinkAction } from "@/services/user/actions";
-import type { AuthUser } from "@/response-types/authResponseTypes";
 
 // Both upload-URL responses share this shape: an S3 POST policy plus the
 // object key to send back when creating/updating the course.
@@ -52,12 +49,14 @@ async function uploadFileToS3(
 }
 
 type CreateNewCoursesProps = {
+  isStripeOnboardingComplete: boolean;
   categories: Category[];
   categoriesPagination: Pagination;
   categorySearch: string;
 };
 
 const CreateNewCourses = ({
+  isStripeOnboardingComplete,
   categories,
   categoriesPagination,
   categorySearch,
@@ -66,28 +65,6 @@ const CreateNewCourses = ({
   const { run: runCreateAction, isLoading: isCreating } = useClientAction();
   const { run: runOnboardingAction, isLoading: isOnboarding } =
     useClientAction();
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [isUserLoaded, setIsUserLoaded] = useState(false);
-
-  useEffect(() => {
-    const loadStoredUser = () => {
-      const storedUser = window.localStorage.getItem("currentUser");
-
-      if (storedUser) {
-        try {
-          setUser(JSON.parse(storedUser) as AuthUser);
-        } catch {
-          window.localStorage.removeItem("currentUser");
-        }
-      }
-
-      setIsUserLoaded(true);
-    };
-
-    const timeoutId = window.setTimeout(loadStoredUser, 0);
-
-    return () => window.clearTimeout(timeoutId);
-  }, []);
 
   const handleStripeOnboarding = async () => {
     const response = await runOnboardingAction(() =>
@@ -194,11 +171,7 @@ const CreateNewCourses = ({
     return false;
   };
 
-  if (!isUserLoaded) {
-    return <AppLoadingScreen />;
-  }
-
-  if (user?.role === "instructor" && !user.stripeOnboardingComplete) {
+  if (!isStripeOnboardingComplete) {
     return (
       <PageFlexCol>
         <PageHeader

@@ -4,7 +4,8 @@ import { useEffect } from "react";
 import type { AuthUser } from "@/response-types/authResponseTypes";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
+import { isRedirectError } from "next/dist/client/components/redirect-error";
 import {
   Bell,
   BookOpen,
@@ -283,7 +284,6 @@ const isRouteActive = (pathname: string, href: string) =>
 
 const AppLayoutShell = ({ role, user, children }: AppLayoutShellProps) => {
   const pathname = usePathname();
-  const router = useRouter();
   const navigation = navigationByRole[role];
   const meta = roleMeta[role];
   const { run: runSignoutAction, isLoading: isSignoutLoading } =
@@ -296,11 +296,16 @@ const AppLayoutShell = ({ role, user, children }: AppLayoutShellProps) => {
   }, [user]);
 
   const handleSignout = async () => {
-    const response = await runSignoutAction(() => signoutAction());
-
-    if (response && response.status === "success") {
-      localStorage.removeItem("currentUser");
-      router.push("/signin");
+    try {
+      await runSignoutAction(() => signoutAction());
+    } catch (error) {
+      // On success signoutAction redirects to /signin, and Next then rejects
+      // the action promise with a redirect error instead of resolving it —
+      // so this is the success path. Rethrow so Next completes the redirect.
+      if (isRedirectError(error)) {
+        localStorage.removeItem("currentUser");
+      }
+      throw error;
     }
   };
 
