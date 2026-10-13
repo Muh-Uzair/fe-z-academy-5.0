@@ -14,9 +14,9 @@ Base path: `/api/v1/transactions`
 
 ## Roles and access
 
-| Route      | Allowed caller         | Visibility                                                                                                                                    |
-| ---------- | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET /`    | Any authenticated user | Admin sees every transaction; Instructor sees only transactions for their own courses; Student sees only their own transactions.              |
+| Route | Allowed caller | Visibility |
+| --- | --- | --- |
+| `GET /` | Any authenticated user | Admin sees every transaction; Instructor sees only transactions for their own courses; Student sees only their own transactions. |
 | `GET /:id` | Any authenticated user | Admin can view any transaction; Instructor/Student can only view a transaction where they are the instructor/student on it (`403` otherwise). |
 
 Unlike other routers, there is no `restrictTo(...)` role gate on these routes — every role is allowed to call them, and the actual scoping/ownership check happens inside the service layer.
@@ -92,18 +92,18 @@ Returns a paginated, sortable, searchable, filterable list of transactions, scop
 
 ### Query parameters
 
-| Param           | Type                                                                   | Default     | Notes                                            |
-| --------------- | ---------------------------------------------------------------------- | ----------- | ------------------------------------------------ |
-| `student`       | string                                                                 | —           | Filter by student `_id`.                         |
-| `course`        | string                                                                 | —           | Filter by course `_id`.                          |
-| `instructor`    | string                                                                 | —           | Filter by instructor `_id`.                      |
-| `paymentStatus` | `"pending" \| "paid" \| "failed" \| "refund_processing" \| "refunded"` | —           | Filter by payment status.                        |
-| `search`        | string                                                                 | —           | Case-insensitive search against `transactionId`. |
-| `projection`    | string                                                                 | —           | Comma-separated Mongo field projection.          |
-| `page`          | number (≥1)                                                            | `1`         |                                                  |
-| `limit`         | number (≥1)                                                            | `10`        |                                                  |
-| `sortBy`        | string                                                                 | `createdAt` |                                                  |
-| `sortOrder`     | `"asc" \| "desc"`                                                      | `desc`      |                                                  |
+| Param | Type | Default | Notes |
+| --- | --- | --- | --- |
+| `student` | string | — | Filter by student `_id`. |
+| `course` | string | — | Filter by course `_id`. |
+| `instructor` | string | — | Filter by instructor `_id`. |
+| `paymentStatus` | `"pending" \| "paid" \| "failed" \| "refund_processing" \| "refunded"` | — | Filter by payment status. |
+| `search` | string | — | Case-insensitive search against `transactionId`. |
+| `projection` | string | — | Comma-separated Mongo field projection. |
+| `page` | number (≥1) | `1` | |
+| `limit` | number (≥1) | `10` | |
+| `sortBy` | string | `createdAt` | |
+| `sortOrder` | `"asc" \| "desc"` | `desc` | |
 
 All params are optional and sent as query-string values (strings); `page`/`limit` are coerced to numbers server-side.
 
@@ -116,9 +116,7 @@ HTTP `200`
   "status": "success",
   "message": "Transactions fetched successfully",
   "data": {
-    "transactions": [
-      /* Transaction shape, see above */
-    ],
+    "transactions": [ /* Transaction shape, see above */ ],
     "pagination": {
       "page": 1,
       "limit": 10,
@@ -133,10 +131,10 @@ HTTP `200`
 
 ### Possible errors
 
-| HTTP status | Message                           | When                                            |
-| ----------- | --------------------------------- | ----------------------------------------------- |
-| 400         | `Validation failed`               | An invalid or undocumented query param is sent. |
-| 401         | _(see auth guide `/me` 401 rows)_ | Access-token cookie missing/invalid/expired.    |
+| HTTP status | Message | When |
+| --- | --- | --- |
+| 400 | `Validation failed` | An invalid or undocumented query param is sent. |
+| 401 | *(see auth guide `/me` 401 rows)* | Access-token cookie missing/invalid/expired. |
 
 ## API 2 — Get transaction details
 
@@ -144,9 +142,9 @@ HTTP `200`
 
 ### URL params
 
-| Param | Rules                                     |
-| ----- | ----------------------------------------- |
-| `id`  | Required, non-empty string (Mongo `_id`). |
+| Param | Rules |
+| --- | --- |
+| `id` | Required, non-empty string (Mongo `_id`). |
 
 ### Success response
 
@@ -157,20 +155,18 @@ HTTP `200`
   "status": "success",
   "message": "Transaction details fetched successfully",
   "data": {
-    "transaction": {
-      /* Transaction shape, see above */
-    }
+    "transaction": { /* Transaction shape, see above */ }
   }
 }
 ```
 
 ### Possible errors
 
-| HTTP status | Message                                                 | When                                                                    |
-| ----------- | ------------------------------------------------------- | ----------------------------------------------------------------------- |
-| 401         | _(see auth guide `/me` 401 rows)_                       | Access-token cookie missing/invalid/expired.                            |
-| 403         | `You do not have permission to access this transaction` | Caller is an Instructor/Student who is not a party to this transaction. |
-| 404         | `Transaction not found`                                 | No transaction exists with that `id`.                                   |
+| HTTP status | Message | When |
+| --- | --- | --- |
+| 401 | *(see auth guide `/me` 401 rows)* | Access-token cookie missing/invalid/expired. |
+| 403 | `You do not have permission to access this transaction` | Caller is an Instructor/Student who is not a party to this transaction. |
+| 404 | `Transaction not found` | No transaction exists with that `id`. |
 
 ## Frontend types
 

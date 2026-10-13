@@ -14,11 +14,11 @@ Base path: `/api/v1/enrollments`
 
 ## Roles and access
 
-| Route                 | Allowed caller         | Visibility                                                                                                                                   |
-| --------------------- | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET /`               | Any authenticated user | Admin sees every enrollment; Instructor sees only enrollments in their own courses; Student sees only their own enrollments.                 |
-| `GET /:id`            | Any authenticated user | Admin can view any enrollment; Instructor/Student can only view an enrollment where they are the instructor/student on it (`403` otherwise). |
-| `PATCH /:id/progress` | Any authenticated user | Only the enrolled **student** may update their own enrollment's progress (`403` otherwise, including for Admin/Instructor).                  |
+| Route | Allowed caller | Visibility |
+| --- | --- | --- |
+| `GET /` | Any authenticated user | Admin sees every enrollment; Instructor sees only enrollments in their own courses; Student sees only their own enrollments. |
+| `GET /:id` | Any authenticated user | Admin can view any enrollment; Instructor/Student can only view an enrollment where they are the instructor/student on it (`403` otherwise). |
+| `PATCH /:id/progress` | Any authenticated user | Only the enrolled **student** may update their own enrollment's progress (`403` otherwise, including for Admin/Instructor). |
 
 Unlike other routers, there is no `restrictTo(...)` role gate on these routes — every role is allowed to call them, and the actual scoping/ownership check happens inside the service layer.
 
@@ -108,20 +108,20 @@ Returns a paginated, sortable, filterable list of enrollments, scoped by the cal
 
 ### Query parameters
 
-| Param               | Type                | Default     | Notes                                                                                                                                                         |
-| ------------------- | ------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `student`           | string              | —           | Filter by student `_id`.                                                                                                                                      |
-| `course`            | string              | —           | Filter by course `_id`.                                                                                                                                       |
-| `instructor`        | string              | —           | Filter by instructor `_id`.                                                                                                                                   |
-| `transaction`       | string              | —           | Filter by transaction `_id`.                                                                                                                                  |
-| `watchedCompletely` | `"true" \| "false"` | —           | Filter by completion state.                                                                                                                                   |
-| `continueWatching`  | `"true" \| "false"` | —           | For students, when `true`, return only courses that have been started (`watchPercentage > 0`) but are not complete. Ignored for Admin and Instructor callers. |
-| `certificateIssued` | `"true" \| "false"` | —           | Filter by certificate-issued state.                                                                                                                           |
-| `projection`        | string              | —           | Comma-separated Mongo field projection.                                                                                                                       |
-| `page`              | number (≥1)         | `1`         |                                                                                                                                                               |
-| `limit`             | number (≥1)         | `10`        |                                                                                                                                                               |
-| `sortBy`            | string              | `createdAt` |                                                                                                                                                               |
-| `sortOrder`         | `"asc" \| "desc"`   | `desc`      |                                                                                                                                                               |
+| Param | Type | Default | Notes |
+| --- | --- | --- | --- |
+| `student` | string | — | Filter by student `_id`. |
+| `course` | string | — | Filter by course `_id`. |
+| `instructor` | string | — | Filter by instructor `_id`. |
+| `transaction` | string | — | Filter by transaction `_id`. |
+| `watchedCompletely` | `"true" \| "false"` | — | Filter by completion state. |
+| `continueWatching` | `"true" \| "false"` | — | For students, when `true`, return only courses that have been started (`watchPercentage > 0`) but are not complete. Ignored for Admin and Instructor callers. |
+| `certificateIssued` | `"true" \| "false"` | — | Filter by certificate-issued state. |
+| `projection` | string | — | Comma-separated Mongo field projection. |
+| `page` | number (≥1) | `1` | |
+| `limit` | number (≥1) | `10` | |
+| `sortBy` | string | `createdAt` | |
+| `sortOrder` | `"asc" \| "desc"` | `desc` | |
 
 All params are optional and sent as query-string values (strings); `page`/`limit` are coerced to numbers server-side. There is no `search` param on this endpoint.
 
@@ -143,9 +143,7 @@ HTTP `200`
   "status": "success",
   "message": "Enrollments fetched successfully",
   "data": {
-    "enrollments": [
-      /* Enrollment shape, see above */
-    ],
+    "enrollments": [ /* Enrollment shape, see above */ ],
     "pagination": {
       "page": 1,
       "limit": 10,
@@ -160,10 +158,10 @@ HTTP `200`
 
 ### Possible errors
 
-| HTTP status | Message                           | When                                            |
-| ----------- | --------------------------------- | ----------------------------------------------- |
-| 400         | `Validation failed`               | An invalid or undocumented query param is sent. |
-| 401         | _(see auth guide `/me` 401 rows)_ | Access-token cookie missing/invalid/expired.    |
+| HTTP status | Message | When |
+| --- | --- | --- |
+| 400 | `Validation failed` | An invalid or undocumented query param is sent. |
+| 401 | *(see auth guide `/me` 401 rows)* | Access-token cookie missing/invalid/expired. |
 
 ## API 2 — Get enrollment details
 
@@ -171,9 +169,9 @@ HTTP `200`
 
 ### URL params
 
-| Param | Rules                                     |
-| ----- | ----------------------------------------- |
-| `id`  | Required, non-empty string (Mongo `_id`). |
+| Param | Rules |
+| --- | --- |
+| `id` | Required, non-empty string (Mongo `_id`). |
 
 ### Success response
 
@@ -184,20 +182,18 @@ HTTP `200`
   "status": "success",
   "message": "Enrollment details fetched successfully",
   "data": {
-    "enrollment": {
-      /* Enrollment shape, see above */
-    }
+    "enrollment": { /* Enrollment shape, see above */ }
   }
 }
 ```
 
 ### Possible errors
 
-| HTTP status | Message                                                | When                                                                   |
-| ----------- | ------------------------------------------------------ | ---------------------------------------------------------------------- |
-| 401         | _(see auth guide `/me` 401 rows)_                      | Access-token cookie missing/invalid/expired.                           |
-| 403         | `You do not have permission to access this enrollment` | Caller is an Instructor/Student who is not a party to this enrollment. |
-| 404         | `Enrollment not found`                                 | No enrollment exists with that `id`.                                   |
+| HTTP status | Message | When |
+| --- | --- | --- |
+| 401 | *(see auth guide `/me` 401 rows)* | Access-token cookie missing/invalid/expired. |
+| 403 | `You do not have permission to access this enrollment` | Caller is an Instructor/Student who is not a party to this enrollment. |
+| 404 | `Enrollment not found` | No enrollment exists with that `id`. |
 
 ## API 3 — Update watch progress
 
@@ -206,21 +202,20 @@ HTTP `200`
 Reports how far into the course video the student has played, e.g. from the video player's `timeupdate`/`pause`/`ended` handlers or an `onStop` heartbeat. The backend tracks the **furthest position ever reached** — sending a smaller `lastPositionInSeconds` (e.g. after rewinding to rewatch a part) never lowers `watchPercentage`, and a position beyond the course's duration is capped at 100%.
 
 Side effects on every call:
-
 - `totalDurationWatchedInMinutes` and `watchPercentage` are recomputed from the furthest position reached.
 - The first time `watchPercentage` crosses 95%, `watchedCompletely` becomes `true` and `watchedCompletelyAt` is set (once — it is never re-set on later calls).
 - This enrollment's `mostRecentlySeen` becomes `true`, and it is cleared to `false` on every other enrollment belonging to the same student — so at most one of a student's enrollments is ever "most recently seen".
 
 ### URL params
 
-| Param | Rules                                     |
-| ----- | ----------------------------------------- |
-| `id`  | Required, non-empty string (Mongo `_id`). |
+| Param | Rules |
+| --- | --- |
+| `id` | Required, non-empty string (Mongo `_id`). |
 
 ### Request body
 
-| Field                   | Type   | Rules                                                               |
-| ----------------------- | ------ | ------------------------------------------------------------------- |
+| Field | Type | Rules |
+| --- | --- | --- |
 | `lastPositionInSeconds` | number | Required, `>= 0`. The video's current playback position in seconds. |
 
 ```json
@@ -263,14 +258,14 @@ Note this response's `enrollment` is the **raw** document — `student`/`course`
 
 ### Possible errors
 
-| HTTP status | Message                                                           | When                                                                                         |
-| ----------- | ----------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| 400         | `Validation failed`                                               | `lastPositionInSeconds` is missing, negative, non-numeric, or an undocumented field is sent. |
-| 400         | `This course has no duration set, so progress cannot be tracked`  | The enrolled course's `totalDurationInMinutes` is `0`.                                       |
-| 401         | _(see auth guide `/me` 401 rows)_                                 | Access-token cookie missing/invalid/expired.                                                 |
-| 403         | `You do not have permission to update this enrollment's progress` | Caller is not the student on this enrollment (includes Admin/Instructor).                    |
-| 404         | `Enrollment not found`                                            | No enrollment exists with that `id`.                                                         |
-| 404         | `Course not found`                                                | The enrollment's course was deleted.                                                         |
+| HTTP status | Message | When |
+| --- | --- | --- |
+| 400 | `Validation failed` | `lastPositionInSeconds` is missing, negative, non-numeric, or an undocumented field is sent. |
+| 400 | `This course has no duration set, so progress cannot be tracked` | The enrolled course's `totalDurationInMinutes` is `0`. |
+| 401 | *(see auth guide `/me` 401 rows)* | Access-token cookie missing/invalid/expired. |
+| 403 | `You do not have permission to update this enrollment's progress` | Caller is not the student on this enrollment (includes Admin/Instructor). |
+| 404 | `Enrollment not found` | No enrollment exists with that `id`. |
+| 404 | `Course not found` | The enrollment's course was deleted. |
 
 ## Frontend types
 

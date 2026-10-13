@@ -15,15 +15,15 @@ Base path: `/api/v1/categories`
 
 ## Roles and access
 
-| Route                | Allowed caller            |
-| -------------------- | ------------------------- |
-| `POST /upload-image` | Admin only                |
-| `POST /`             | Admin only                |
-| `GET /`              | Public (no auth required) |
-| `GET /top`           | Public (no auth required) |
-| `GET /:id`           | Public (no auth required) |
-| `PATCH /:id`         | Admin only                |
-| `DELETE /:id`        | Admin only                |
+| Route | Allowed caller |
+| --- | --- |
+| `POST /upload-image` | Admin only |
+| `POST /` | Admin only |
+| `GET /` | Public (no auth required) |
+| `GET /top` | Public (no auth required) |
+| `GET /:id` | Public (no auth required) |
+| `PATCH /:id` | Admin only |
+| `DELETE /:id` | Admin only |
 
 A caller with the wrong role receives `403 You do not have permission to perform this action`. A missing/invalid/expired `accessToken` cookie receives the same `401` errors documented for `/auth/me`.
 
@@ -59,9 +59,9 @@ Admin only. Generates a presigned S3 POST policy for uploading a category image 
 }
 ```
 
-| Field      | Rules                                             |
-| ---------- | ------------------------------------------------- |
-| `fileName` | Required, non-empty string.                       |
+| Field | Rules |
+| --- | --- |
+| `fileName` | Required, non-empty string. |
 | `fileType` | Required, one of `"image/jpeg"` or `"image/png"`. |
 
 ### Success response
@@ -93,11 +93,11 @@ HTTP `200`
 
 ### Possible errors
 
-| HTTP status | Message                                             | When                                                               |
-| ----------- | --------------------------------------------------- | ------------------------------------------------------------------ |
-| 400         | `Validation failed`                                 | `fileName` missing, or `fileType` is not `image/jpeg`/`image/png`. |
-| 401         | _(see auth guide `/me` 401 rows)_                   | Access-token cookie missing/invalid/expired.                       |
-| 403         | `You do not have permission to perform this action` | Caller is not an admin.                                            |
+| HTTP status | Message | When |
+| --- | --- | --- |
+| 400 | `Validation failed` | `fileName` missing, or `fileType` is not `image/jpeg`/`image/png`. |
+| 401 | *(see auth guide `/me` 401 rows)* | Access-token cookie missing/invalid/expired. |
+| 403 | `You do not have permission to perform this action` | Caller is not an admin. |
 
 ## API 2 — Create category
 
@@ -115,11 +115,11 @@ Admin only. Creates a new category. `imageKey` must come from API 1.
 }
 ```
 
-| Field         | Rules                                                  |
-| ------------- | ------------------------------------------------------ |
-| `name`        | Required, trimmed, 2–50 characters. Must be unique.    |
-| `imageKey`    | Required, non-empty string (S3 object key from API 1). |
-| `description` | Required, trimmed, 10–500 characters.                  |
+| Field | Rules |
+| --- | --- |
+| `name` | Required, trimmed, 2–50 characters. Must be unique. |
+| `imageKey` | Required, non-empty string (S3 object key from API 1). |
+| `description` | Required, trimmed, 10–500 characters. |
 
 ### Success response
 
@@ -144,12 +144,12 @@ HTTP `201`
 
 ### Possible errors
 
-| HTTP status | Message                                             | When                                                                          |
-| ----------- | --------------------------------------------------- | ----------------------------------------------------------------------------- |
-| 400         | `Validation failed`                                 | A field is missing, out of length range, or an undocumented field is sent.    |
-| 401         | _(see auth guide `/me` 401 rows)_                   | Access-token cookie missing/invalid/expired.                                  |
-| 403         | `You do not have permission to perform this action` | Caller is not an admin.                                                       |
-| 500         | `Something went wrong. Please try again later.`     | `name` collides with an existing category or another unexpected error occurs. |
+| HTTP status | Message | When |
+| --- | --- | --- |
+| 400 | `Validation failed` | A field is missing, out of length range, or an undocumented field is sent. |
+| 401 | *(see auth guide `/me` 401 rows)* | Access-token cookie missing/invalid/expired. |
+| 403 | `You do not have permission to perform this action` | Caller is not an admin. |
+| 500 | `Something went wrong. Please try again later.` | `name` collides with an existing category or another unexpected error occurs. |
 
 ## API 3 — List categories
 
@@ -159,14 +159,14 @@ Public. Returns a paginated, sortable, searchable list of categories.
 
 ### Query parameters
 
-| Param        | Type              | Default     | Notes                                   |
-| ------------ | ----------------- | ----------- | --------------------------------------- |
-| `search`     | string            | —           | Case-insensitive search against `name`. |
-| `projection` | string            | —           | Comma-separated Mongo field projection. |
-| `page`       | number (≥1)       | `1`         |                                         |
-| `limit`      | number (≥1)       | `10`        |                                         |
-| `sortBy`     | string            | `createdAt` |                                         |
-| `sortOrder`  | `"asc" \| "desc"` | `desc`      |                                         |
+| Param | Type | Default | Notes |
+| --- | --- | --- | --- |
+| `search` | string | — | Case-insensitive search against `name`. |
+| `projection` | string | — | Comma-separated Mongo field projection. |
+| `page` | number (≥1) | `1` | |
+| `limit` | number (≥1) | `10` | |
+| `sortBy` | string | `createdAt` | |
+| `sortOrder` | `"asc" \| "desc"` | `desc` | |
 
 All params are optional and sent as query-string values (strings); `page`/`limit` are coerced to numbers server-side.
 
@@ -203,9 +203,9 @@ HTTP `200`
 
 ### Possible errors
 
-| HTTP status | Message             | When                                            |
-| ----------- | ------------------- | ----------------------------------------------- |
-| 400         | `Validation failed` | An invalid or undocumented query param is sent. |
+| HTTP status | Message | When |
+| --- | --- | --- |
+| 400 | `Validation failed` | An invalid or undocumented query param is sent. |
 
 ## API 4 — Get top categories
 
@@ -245,9 +245,9 @@ Public. Fetches a single category by id.
 
 ### URL params
 
-| Param | Rules                                     |
-| ----- | ----------------------------------------- |
-| `id`  | Required, non-empty string (Mongo `_id`). |
+| Param | Rules |
+| --- | --- |
+| `id` | Required, non-empty string (Mongo `_id`). |
 
 ### Success response
 
@@ -272,10 +272,10 @@ HTTP `200`
 
 ### Possible errors
 
-| HTTP status | Message              | When                               |
-| ----------- | -------------------- | ---------------------------------- |
-| 400         | `Validation failed`  | `id` is missing.                   |
-| 404         | `Category not found` | No category exists with that `id`. |
+| HTTP status | Message | When |
+| --- | --- | --- |
+| 400 | `Validation failed` | `id` is missing. |
+| 404 | `Category not found` | No category exists with that `id`. |
 
 ## API 6 — Update category
 
@@ -285,9 +285,9 @@ Admin only. All fields are optional, but at least one must be sent. Blocked if a
 
 ### URL params
 
-| Param | Rules                       |
-| ----- | --------------------------- |
-| `id`  | Required, non-empty string. |
+| Param | Rules |
+| --- | --- |
+| `id` | Required, non-empty string. |
 
 ### Request body
 
@@ -298,11 +298,11 @@ Admin only. All fields are optional, but at least one must be sent. Blocked if a
 }
 ```
 
-| Field         | Rules                                                  |
-| ------------- | ------------------------------------------------------ |
-| `name`        | Optional, trimmed, 2–50 characters.                    |
-| `imageKey`    | Optional, non-empty string (S3 object key from API 1). |
-| `description` | Optional, trimmed, 10–500 characters.                  |
+| Field | Rules |
+| --- | --- |
+| `name` | Optional, trimmed, 2–50 characters. |
+| `imageKey` | Optional, non-empty string (S3 object key from API 1). |
+| `description` | Optional, trimmed, 10–500 characters. |
 
 ### Success response
 
@@ -327,13 +327,13 @@ HTTP `200`
 
 ### Possible errors
 
-| HTTP status | Message                                                    | When                                                                            |
-| ----------- | ---------------------------------------------------------- | ------------------------------------------------------------------------------- |
-| 400         | `Validation failed`                                        | Body is empty, a field fails its shape rules, or an undocumented field is sent. |
-| 400         | `Cannot update a category that has courses assigned to it` | One or more courses still reference this category.                              |
-| 401         | _(see auth guide `/me` 401 rows)_                          | Access-token cookie missing/invalid/expired.                                    |
-| 403         | `You do not have permission to perform this action`        | Caller is not an admin.                                                         |
-| 404         | `Category not found`                                       | No category exists with that `id`.                                              |
+| HTTP status | Message | When |
+| --- | --- | --- |
+| 400 | `Validation failed` | Body is empty, a field fails its shape rules, or an undocumented field is sent. |
+| 400 | `Cannot update a category that has courses assigned to it` | One or more courses still reference this category. |
+| 401 | *(see auth guide `/me` 401 rows)* | Access-token cookie missing/invalid/expired. |
+| 403 | `You do not have permission to perform this action` | Caller is not an admin. |
+| 404 | `Category not found` | No category exists with that `id`. |
 
 ## API 7 — Delete category
 
@@ -343,9 +343,9 @@ Admin only. Deletes the category and its S3 image. Blocked if any course still r
 
 ### URL params
 
-| Param | Rules                       |
-| ----- | --------------------------- |
-| `id`  | Required, non-empty string. |
+| Param | Rules |
+| --- | --- |
+| `id` | Required, non-empty string. |
 
 ### Success response
 
@@ -361,12 +361,12 @@ HTTP `200`
 
 ### Possible errors
 
-| HTTP status | Message                                                    | When                                               |
-| ----------- | ---------------------------------------------------------- | -------------------------------------------------- |
-| 400         | `Cannot delete a category that has courses assigned to it` | One or more courses still reference this category. |
-| 401         | _(see auth guide `/me` 401 rows)_                          | Access-token cookie missing/invalid/expired.       |
-| 403         | `You do not have permission to perform this action`        | Caller is not an admin.                            |
-| 404         | `Category not found`                                       | No category exists with that `id`.                 |
+| HTTP status | Message | When |
+| --- | --- | --- |
+| 400 | `Cannot delete a category that has courses assigned to it` | One or more courses still reference this category. |
+| 401 | *(see auth guide `/me` 401 rows)* | Access-token cookie missing/invalid/expired. |
+| 403 | `You do not have permission to perform this action` | Caller is not an admin. |
+| 404 | `Category not found` | No category exists with that `id`. |
 
 ## Frontend types
 

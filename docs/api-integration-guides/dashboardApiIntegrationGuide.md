@@ -14,21 +14,21 @@ Base path: `/api/v1/dashboard`
 
 ## Period filter
 
-| Value   | Date range    |
-| ------- | ------------- |
-| `week`  | Last 7 days   |
-| `month` | Last 30 days  |
-| `year`  | Last 365 days |
+| Value | Date range |
+| --- | --- |
+| `week` | Last 7 days |
+| `month` | Last 30 days |
+| `year` | Last 365 days |
 
 All period-sensitive metrics are computed against this date window. The only exception is `recentUsers` on the admin dashboard — those are the 5 most recently joined users across all time and are not period-filtered.
 
 ## Roles and access
 
-| Route             | Allowed role | Returns `403` for       |
-| ----------------- | ------------ | ----------------------- |
-| `GET /admin`      | `admin`      | `instructor`, `student` |
-| `GET /instructor` | `instructor` | `admin`, `student`      |
-| `GET /student`    | `student`    | `admin`, `instructor`   |
+| Route | Allowed role | Returns `403` for |
+| --- | --- | --- |
+| `GET /admin` | `admin` | `instructor`, `student` |
+| `GET /instructor` | `instructor` | `admin`, `student` |
+| `GET /student` | `student` | `admin`, `instructor` |
 
 A missing/invalid/expired `accessToken` cookie returns `401` (see auth guide).
 
@@ -40,9 +40,9 @@ A missing/invalid/expired `accessToken` cookie returns `401` (see auth guide).
 
 ### Query parameters
 
-| Param    | Type                          | Required | Notes                            |
-| -------- | ----------------------------- | -------- | -------------------------------- |
-| `period` | `"week" \| "month" \| "year"` | ✅ Yes   | The time window for all metrics. |
+| Param | Type | Required | Notes |
+| --- | --- | --- | --- |
+| `period` | `"week" \| "month" \| "year"` | ✅ Yes | The time window for all metrics. |
 
 ### Success response
 
@@ -106,7 +106,6 @@ HTTP `200`
 All keys are always present even if the value is `0`.
 
 **`period=week`** — one key per day of the week:
-
 ```json
 {
   "Sunday": 0,
@@ -120,7 +119,6 @@ All keys are always present even if the value is `0`.
 ```
 
 **`period=month`** — one key per week bucket (based on day-of-month):
-
 ```json
 {
   "Week 1": 500,
@@ -131,7 +129,6 @@ All keys are always present even if the value is `0`.
 ```
 
 **`period=year`** — one key per calendar month:
-
 ```json
 {
   "January": 1000,
@@ -151,13 +148,13 @@ All keys are always present even if the value is `0`.
 
 ### `stats` field details
 
-| Field              | Source                                                                | Period-filtered? |
-| ------------------ | --------------------------------------------------------------------- | ---------------- |
-| `totalRevenue`     | Sum of `amountPaid` on `paid` transactions                            | ✅ Yes           |
-| `adminCommission`  | Sum of `adminCommission` on `paid` transactions                       | ✅ Yes           |
-| `totalStudents`    | Count of users with `role=student` registered in period               | ✅ Yes           |
-| `totalInstructors` | Count of users with `role=instructor` registered in period            | ✅ Yes           |
-| `totalCourses`     | Count of courses created in period, regardless of verification status | ✅ Yes           |
+| Field | Source | Period-filtered? |
+| --- | --- | --- |
+| `totalRevenue` | Sum of `amountPaid` on `paid` transactions | ✅ Yes |
+| `adminCommission` | Sum of `adminCommission` on `paid` transactions | ✅ Yes |
+| `totalStudents` | Count of users with `role=student` registered in period | ✅ Yes |
+| `totalInstructors` | Count of users with `role=instructor` registered in period | ✅ Yes |
+| `totalCourses` | Count of courses created in period, regardless of verification status | ✅ Yes |
 
 ### `topPerformingCourses` details
 
@@ -173,11 +170,11 @@ All keys are always present even if the value is `0`.
 
 ### Possible errors
 
-| HTTP status | Message                                             | When                                                     |
-| ----------- | --------------------------------------------------- | -------------------------------------------------------- |
-| `400`       | `Validation failed`                                 | `period` is missing, invalid, or an extra param is sent. |
-| `401`       | _(see auth guide)_                                  | Access-token cookie missing/invalid/expired.             |
-| `403`       | `You do not have permission to perform this action` | Non-admin role calling this endpoint.                    |
+| HTTP status | Message | When |
+| --- | --- | --- |
+| `400` | `Validation failed` | `period` is missing, invalid, or an extra param is sent. |
+| `401` | *(see auth guide)* | Access-token cookie missing/invalid/expired. |
+| `403` | `You do not have permission to perform this action` | Non-admin role calling this endpoint. |
 
 ---
 
@@ -187,9 +184,9 @@ All keys are always present even if the value is `0`.
 
 ### Query parameters
 
-| Param    | Type                          | Required | Notes                                        |
-| -------- | ----------------------------- | -------- | -------------------------------------------- |
-| `period` | `"week" \| "month" \| "year"` | ✅ Yes   | The time window for period-filtered metrics. |
+| Param | Type | Required | Notes |
+| --- | --- | --- | --- |
+| `period` | `"week" \| "month" \| "year"` | ✅ Yes | The time window for period-filtered metrics. |
 
 ### Success response
 
@@ -255,13 +252,13 @@ HTTP `200`
 
 ### `stats` field details
 
-| Field             | Source                                                                | Period-filtered? |
-| ----------------- | --------------------------------------------------------------------- | ---------------- |
-| `totalRevenue`    | Sum of `instructorRevenue` on `paid` transactions for this instructor | ✅ Yes           |
-| `adminCommission` | Sum of `adminCommission` on `paid` transactions for this instructor   | ✅ Yes           |
-| `totalStudents`   | Distinct count of students enrolled in this instructor's courses      | ✅ Yes           |
-| `totalCourses`    | Total count of courses owned by this instructor                       | ❌ No (All-time) |
-| `averageRating`   | Combined average rating across all reviews of this instructor         | ❌ No (All-time) |
+| Field | Source | Period-filtered? |
+| --- | --- | --- |
+| `totalRevenue` | Sum of `instructorRevenue` on `paid` transactions for this instructor | ✅ Yes |
+| `adminCommission` | Sum of `adminCommission` on `paid` transactions for this instructor | ✅ Yes |
+| `totalStudents` | Distinct count of students enrolled in this instructor's courses | ✅ Yes |
+| `totalCourses` | Total count of courses owned by this instructor | ❌ No (All-time) |
+| `averageRating` | Combined average rating across all reviews of this instructor | ❌ No (All-time) |
 
 ### `revenueByCourse` details
 
@@ -272,7 +269,6 @@ HTTP `200`
 ### `enrollmentsTrend` details
 
 Follows the exact same period structure as `revenueTrend`:
-
 - **`period=week`**: `{ Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday }`
 - **`period=month`**: `{ "Week 1", "Week 2", "Week 3", "Week 4" }`
 - **`period=year`**: `{ January, February, ..., December }`
@@ -290,11 +286,11 @@ Follows the exact same period structure as `revenueTrend`:
 
 ### Possible errors
 
-| HTTP status | Message                                             | When                                         |
-| ----------- | --------------------------------------------------- | -------------------------------------------- |
-| `400`       | `Validation failed`                                 | `period` is missing or invalid.              |
-| `401`       | _(see auth guide)_                                  | Access-token cookie missing/invalid/expired. |
-| `403`       | `You do not have permission to perform this action` | Non-instructor role calling this endpoint.   |
+| HTTP status | Message | When |
+| --- | --- | --- |
+| `400` | `Validation failed` | `period` is missing or invalid. |
+| `401` | *(see auth guide)* | Access-token cookie missing/invalid/expired. |
+| `403` | `You do not have permission to perform this action` | Non-instructor role calling this endpoint. |
 
 ---
 
@@ -374,12 +370,12 @@ HTTP `200`
 
 ### `stats` field details
 
-| Field                         | Description                                               | Source                                            |
-| ----------------------------- | --------------------------------------------------------- | ------------------------------------------------- |
-| `enrolledCourses`             | Total courses enrolled by this student                    | Count of `Enrollment` documents                   |
-| `completedCourses`            | Courses where `watchedCompletely: true`                   | Count of completed `Enrollment` documents         |
-| `averageCompletionPercentage` | Average `watchPercentage` across all enrolled courses     | Calculated from `Enrollment.watchPercentage`      |
-| `totalWatchTime`              | Total watch time across all enrolled courses (in minutes) | Sum of `Enrollment.totalDurationWatchedInMinutes` |
+| Field | Description | Source |
+| --- | --- | --- |
+| `enrolledCourses` | Total courses enrolled by this student | Count of `Enrollment` documents |
+| `completedCourses` | Courses where `watchedCompletely: true` | Count of completed `Enrollment` documents |
+| `averageCompletionPercentage` | Average `watchPercentage` across all enrolled courses | Calculated from `Enrollment.watchPercentage` |
+| `totalWatchTime` | Total watch time across all enrolled courses (in minutes) | Sum of `Enrollment.totalDurationWatchedInMinutes` |
 
 ### `continueWatching` details
 
@@ -398,10 +394,10 @@ HTTP `200`
 
 ### Possible errors
 
-| HTTP status | Message                                             | When                                         |
-| ----------- | --------------------------------------------------- | -------------------------------------------- |
-| `401`       | _(see auth guide)_                                  | Access-token cookie missing/invalid/expired. |
-| `403`       | `You do not have permission to perform this action` | Non-student role calling this endpoint.      |
+| HTTP status | Message | When |
+| --- | --- | --- |
+| `401` | *(see auth guide)* | Access-token cookie missing/invalid/expired. |
+| `403` | `You do not have permission to perform this action` | Non-student role calling this endpoint. |
 
 ---
 
@@ -409,24 +405,25 @@ HTTP `200`
 
 Copy [`src/response-types/dashboardResponseTypes.ts`](../src/response-types/dashboardResponseTypes.ts) into the frontend project. It is a pure TypeScript file with no backend imports and exports:
 
-| Export                           | Description                                            |
-| -------------------------------- | ------------------------------------------------------ |
-| `DashboardPeriod`                | `"week" \| "month" \| "year"`                          |
-| `TrendRecord`                    | `Record<string, number>` — shape for trend breakdowns  |
-| `AdminDashboardStats`            | Admin stats card data                                  |
-| `TopPerformingCourse`            | Admin single course in top-5 list                      |
-| `AdminRecentUser`                | Admin single user in recent-users list                 |
-| `AdminDashboardData`             | Full `data` payload of admin dashboard                 |
-| `GetAdminDashboardResponse`      | Complete typed response union for admin dashboard      |
-| `InstructorDashboardStats`       | Instructor stats card data                             |
-| `InstructorRevenueByCourse`      | Course revenue slice for circular chart                |
-| `InstructorCoursePerformance`    | Single course row in course performance table          |
-| `InstructorRecentReview`         | Single review row in recent reviews table              |
-| `InstructorDashboardData`        | Full `data` payload of instructor dashboard            |
+| Export | Description |
+| --- | --- |
+| `DashboardPeriod` | `"week" \| "month" \| "year"` |
+| `TrendRecord` | `Record<string, number>` — shape for trend breakdowns |
+| `AdminDashboardStats` | Admin stats card data |
+| `TopPerformingCourse` | Admin single course in top-5 list |
+| `AdminRecentUser` | Admin single user in recent-users list |
+| `AdminDashboardData` | Full `data` payload of admin dashboard |
+| `GetAdminDashboardResponse` | Complete typed response union for admin dashboard |
+| `InstructorDashboardStats` | Instructor stats card data |
+| `InstructorRevenueByCourse` | Course revenue slice for circular chart |
+| `InstructorCoursePerformance` | Single course row in course performance table |
+| `InstructorRecentReview` | Single review row in recent reviews table |
+| `InstructorDashboardData` | Full `data` payload of instructor dashboard |
 | `GetInstructorDashboardResponse` | Complete typed response union for instructor dashboard |
-| `StudentDashboardStats`          | Student stats card data                                |
-| `StudentContinueWatchingItem`    | Single course in continue watching list                |
-| `StudentRecentTransaction`       | Single transaction in student recent transactions      |
-| `StudentRecentReview`            | Single review in student recent reviews                |
-| `StudentDashboardData`           | Full `data` payload of student dashboard               |
-| `GetStudentDashboardResponse`    | Complete typed response union for student dashboard    |
+| `StudentDashboardStats` | Student stats card data |
+| `StudentContinueWatchingItem` | Single course in continue watching list |
+| `StudentRecentTransaction` | Single transaction in student recent transactions |
+| `StudentRecentReview` | Single review in student recent reviews |
+| `StudentDashboardData` | Full `data` payload of student dashboard |
+| `GetStudentDashboardResponse` | Complete typed response union for student dashboard |
+
