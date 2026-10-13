@@ -113,10 +113,11 @@ const PagedSearchSelect = ({
             )}
           </div>
 
-          {pagination.totalPages > 1 ? (
+          {pagination ? (
             <div className="flex items-center justify-between gap-2 border-t p-2">
               <span className="text-xs text-muted-foreground">
-                Page {pagination.page} of {pagination.totalPages}
+                Page {pagination.totalPages === 0 ? 0 : pagination.page} of{" "}
+                {pagination.totalPages}
               </span>
               <div className="flex gap-2">
                 <Button
