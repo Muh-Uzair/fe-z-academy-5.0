@@ -262,7 +262,7 @@ const PaymentForm = ({
                     className={cn(
                       "flex-1 py-2 text-xs font-semibold rounded-md transition-all flex items-center justify-center gap-1.5",
                       paymentMode === "saved"
-                        ? "bg-background text-foreground shadow-xs"
+                        ? "bg-primary text-white shadow-xs"
                         : "text-muted-foreground hover:text-foreground",
                     )}
                   >
@@ -275,7 +275,7 @@ const PaymentForm = ({
                     className={cn(
                       "flex-1 py-2 text-xs font-semibold rounded-md transition-all flex items-center justify-center gap-1.5",
                       paymentMode === "new"
-                        ? "bg-background text-foreground shadow-xs"
+                        ? "bg-primary text-white shadow-xs"
                         : "text-muted-foreground hover:text-foreground",
                     )}
                   >
