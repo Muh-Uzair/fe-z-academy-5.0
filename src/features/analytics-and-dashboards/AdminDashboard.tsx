@@ -43,7 +43,6 @@ interface AdminDashboardProps {
 }
 
 const AdminDashboard = ({ data, period }: AdminDashboardProps) => {
-  console.log("data --------------------------- \n", data);
   const router = useRouter();
   const [isMounted, setIsMounted] = useState(false);
 
@@ -72,7 +71,6 @@ const AdminDashboard = ({ data, period }: AdminDashboardProps) => {
         return "Weekly breakdown over the last 30 days";
     }
   }, [period]);
-
 
   const revenueChartData = useMemo(() => {
     return Object.entries(data?.revenueTrend ?? {}).map(([name, value]) => ({
@@ -374,7 +372,7 @@ const AdminDashboard = ({ data, period }: AdminDashboardProps) => {
               label: "Commission Earned",
               render: (value: number) => (
                 <span className="font-semibold text-emerald-600">
-                  ${value ?? 0}
+                  ${Number(value ?? 0).toFixed(2)}
                 </span>
               ),
             },
