@@ -14,7 +14,7 @@ interface CourseCardProps {
     title: string;
     thumbnailUrl?: string;
     thumbnail?: string;
-    price: number;
+    price?: number;
     level: string;
     instructorDetails?: { fullName: string };
     instructor?: string;
@@ -68,7 +68,7 @@ const CourseCard = ({ course, footer = null, mode = "default" }: CourseCardProps
         </AspectRatio>
 
         {/* Price Badge */}
-        {mode === "default" && (
+        {mode === "default" && course.price !== undefined && (
           <div className="absolute top-3 right-3 bg-black/80 text-white text-xs px-2 py-1 rounded-md">
             ${course.price}
           </div>
@@ -133,6 +133,16 @@ const CourseCard = ({ course, footer = null, mode = "default" }: CourseCardProps
           )}
 
           <Separator className="mb-4" />
+
+          {/* Price */}
+          {mode === "default" && course.price !== undefined && (
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-xs font-medium text-muted-foreground">Price</span>
+              <span className="text-xl font-bold text-foreground">
+                ${course.price}
+              </span>
+            </div>
+          )}
 
           {/* Footer pinned to bottom */}
           {footer && (
