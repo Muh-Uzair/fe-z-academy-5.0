@@ -3,7 +3,11 @@ import { redirect } from "next/navigation";
 import AppLayoutShell from "@/components/AppLayoutShell";
 import { getMeQuery } from "@/services/auth/queries";
 
-const StudentLayout = async ({ children }: LayoutProps<"/student">) => {
+const StudentLayout = async ({
+  children,
+}: {
+  children: React.ReactNode;
+}) => {
   const response = (await getMeQuery())!;
   const { user } = response.data;
 
