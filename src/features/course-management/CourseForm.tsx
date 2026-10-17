@@ -215,6 +215,7 @@ const CourseForm = ({
   );
   const [thumbnailInputKey, setThumbnailInputKey] = useState(0);
   const [videoInputKey, setVideoInputKey] = useState(0);
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const thumbnailFileInputRef = useRef<HTMLInputElement | null>(null);
   const videoFileInputRef = useRef<HTMLInputElement | null>(null);
   const videoElementRef = useRef<HTMLVideoElement | null>(null);
@@ -232,7 +233,7 @@ const CourseForm = ({
     (!allowEdit && !hideCloseButton) ||
     allowEdit ||
     (showEnrollButton && !!onEnroll) ||
-    showRefundButton;
+    (showRefundButton && !isVideoPlaying);
   const showFormFooter = mode !== "view" || hasViewModeActions;
   const selectedVideoFile = useWatch({
     control: form.control,
@@ -664,9 +665,12 @@ const CourseForm = ({
                                 initialVideoPosition;
                             }
                           }}
-                          onPause={(event) =>
-                            onVideoPause?.(event.currentTarget.currentTime)
-                          }
+                          onPlay={() => setIsVideoPlaying(true)}
+                          onPause={(event) => {
+                            setIsVideoPlaying(false);
+                            onVideoPause?.(event.currentTarget.currentTime);
+                          }}
+                          onEnded={() => setIsVideoPlaying(false)}
                         />
                         <div className="space-y-1 text-xs text-muted-foreground">
                           {selectedVideoFile ? (
@@ -740,7 +744,10 @@ const CourseForm = ({
 
         {showFormFooter ? (
           <div className="flex flex-col gap-2 border-t pt-4">
-            {showRefundButton && !refundEligible && refundDisabledReason ? (
+            {showRefundButton &&
+            !isVideoPlaying &&
+            !refundEligible &&
+            refundDisabledReason ? (
               <p className="text-sm text-muted-foreground sm:text-right">
                 {refundDisabledReason}
               </p>
@@ -770,7 +777,7 @@ const CourseForm = ({
                       Enroll Now
                     </AppButton>
                   ) : null}
-                  {showRefundButton ? (
+                  {showRefundButton && !isVideoPlaying ? (
                     <AppButton
                       type="button"
                       variant="destructive"
