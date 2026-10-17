@@ -294,7 +294,7 @@ const StudentCards = ({ cards }: StudentCardsProps) => {
                 <div className="px-4 py-3 flex items-center justify-between gap-2 border-t bg-muted/10 mt-auto">
                   {card.isDefault ? (
                     <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1.5">
-                      <CheckCircle2 className="h-4 w-4" /> Primary Card
+                      <CheckCircle2 className="h-4 w-4" /> Default Card
                     </span>
                   ) : (
                     <AppButton
