@@ -61,7 +61,8 @@ export async function proxy(request: NextRequest) {
 
   // 3. We have a refresh token but no access token. Attempt rotation.
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1";
+    const rawBaseUrl = process.env.API_URL || "http://localhost:5000/api/v1";
+    const baseUrl = rawBaseUrl.replace(/\/+$/, "");
     const rotateUrl = `${baseUrl}/auth/rotate-token`;
 
     const res = await fetch(rotateUrl, {
@@ -82,7 +83,7 @@ export async function proxy(request: NextRequest) {
     // 5. Rotation succeeded. Perform the Two-Way Cookie Sync.
     const requestHeaders = new Headers(request.headers);
     const requestCookies = new Map();
-    
+
     // Start with all incoming cookies
     for (const cookie of request.cookies.getAll()) {
       requestCookies.set(cookie.name, cookie.value);
@@ -131,8 +132,8 @@ export async function proxy(request: NextRequest) {
     }
 
     return response;
-
   } catch (error) {
+    console.error("Token rotation failed in proxy:", error);
     // If the network call to Express fails completely, redirect to signin to be safe
     return NextResponse.redirect(new URL("/signin", request.url));
   }

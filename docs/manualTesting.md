@@ -22,7 +22,7 @@ npm start
 ### 0.2 Checklist
 
 - [ ] Backend is running and reachable.
-- [ ] `API_URL` **and** `NEXT_PUBLIC_API_URL` are both set to the backend (`.../api/v1`). `src/proxy.ts` reads `NEXT_PUBLIC_API_URL`, `apiClient` reads `API_URL`.
+- [ ] `API_URL` is set to the backend (`.../api/v1`). Both `apiClient` and `src/proxy.ts` read `API_URL`.
 - [ ] Stripe is in **test mode** (publishable and secret keys).
 - [ ] The Stripe **webhook** reaches the backend. Enrollments, paid transactions and refunds are only completed by webhooks. Locally, use the Stripe CLI (`stripe listen --forward-to <backend webhook URL>`). Ask the backend owner for the exact URL.
 - [ ] Email sending works and you can read the inbox (OTP codes, verification emails).
