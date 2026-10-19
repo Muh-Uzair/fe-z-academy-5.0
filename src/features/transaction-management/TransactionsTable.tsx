@@ -15,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 import { PaymentStatusBadge, formatCurrency } from "./transactionHelpers";
 import type {
   Transaction,
@@ -161,8 +162,18 @@ const TransactionsTable = ({
     {
       key: "courseDetails",
       label: "Course",
-      render: (value: TransactionCourseSummary) => (
-        <span className="line-clamp-1">{value.title}</span>
+      render: (value: TransactionCourseSummary, row: Transaction) => (
+        <div className="flex items-center gap-2">
+          <span className="line-clamp-1">{value?.title || "Untitled Course"}</span>
+          {row.isCourseDeleted && (
+            <Badge
+              variant="outline"
+              className="text-[10px] text-destructive border-destructive/40 shrink-0 font-normal py-0 h-4"
+            >
+              Deleted
+            </Badge>
+          )}
+        </div>
       ),
     },
     ...(showInstructorColumn

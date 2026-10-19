@@ -130,11 +130,18 @@ const TransactionDetails = ({
                 <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                   Purchased Item
                 </span>
-                {course?.level && (
-                  <Badge variant="outline" className="text-xs font-normal capitalize">
-                    {formatCourseLevel(course.level)}
-                  </Badge>
-                )}
+                <div className="flex items-center gap-2">
+                  {transaction.isCourseDeleted && (
+                    <Badge variant="destructive" className="text-xs font-normal">
+                      Course Deleted
+                    </Badge>
+                  )}
+                  {course?.level && (
+                    <Badge variant="outline" className="text-xs font-normal capitalize">
+                      {formatCourseLevel(course.level)}
+                    </Badge>
+                  )}
+                </div>
               </div>
 
               <div className="flex items-start gap-3.5">
