@@ -142,6 +142,7 @@ export async function updateCourseAction(
     // — title, price, thumbnailUrl changes must bust those caches too.
     updateTag(ENROLLMENT_TAGS.enrollments);
     updateTag(TRANSACTION_TAGS.transactions);
+    updateTag(TRANSACTION_TAGS.transactionDetails(id));
     updateTag(REVIEW_TAGS.reviews);
     // Per-course review caches also embed courseDetails — bust them too.
     updateTag(REVIEW_TAGS.reviewByCourse(id));
@@ -183,6 +184,7 @@ export async function deleteCourseAction(
     // review of this course can exist — but past (refunded) transactions still
     // embed courseDetails.
     updateTag(TRANSACTION_TAGS.transactions);
+    updateTag(TRANSACTION_TAGS.transactionDetails(id));
     // Admin/instructor totalCourses, and the student's recent transactions
     // (courseTitle) change.
     updateTag(DASHBOARD_TAGS.admin);
@@ -226,6 +228,7 @@ export async function updateCourseVerificationAction(
     // Enrollments and transactions embed courseDetails (isVerified, verificationRejectionReason).
     updateTag(ENROLLMENT_TAGS.enrollments);
     updateTag(TRANSACTION_TAGS.transactions);
+    updateTag(TRANSACTION_TAGS.transactionDetails(id));
     // Reviews embed courseDetails (isVerified field).
     updateTag(REVIEW_TAGS.reviews);
     updateTag(REVIEW_TAGS.reviewByCourse(id));

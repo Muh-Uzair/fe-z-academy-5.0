@@ -96,6 +96,14 @@ export async function getTransactionDetailsQuery(
       throw new Error(json.message);
     }
 
+    if (json.data.transaction?.courseDetails?._id) {
+      cacheTag(
+        TRANSACTION_TAGS.transactionDetails(
+          json.data.transaction.courseDetails._id,
+        ),
+      );
+    }
+
     return json;
   } catch (err) {
     console.error("getTransactionDetailsQuery failed:", err);
