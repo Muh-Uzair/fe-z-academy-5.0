@@ -118,7 +118,8 @@ export async function updateReviewAction(
 }
 
 /**
- * Open to any authenticated role — the review's own author, or an Admin.
+ * Restricted to Student (own review only) and Admin callers.
+ * Instructors are blocked at the router level.
  */
 export async function deleteReviewAction(
   id: string,

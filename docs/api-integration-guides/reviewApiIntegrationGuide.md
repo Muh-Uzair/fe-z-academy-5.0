@@ -23,7 +23,7 @@ Base path: `/api/v1/reviews`
 | `GET /course/:courseId` | Student, Instructor, Admin |
 | `GET /:id` | Public (no auth required) |
 | `PATCH /:id` | Student only, and only the review's own author |
-| `DELETE /:id` | Any authenticated user — the review's own author, or an Admin |
+| `DELETE /:id` | Student (own review only) or Admin |
 
 A caller with the wrong role receives `403 You do not have permission to perform this action`. A missing/invalid/expired `accessToken` cookie receives the same `401` errors documented for `/auth/me`.
 
@@ -364,7 +364,7 @@ HTTP `200`
 
 `DELETE /api/v1/reviews/:id`
 
-Open to any authenticated role — the review's own author, or an Admin. There is no `restrictTo(...)` gate on this route; ownership/admin permission is enforced in the service layer.
+Restricted to **Student** and **Admin** callers. An authenticated student may only delete their own review (`reviewBy === user.id`); an Admin may delete any review. Instructors are blocked at the router level.
 
 ### URL params
 
@@ -389,7 +389,8 @@ HTTP `200`
 | HTTP status | Message | When |
 | --- | --- | --- |
 | 401 | *(see auth guide `/me` 401 rows)* | Access-token cookie missing/invalid/expired. |
-| 403 | `You do not have permission to delete this review` | Caller is neither the review's author nor an Admin. |
+| 403 | `You do not have permission to perform this action` | Caller is not a Student or Admin (e.g. Instructor blocked at router level). |
+| 403 | `You do not have permission to delete this review` | Caller is a Student but not this review's author. |
 | 404 | `Review not found` | No review exists with that `id`. |
 
 ## Frontend types

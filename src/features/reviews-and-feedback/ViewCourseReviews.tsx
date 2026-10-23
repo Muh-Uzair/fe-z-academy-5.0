@@ -131,15 +131,17 @@ const ViewCourseReviews = ({
   const router = useRouter();
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [reviewIdToDelete, setReviewIdToDelete] = useState<string | null>(null);
   const { run: runDeleteAction, isLoading: isDeleting } = useClientAction();
 
   const handleConfirmDeleteReview = async () => {
-    if (!studentReview) return;
+    if (!reviewIdToDelete) return;
     const response = await runDeleteAction(() =>
-      deleteReviewAction(studentReview._id, course._id),
+      deleteReviewAction(reviewIdToDelete, course._id),
     );
     if (response?.status === "success") {
       setIsDeleteDialogOpen(false);
+      setReviewIdToDelete(null);
     }
   };
 
@@ -227,7 +229,10 @@ const ViewCourseReviews = ({
                   <ReviewCard
                     review={studentReview}
                     canDelete={true}
-                    onDelete={() => setIsDeleteDialogOpen(true)}
+                    onDelete={() => {
+                      setReviewIdToDelete(studentReview._id);
+                      setIsDeleteDialogOpen(true);
+                    }}
                     canEdit={true}
                     onEdit={() => setIsEditOpen(true)}
                   />
@@ -284,7 +289,15 @@ const ViewCourseReviews = ({
               ) : (
                 <div className="space-y-3">
                   {reviews.map((review) => (
-                    <ReviewCard key={review._id} review={review} />
+                    <ReviewCard
+                      key={review._id}
+                      review={review}
+                      canDelete={role === "admin"}
+                      onDelete={() => {
+                        setReviewIdToDelete(review._id);
+                        setIsDeleteDialogOpen(true);
+                      }}
+                    />
                   ))}
                 </div>
               )}
@@ -323,13 +336,16 @@ const ViewCourseReviews = ({
 
       <AlertDialog
         open={isDeleteDialogOpen}
-        onOpenChange={setIsDeleteDialogOpen}
+        onOpenChange={(open) => {
+          setIsDeleteDialogOpen(open);
+          if (!open) setReviewIdToDelete(null);
+        }}
       >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Review</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete your review? This action cannot be
+              Are you sure you want to delete this review? This action cannot be
               undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
