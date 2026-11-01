@@ -1,18 +1,10 @@
 import AboutUs from "@/features/course-management/AboutUs";
 import { getPlatformStatsQuery } from "@/services/stat/queries";
 
-const defaultStats = { totalStudents: 0, totalCourses: 0 };
-
 const AboutUsPage = async () => {
-  let stats = defaultStats;
-  try {
-    const platformStatsRes = await getPlatformStatsQuery();
-    stats = platformStatsRes.data;
-  } catch {
-    // Fallback to default stats if API is unavailable during build/offline
-  }
+  const platformStatsRes = await getPlatformStatsQuery();
 
-  return <AboutUs platformStats={stats} />;
+  return <AboutUs platformStats={platformStatsRes.data} />;
 };
 
 export default AboutUsPage;
