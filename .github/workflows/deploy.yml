@@ -1,0 +1,59 @@
+name: Deploy Frontend to EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "npm"
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build Next.js Application
+        env:
+          PORT: 3000
+          API_URL: https://be-z-academy.duckdns.org/api/v1
+          NEXT_PUBLIC_API_URL: https://be-z-academy.duckdns.org/api/v1
+          STRIPE_PUBLISHABLE_KEY: pk_test_51TwTe73o1TAjKRGvgS8CcTZmcItvw61zZuZXspdDEHmsaDzFzJrCsRDMlgp17h8pOKoMojGNCsWBS8WzKas6eqiZ00qCli4DH5
+          NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: pk_test_51TwTe73o1TAjKRGvgS8CcTZmcItvw61zZuZXspdDEHmsaDzFzJrCsRDMlgp17h8pOKoMojGNCsWBS8WzKas6eqiZ00qCli4DH5
+        run: |
+          npm run build
+          cp -r public .next/standalone/public
+          cp -r .next/static .next/standalone/.next/static
+          tar -czf deploy.tar.gz -C .next/standalone .
+
+      - name: Transfer Deployment Archive to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "deploy.tar.gz"
+          target: "~/fe-z-academy"
+
+      - name: Extract & Restart PM2 on EC2
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd ~/fe-z-academy
+            tar -xzf deploy.tar.gz
+            rm deploy.tar.gz
+            pm2 describe fe-z-academy > /dev/null 2>&1 && pm2 restart fe-z-academy --update-env || pm2 start server.js --name "fe-z-academy" --time
+            pm2 save
+
