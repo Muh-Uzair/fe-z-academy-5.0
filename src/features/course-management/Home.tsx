@@ -45,8 +45,10 @@ export default function Home({
   };
 
   return (
-    <div className="w-full min-h-screen flex flex-col bg-background overflow-x-hidden selection:bg-primary/30">
+    <div className="w-full min-h-screen flex flex-col bg-background selection:bg-primary/30">
       <PublicNavbar user={user} />
+
+      <main className="flex-1 w-full flex flex-col overflow-x-clip">
 
       {/* Modern Hero Section */}
       <section className="relative w-full pt-28 pb-32 lg:pt-36 lg:pb-40 overflow-hidden isolate">
@@ -270,7 +272,7 @@ export default function Home({
       </section>
 
       {/* Trending Courses */}
-      <section className="py-32 px-6 bg-gradient-to-b from-primary-very-light/30 to-transparent border-t border-primary/10 relative">
+      <section className="py-32 px-6 bg-gradient-to-b from-primary-very-light/30 to-transparent border-t border-primary/10 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary-light/20 rounded-full blur-[150px] pointer-events-none"></div>
 
         <div className="max-w-[1200px] mx-auto w-full relative z-10">
@@ -352,6 +354,7 @@ export default function Home({
           </div>
         </div>
       </section>
+      </main>
 
       {/* Footer */}
       <PublicFooter />
